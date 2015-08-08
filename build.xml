@@ -1,0 +1,333 @@
+<project default="all" name="Compile and build java classes plus jar archives">
+	<property name="app.name" value="OSMChartBundler" />
+	<property name="app.shname" value="osmcb" />
+	<property file="src/main/resources/${app.shname}/${app.shname}.properties" />
+	<property name="jar.name" value="${app.name}.jar" />
+	<property name="zip.name" value="${app.name}${osmcb.version}.zip" />
+	<property name="zip_src.name" value="${app.name}${osmcb.version}src.zip" />
+	<property name="starter.class" value="${app.shname}.StartOSMCB" />
+	<property name="rev.prop.file" value="src/main/resources/${app.shname}/${app.shname}-rev.properties" />
+
+	<property name="rtlibraryjar.non_osx" value="${java.home}/lib/rt.jar" />
+	<property name="rtlibraryjar.osx" value="${java.home}/../Classes/classes.jar" />
+	<available property="rtlibraryjar.osx.present" file="${rtlibraryjar.osx}" />
+
+	<property name="srcdir" value="src/main/java" />
+	<property name="mp.srcdir" value="${srcdir}/${app.shname}/mapsources/mappacks" />
+	<tstamp>
+		<format property="build.date" pattern="yyyy-MM-dd HH:mm:ss" />
+	</tstamp>
+
+	<!-- version dependent libraries -->
+	<property name="je-version" value="3.3.93" />
+	<property name="sqlite-version" value="3.7.15-M1" />
+
+	<!-- Java target version -->
+	<property name="java-target" value="1.7" />
+
+	<path id="maincp">
+		<fileset dir="lib" includes="log*.jar" />
+		<fileset dir="lib" includes="jai*.jar" />
+		<fileset dir="lib" includes="bsh-2.0b4.jar" />
+		<fileset dir="lib" includes="Tidy.jar" />
+		<fileset dir="lib" includes="javapng-2.0.jar" />
+		<fileset dir="lib" includes="itextpdf-5.1.0.jar" />
+		<fileset dir="lib" includes="commons-codec-1.4.jar" />
+		<fileset dir="lib" includes="commons-io-2.0.jar" />
+		<fileset dir="lib" includes="commons-lang3-3.1.jar" />
+		<fileset dir="lib" includes="je-${je-version}.jar" />
+	</path>
+
+	<!-- Targets -->
+	<target name="all" depends="clean_build,svnversion,build,build_mapsources,sign_mapsources,create_jar,shrink,create_release,create_release_src" />
+
+	<target name="update_mapsources" depends="build_mapsources,sign_mapsources" />
+
+	<target name="clean_workspace" description="Deletes the work directories">
+		<delete includeemptydirs="true" failonerror="false">
+			<!--<fileset dir="atlases" includes="**/*" />-->
+			<fileset dir="build" includes="**/*" />
+			<!--<fileset dir="tilestore" includes="**/*" />-->
+		</delete>
+	</target>
+
+	<target name="clean_build">
+		<delete includeEmptyDirs="true" failonerror="false">
+			<fileset dir="build" includes="**/*" />
+		</delete>
+	</target>
+
+	<target name="delete_build" description="Deleted the entire build folder">
+		<delete failonerror="yes" dir="build" />
+	</target>
+
+	<target name="build">
+		<!--<property name="buildDir" value="build/${app.shname}" />-->
+		<property name="buildDir" value="build" />
+		<mkdir dir="${buildDir}" />
+		<!-- Compile the starter class for Java 1.5 (shows an verbose error if the JRE requirements are not met -->
+		<javac srcdir="src/main/java" destdir="${buildDir}" target="1.5" source="1.5" debug="true" includeantruntime="false" encoding="UTF-8" listfiles="yes">
+			<classpath refid="maincp"  />
+			<include name="${app.shname}/StartOSMCB.java" />
+		</javac>
+		<!-- Compile the other classes for Java ${java-target} -->
+		<!-- <javac srcdir="src/main/java" destdir="build/osmcb" target="${java-target}" source="${java-target}" debug="true" includeantruntime="false" encoding="UTF-8"> -->
+		<javac srcdir="src/main/java" destdir="${buildDir}" target="${java-target}" source="${java-target}" debug="true" includeantruntime="false" encoding="UTF-8" listfiles="yes">
+			<classpath refid="maincp" />
+			<exclude name="${app.shname}/StartOSMCB.java" />
+			<exclude name="${osmcb.mpsrcdir}/**" />
+			<include name="${app.shname}/**" />
+		</javac>
+		<copy todir="build/${app.shname}" overwrite="true">
+			<fileset dir="src/main/resources" excludes="**/mapsources.properties" />
+		</copy>
+	</target>
+
+	<!-- mappack runtime location is: ${ProgDir}/mapsources
+	     src code is located at src/main/java/${app.shname}/mapsources/mappacks/@{mappack}
+	     build location is build/${app.shname}/mapsources/mappacks/@{mappack} -->
+	<!--<target name="build_mapsources" depends="clean_build,build,svnversion" description="Build all map packs and generate the new mappacks-md5.txt">-->
+	<target name="build_mapsources" description="Build all map packs and generate the new mappacks-md5.txt">
+		<property file="keys/keystore.properties" />
+		<taskdef name="for" classname="net.sf.antcontrib.logic.ForTask">
+			<classpath>
+				<pathelement location="lib/ant-contrib-for.jar" />
+			</classpath>
+		</taskdef>
+		<delete dir="mapsources" includes="mp-*.jar" />
+		<dirset id="mappacks" dir="${mp.srcdir}/" includes="*" />
+		<pathconvert pathsep=";" property="mappacklist" refid="mappacks">
+			<mapper type="flatten" />
+		</pathconvert>
+		<mkdir dir="mapsources" />
+		<echo file="mapsources/mappacks-md5.txt" append="false" message="" />
+		<for list="${mappacklist}" param="mappack" delimiter=";">
+			<sequential>
+				<echo message="map pack: '@{mappack}'" />
+				<property name="mp.builddir" value="build" />
+				<echo message="map pack dir: '${mp.builddir}'" />
+				<mkdir dir="${mp.builddir}" />
+				<uptodate property="@{mappack}.newer" targetfile="mapsources/mp-@{mappack}.jar">
+					<srcfiles dir="${mp.srcdir}/@{mappack}" />
+				</uptodate>
+				<!--<echo message="No changes in map pack detected: '@{mappack}'" unless="@{mappack}.newer" />-->
+
+				<echo message="compile map pack: '@{mappack}'" />
+				<javac srcdir="src/main/java" destdir="${mp.builddir}/" defaultexcludes="true" debug="true" target="${java-target}" source="${java-target}" includeantruntime="false" encoding="UTF-8">
+					<include name="${mp.srcdir}/@{mappack}/**.java" />
+					<classpath>
+						<path refid="maincp" />
+						<path path="build/${app.shname}" />
+					</classpath>
+				</javac>
+				<delete file="mapsources/mp-@{mappack}.jar" failonerror="false" />
+				<fileset dir="${mp.builddir}" defaultexcludes="true" id="fileset-@{mappack}">
+					<include name="${app.shname}/mapsources/mappacks/@{mappack}/**.class" />
+				</fileset>
+
+				<echo message="build map pack jar: 'mp-@{mappack}.jar'" />
+				<jar destfile="mapsources/mp-@{mappack}.jar">
+					<manifest>
+						<attribute name="MapPackVersion" value="${osmcb.mappackversion}" />
+						<attribute name="MapPackName" value="@{mappack}" />
+						<attribute name="MapPackBuild-Date" value="${build.date}" />
+						<attribute name="MapPackRevision" value="${osmcb.revision.new}" />
+					</manifest>
+					<fileset refid="fileset-@{mappack}" />
+					<zipfileset dir="${mp.srcdir}/@{mappack}/" includes="mapsources.list" fullpath="META-INF/services/${app.shname}.program.interfaces.IfMapSource" />
+				</jar>
+				
+				<echo message="update md5-txt: '@{mappack}'" />
+				<checksum algorithm="MD5" totalproperty="MD5-@{mappack}">
+					<fileset refid="fileset-@{mappack}" />
+				</checksum>
+				<echo file="mapsources/mappacks-md5.txt" append="true" message="${MD5-@{mappack}} mp-@{mappack}.jar&#13;&#10;" />
+
+			</sequential>
+		</for>
+	</target>
+
+	<target name="check_keystore" description="Checks if the key store for signing the map packs is present">
+		<available file="keys/keystore.jks" property="keystore.present" />
+	</target>
+
+	<!-- This task is only executed if a java key store is present in the keys directory -->
+	<target name="sign_mapsources" depends="build_mapsources,check_keystore" if="keystore.present">
+		<!-- The required key stores are not available in SVN and releases! -->
+		<echo message="Signing map packs using password: ${keystore.password}" />
+		<for list="${mappacklist}" param="mappack" delimiter=";">
+			<sequential>
+				<signjar keystore="keys/keystore.jks" storepass="${keystore.password}" alias="MapPack" jar="mapsources/mp-@{mappack}.jar" verbose="false" />
+			</sequential>
+		</for>
+	</target>
+
+	<target name="create_jar">
+		<delete file="${jar.name}" />
+		<jar destfile="${jar.name}" filesetmanifest="mergewithoutmain">
+			<manifest>
+				<attribute name="Main-Class" value="${starter.class}" />
+				<attribute name="Class-Path" value="./ sqlite-jdbc-${sqlite-version}.jar sqlite.jar jai_core.jar jai_codec.jar lib/jai_core.jar lib/jai_codec.jar jai_*.jar lib/jai_*.jar" />
+			</manifest>
+			<zipfileset src="lib/log4j-1.2.15.jar" includes="org/apache/log4j/**" />
+			<zipfileset src="lib/je-${je-version}.jar" />
+			<zipfileset src="lib/bsh-2.0b4.jar" includes="**/*.class" />
+			<zipfileset src="lib/commons-codec-1.4.jar" includes="**/*.class" />
+			<zipfileset src="lib/commons-io-2.0.jar" includes="**/*.class" />
+			<zipfileset src="lib/commons-lang3-3.1.jar" includes="**/*.class" />
+			<zipfileset src="lib/javapng-2.0.jar" includes="**/*.class" />
+			<zipfileset src="lib/Tidy.jar" includes="org/w3c/tidy/**" />
+			<zipfileset src="lib/itextpdf-5.1.0.jar" includes="com/**" />
+			<fileset dir="${buildDir}">
+				<exclude name="**/unittest/**" />
+				<exclude name="${app.shname}/mapsources/mapapcks/**" />
+				<exclude name="**/*.java" />
+			</fileset>
+		</jar>
+	</target>
+
+	<target name="shrink_libraryjars" unless="rtlibraryjar.osx.present">
+		<property name="rtlibraryjar" value="${rtlibraryjar.non_osx}" />
+	</target>
+
+	<target name="shrink_libraryjars_osx" if="rtlibraryjar.osx.present">
+		<property name="rtlibraryjar" value="${rtlibraryjar.osx}" />
+	</target>
+
+	<target name="shrink" depends="create_jar,shrink_libraryjars,shrink_libraryjars_osx" description="Removes unused classes from compiled jar">
+		<taskdef resource="proguard/ant/task.properties" classpath="lib/proguard.jar" />
+		<proguard>
+			-libraryjars "${rtlibraryjar}"
+			-injars
+			"${jar.name}"
+			-outjars
+			build/temp.jar
+			-keepattributes *Annotation*
+			-keep class ${starter.class} { public static void main(java.lang.String[]); }
+			-keep class osmcb.program.* { public *; }
+			-keep class osmcb.program.interfaces.* { public *; }
+			-keep class osmcb.program.abstracts.* { public *; }
+			-keep class osmcb.program.model.package-info
+			-keep class	osmcb.program.model.* { public *; }
+			-keep class osmcb.program.jaxb.* { public *; }
+			-keep class osmcb.program.interfaces.* { public *; }
+			-keep class osmcb.program.download.UserAgent { public *; }
+			-keep class	osmcb.exceptions.* { public *; }
+			-keep class	osmcb.program.tilestore.berkeleydb.* { *; }
+			-keep class	osmcb.program.tilestore.TileStoreEntry { public *; }
+			-keep class	osmcb.program.bundlecreators.ACBundleCreator { public *; }
+			-keep class	osmcd.utilities.beanshell.* { public *; }
+			-keep class	osmcb.utilities.tar.TarIndex { public *; }
+			-keep class	osmcb.utilities.tar.TarIndexedArchive { public *; }
+			-keep class	osmcb.data.gpx.gpx11.* { public *; }
+			-keep class	osmcb.mapsources.MapSourceTools { public *; }
+			-keep class	osmcb.mapsources.MapSourceUrlUpdater { public *; }
+			-keep class	osmcb.mapsources.custom.* { *; }
+			-keep class org.apache.log4j.Layout { public *; }
+			-keep class org.apache.log4j.Level { public *; }
+			-keep class org.apache.commons.lang3.StringEscapeUtils { public *; }
+			-keep class org.apache.log4j.Category { public *; }
+			-keep class	org.apache.log4j.Priority { public *; }
+			-keep class	org.apache.log4j.spi.LoggingEvent { public *; }
+			-keep class	org.apache.log4j.spi.ThrowableInformation { public *; }
+			-keep class	org.apache.log4j.spi.LocationInfo { public *; }
+			-keep class	org.apache.log4j.PatternLayout { public *; }
+			-keep class	org.apache.log4j.Appender { public *; }
+			-keep class	org.apache.log4j.FileAppender { public *; }
+			-keep class	com.sixlegs.png.PngImage { public *; }
+			-keep class bsh.This { public *; }
+			-keep class bsh.XThis { public *; }
+			-keep class
+			com.sleepycat.persist.PrimaryIndex { public *; }
+			-keepclassmembers
+			enum * {
+			public static **[] values();
+			public static **
+			valueOf(java.lang.String);
+			}
+			-keepclassmembers class *
+			implements
+			java.io.Serializable {
+			static final long serialVersionUID;
+			private void
+			writeObject(java.io.ObjectOutputStream);
+			private void
+			readObject(java.io.ObjectInputStream);
+			java.lang.Object
+			writeReplace();
+			java.lang.Object readResolve();
+			}
+			-keepclassmembers
+			class * implements
+			com.sleepycat.persist.evolve.Conversion { boolean equals(java.lang.Object);	}
+			-dontnote java.**
+			-dontnote javax.**
+			-dontnote com.sun.**
+			-dontnote sun.**
+			-dontwarn
+			-dontoptimize
+			-dontobfuscate
+		</proguard>
+		<move file="build/temp.jar" tofile="${jar.name}" overwrite="true" />
+	</target>
+
+	<target name="svnversion" description="Updates the revision information in src/osmcb/osmcb.properties" depends="svnversion_svn">
+	</target>
+
+	<target name="svnversion_svn">
+		<delete file="${rev.prop.file}" />
+		<exec executable="svnversion" outputproperty="${app.shname}.revision.new" searchpath="true" failifexecutionfails="false" />
+		<property name="${app.shname}.revision.new" value="0013" />
+		<condition property="${app.shname}.revision.exported">
+			<equals arg1="${osmcb.revision.new}" arg2="0013" />
+		</condition>
+		<echo message="OSMCB revision: ${osmcb.revision.new}" />
+		<antcall target="svnversion_write_property_file" />
+	</target>
+
+	<!--<target name="svnversion_write_property_file" unless="${app.shname}.revision.exported">-->
+	<target name="svnversion_write_property_file">
+		<propertyfile file="${rev.prop.file}">
+			<entry key="${app.shname}.revision" value="${osmcb.revision.new}" />
+		</propertyfile>
+	</target>
+
+	<target name="create_release" description="Packs all necessary files for the binary release into one zip archive">
+		<zip destfile="${zip.name}" update="false">
+			<fileset dir="./">
+				<include name="${jar.name}" />
+				<include name="gpl.txt" />
+				<include name="start.jar" />
+				<include name="CHANGELOG.txt" />
+				<include name="start.*" />
+				<include name="${app.name}.exe" />
+				<include name="mapsources/mp-*.jar" />
+			</fileset>
+			<fileset dir="./misc">
+				<include name="${app.shname}.icns" />
+			</fileset>
+			<fileset dir="lib" includes="sqlite-jdbc-${sqlite-version}.jar" />
+		</zip>
+	</target>
+
+	<target name="create_release_src" description="Packs all necessary files for the source code release into one zip archive">
+		<zip destfile="${zip_src.name}" update="false">
+			<fileset dir="./">
+				<include name="src/**" />
+				<exclude name="src/${app.shname}/tools/**" />
+				<include name="log4j.xml" />
+				<include name="build.xml" />
+				<include name="gpl.txt" />
+				<include name="start.jar" />
+				<include name="CHANGELOG.txt" />
+				<include name="start.sh" />
+				<include name=".classpath" />
+				<include name=".project" />
+				<include name="${app.name}.exe" />
+				<include name="misc/launch4j.xml" />
+				<include name="misc/${app.shname}.ico" />
+				<include name="lib/*.jar" />
+			</fileset>
+		</zip>
+	</target>
+</project>

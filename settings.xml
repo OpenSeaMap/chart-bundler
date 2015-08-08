@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<osmcbSettings>
+	<bandwidthLimit>0</bandwidthLimit>
+	<coordinateNumberFormat>DEG_LOCAL</coordinateNumberFormat>
+	<customProxyHost></customProxyHost>
+	<customProxyPassword></customProxyPassword>
+	<customProxyPort></customProxyPort>
+	<customProxyUserName></customProxyUserName>
+	<customTileSize>false</customTileSize>
+	<devMode>false</devMode>
+	<directories>
+		<bundleOutputDirectory>C:\Users\Public\Documents\Chart Bundles</bundleOutputDirectory>
+		<tileStoreDirectory>C:\Users\Public\Documents\OSMCB Tiles</tileStoreDirectory>
+		<catalogsDirectory>C:\Users\Public\Documents\OSMCB Catalogs</catalogsDirectory>
+	</directories>
+	<downloadRetryCount>1</downloadRetryCount>
+	<downloadThreadCount>2</downloadThreadCount>
+    <localeCountry>DE</localeCountry>
+    <localeLanguage>de</localeLanguage>
+	<mapSourcesDisabled />
+  <mapSourcesEnabled>
+    <mapSource>AH OSM DE</mapSource>
+    <mapSource>AH OpenSeaMap - Mapnik</mapSource>
+    <mapSource>Custom OSM Mapnik</mapSource>
+    <mapSource>Mapnik</mapSource>
+    <mapSource>OSMPublicTransport</mapSource>
+    <mapSource>OpenSeaMap</mapSource>  
+    <mapSource>OpenSeaMap-Mapnik</mapSource>
+    <mapSource>OpenSeaMapDE</mapSource>
+  </mapSourcesEnabled>
+  <proxyType>CUSTOM</proxyType>
+  <tileImageFormat>PNG</tileImageFormat>
+  <tileMaxExpirationTime>31743402975</tileMaxExpirationTime>
+  <tileMinExpirationTime>434079772</tileMinExpirationTime>
+  <tileSize>256/256</tileSize>
+  <tileStoreEnabled>true</tileStoreEnabled>
+  <unitSystem>Metric</unitSystem>
+  <userAgent>OSMCB/0.1.12</userAgent>
+  <version>0.1.12</version>
+  <wgsGrid>
+    <color>#0000ff</color>
+    <compressLabels>false</compressLabels>
+    <density>SECONDS_10</density>
+    <enabled>true</enabled>
+    <width>1.0</width>
+  </wgsGrid>
+</osmcbSettings>

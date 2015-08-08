@@ -1,0 +1,10 @@
+Files & directories
+
+1) catalogs: input dir for chart catalogs - profile.xml
+	ca. 20 files for start
+2) tilestore: output dir for tilestore
+	ca. 20 GB ?
+3) bundles: output dir for chart bundles
+	ca. 20 GB ???
+	
+	

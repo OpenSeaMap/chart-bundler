@@ -1,0 +1,32 @@
+Offline-Karten Erstellung
+
+Inhalt
+
+- Ziel: Erzeugung und Verteilung von Karten, die ohne Internetverbindung mobil genutzt werden können
+-- Konsequenzen für Größe, Geschwindigkeit, Auflösung
+--- verschiedene Aufgaben: Orientierung, Navigation, Analyse/Datenpflege
+
+- Vergleich Online - Offline Karten
+-- Speicherbedarf
+-- Bandbreitenbedarf
+-- Erzeugungsaufwand
+
+- Vergleich Vektor - Rasterkarten
+-- Speicherbedarf
+-- Bandbreitenbedarf
+-- Erzuegungsaufwand
+-- Darstellungaufwand
+-- Möglichkeiten der Rückmeldung, Logging, Korrekturen
+
+- Übersicht Mobilgeräte
+-- PC
+-- Handy/Tablet
+-- dedizierte Navis
+
+- Übersicht Software
+
+- Software zur Erzeugung von Karten
+-- 'normale' Renderchain, Auslieferung wie Onlinekarten, lokales Caching
+-- OSMCD, Chartbundles, Downloadsite
+-- automatische Katalogerstellung
+-- Broadcastingservice

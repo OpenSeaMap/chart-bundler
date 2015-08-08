@@ -1,0 +1,160 @@
+The BSB/KAP file format.
+Tim Thornton from the TeamSurv project has contributed an extended documentation of the bsb/kap file format headers.
+
+http://libbsb.sourceforge.net/
+
+
+ There is a .BSB file for the chart (not required by OpenCPN and many others), and a .KAP file for each panel within the chart (and an additional optional file for updates to charts, which we won�t use). A header file is required. Create this in the tile folder with file name chartname.bsb.txt and chartname.kap.txt. This has the following formats. In all cases, date is in the format mm/dd/yyyy. Data fields must not have commas in them where there are sub fields, and probably not /. In the NA fields (and possibly others) /A indicates a new line. Subfields can be separated with a �,� or a new line.
+ Note that the origin for pixels is the top left (NW) corner of the chart, whereas for positions it is the usual SW corner.
+ Tests in OpenCPN have produced a minimum data set requirement for the KAP files. Fields that are required for chart display or for operational reasons have been highlighted in italics in the description. In addition, Raytech requires the BSB file to be present.
+
+-----
+
+BSB Header
+
+! An example BSB text header
+VER/3.0
+CRR/2013, TeamSurv. All rights reserved.
+CHT/NA=Australia 3000000, NU=123
+CHF/Coastal
+CED/SE=70,RE=01,ED=07/25/2012
+NTM/NE=70.00,ND=07/25/2012, BF = on, BD=07/25/2012
+CHK/1,123
+ORG/TeamSurv
+MFR/TeamSurv
+CGD/5
+RGN/4,6
+K01/NA= Australia 3000000
+NU=123
+TY=Base
+FN=123_1.KAP
+N000005580027/RT=N,KN=12221_1,CA=CHART,DE=TIDE BOX,P1=3020,8412
+P2=3020,8771,P3=4114,8771,P4=4114,8412
+N000005580041/RT=L,KN=12221_1,LK=N000005580027,DE=TIDE BOX, 
+P1=8527, 707
+The text header is terminated with a <Control-Z><NUL> sequence (ASCII characters 26 and 0). 
+! - Comment line
+VER - Version number of BSB format � we will use 3.0
+CRR � Copyright message. Free text
+CHT � General parameters 
+NA - Chart name given to the BSB chart (can represent more than one .KAP) 
+NU - Chart number.
+CHF Chart format (e.g. Overview, General, Coastal, Approach, River, Harbour or Berthing)
+CED � Chart edition parameters - optional 
+SE - Source edition / number of paper chart 
+RE - Raster edition / number
+ED - Chart edition date/number
+NTM � Notices to mariners - optional 
+NE - NTM edition number
+ND - NTM date
+BF - Base flag on or off (I guess this allows a base edition of the chart to be specified?) 
+BD - Base date
+CHK � number of KAPs, KAP-number [, KAP-number]
+CGD - ? coast guard district � optional or can be unknown
+RGN - ? - optional
+ORG � Producing agency identifier � TeamSurv for us
+MFR � Manufacturer of the RNC chart � TeamSurv for us
+Knn � Records 1 � n for each KAP file 
+NA - Chart name given to the pane
+NU - Pane number e.g. 123_A
+TY - Type. Base for the base chart, Inset for a plan contained within the base chart, or extension for a plan outside of the base area
+FN � KAP file name e.g. 123_1.kap 
+Naa � List of text boxes and hot spot links on the chart 
+RT � N for text box, L for hot spot link
+KN - ?
+CA � Category e.g. Chart, Caution, General etc
+DE � Type e.g. Tide box, note etc
+LK � Links this hot spot to the specified text box 
+P1, P2, P3, P4 � Hot spot location (just P1) or text box boundaries as 4 point polygon in x, y pixels
+
+-----
+
+KAP Header
+
+! An example KAP text header
+VER/3.0
+CRR/2013, TeamSurv. All rights reserved.
+BSB/NA=Australia 3000000 NU=,RA=625,480,DU=50
+KNP/SC=3000000,GD=,PR=LAMBERT CONFORMAL CONIC,PP=145.0 PI=0.0,SP=Unknown,0,SK=0.0 UN=METRES,SD=,DX=6000.0,DY=6000.0
+KNQ/EC=RF,GD=NARC,VC=UNKNOWN,SC=MLLW,PC=MC,P1=UNKNOWN, P2=37.083 P3=NOT_APPLICABLE,P4=NOT_APPLICABLE,GC=NOT_APPLICABLE,RM=POLYNOMIAL
+CED/SE=70,RE=01,ED=07/25/2012
+NTM/NE=70.00,ND=07/25/2012, BF = on, BD=07/25/2012
+OST/1
+IFM/3
+RGB/1,199,231,252
+RGB/2,174,234,84
+RGB/3,255,254,206
+RGB/4,226,65,6
+CPH/0.0000000000
+WPX/2,863264.4957,11420.23114,-85.46756208,1.913941167,-0.4081181078,0.7362163163
+WPY/2,390032.0953,69.56409751,-6745.589267,0.4669253601,0.0367153316,-96.0547565
+PWX/2,-76.48368342,8.999135076e-005,5.758392982e-009,-1.392859319e-012,-2.377189159e-013,-3.432372134e-013
+PWY/2,37.44988807,-3.111799225e-009,-7.171936009e-005,2.694372983e-013,-1.725045227e-014,-3.594145418e-011
+REF/1,374,8790,36.8166861111,-76.4500000000
+REF/2,374,695,37.4000111111,-76.4500000000
+REF/3,4505,695,37.4000111111,-76.0783222222
+ERR/1,0.0395099814,0.1453734568,0.0000106128,0.0000035 393
+ERR/2,0.2568631181,0.1909729033,0.0000135084,0.0000230 797
+ERR/3,0.2741345061,0.0861261497,0.0000060346,0.0000246 567
+PLY/1,36.8166666667,-76.4500000000
+PLY/2,37.4000000000,-76.4500000000
+PLY/3,37.4000000000,-76.0783333333
+PLY/4,37.4083333333,-76.0783333333
+DTM/0.0,0.0
+
+The text header is terminated with a <Control-Z><NUL> sequence (ASCII characters 26 and 0). 
+Note that where the meaning of a field is the same as in the .BSB file above, it is not repeated here. 
+VER - Version number of BSB format � we will use 3.0
+BSB (or NOS for older GEO/NOS or GEO/NO1 files) � General parameters 
+NA - Pane name 
+NU - Pane number. If chart is 123 and contains a plan A, the plan should be numbered 123_A
+RA - width, height - width and height of raster image data in pixels 
+DU - Drawing Units in pixels/inch (same as DPI resolution) e.g. 50, 150, 175, 254, 300 
+KNP � Detailed chart parameters 
+SC - Scale e.g. 25000 means 1:25000
+GD - Geodetic Datum e.g. WGS84 for us
+PR - Projection e.g. MERCATOR for us. Other known values are TRANSVERSE MERCATOR or LAMBERT CONFORMAL CONIC or POLYCONIC. This must be one of those listed, as the value determines how PP etc. are interpreted. Only MERCATOR and TRANSVERSE MERCATOR are supported by OpenCPN.
+PP � Projection parameter. For Mercator charts this is where the scale is valid, i.e. +lat_ts � use average latitude of the chart. For transverse Mercator it is the +lon_0 value.
+PI � Projection interval ? e.g. 0.0, 0.033333, 0.083333, 2.0 
+SP -? � Unknown is valid
+SK - Skew angle e.g. 0.0 for us. Angle of rotation of the chart
+TA - text angle e.g. 90 for us
+UN � Depth units (for depths and heights) e.g. METRES, FATHOMS, FEET 
+SD - Sounding Datum e.g. MEAN LOWER LOW WATER, HHWLT or normally LAT
+DX � X resolution, distance (meters) covered by one pixel in X direction. OpenCPN ignores this and DY
+DY � Y resolution, distance covered by one pixel in Y direction 
+CED � Chart edition parameters (see BSB section) 
+NTM � Chart edition parameters (see BSB section) 
+OST - Offset STrip image lines (number of image rows per entry in the index table) e.g. 1. Generated by imgkap.
+IFM - Depth of the colormap (bits per pixel). BSB supports 1 through 7 (2 through 127 max colors). Or compression type? Generated by imgkap.
+RGB � Default colour palette - entries in the raster colormap of the form index,red,green,blue (index 0 is not used in BSB). Generated by imgkap. 
+DAY � Optional day colour palette 
+DSK � Optional dusk colour palette 
+NGT � Optional night colour palette 
+NGR � Optional night red colour palette 
+GRY � Optional grey scale palette
+PRC � Optional palette  (palette with reduced colors i.e. 32)
+PRG � Optional grey palette     (palette with reduced grayscale i.e. 32)
+REF � Reference point record, gives point n, then position x, y in pixels, then in longitude, latitude - optional 
+CPH � Phase shift value - optional
+WPX � Polynomial longitude to x - optional. The Polynomials is an alternative to REF points for georeferencing. OpenCPN uses these polynomials if they are available. The existence of polynomials is a condition for using noaa:s chart reprojection tool.
+PWX � Polynomial x to longitude - optional
+WPY � Polynomial latitude to y - optional
+PWY � Polynomial y to latitude - optional
+ERR � Error record �These should be present if polynomials are used. These ERR rows report the error at the REF points due to the usage of polynomials.
+PLY - Border polygon record � coordinates of the panel within the raster image, given in chart datum lat/long. Any shape polygon 
+DTM � Datum shift parameters - Datum's northing and easting in floating point seconds to go between chart datum and WGS84 (omitted or 0,0 for WGS84 charts) 
+KNQ � Additional parameters - Optional 
+P1=?,
+P2 - the same as KNP PP for Mercator and Transverse Mercator projection. 
+P3= scale factor for Transverse Mercator; 1st standard parallel for lambert conic
+P4= 0 for Transverse Mercator; 2nd standard parallel for lambert conic
+P5= Central meridian for Transverse Mercator and lambert conic
+P6= origin of latitude for Transverse Mercator and lambert conic
+P7 = +x_0 for Transverse Mercator and lambert conic
+P8 = +y_0 for Transverse Mercator and lambert conic
+EC=?
+GD=?
+VC= ?
+SC=?
+PC=?. Set to TC for Transverse Mercator.

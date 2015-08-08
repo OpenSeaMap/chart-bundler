@@ -1,0 +1,23 @@
+.project
+.settings
+.classpath
+.git defekt/*
+
+osmcb/*    
+bin/*
+build/*
+mapsources/*
+tilestore/*
+misc/Example*
+misc/spare/*
+src/test/*
+
+*.class
+
+OSeaMChartBundler.log
+OSMChartBundler*.zip
+settings-*.xml
+OSMChartBundler.jar
+RegEx templates
+README*
+src/main/resources/osmcb/resources/text/mobac.strings

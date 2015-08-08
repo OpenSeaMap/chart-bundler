@@ -1,0 +1,17 @@
+﻿*******************************************************************************
+*              O P E N S E A M A P   C H A R T B U N D L E R                  * 
+*******************************************************************************
+*                  V E R S I O N   I N F O R M A T I O N                      *
+*******************************************************************************
+ 
+ + = Additions since previous version
+ ! = Bug fixes since previous version
+ ~ = Changes   since previous version
+ - = Features that has been removed
+
+=======
+ ~ Project has been renamed to "OpenSeaMap ChartBundler" taking account that
+    ... 
+
+see mobac changelog 
+ 

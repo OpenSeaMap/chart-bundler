@@ -1,0 +1,55 @@
+Atlas Formate
+
+PlainImage
+AFTrack (OSZ) : OSMTracker
+AlpineQuestMap (AQM)
+AndNav (andnav) : OSMTracker
+BackCountryNavigator BCNav : RMapsSQLite
+Big Planet Tracks : RMapsSQLite
+CacheBox (PACK)
+CacheWolf (WFL) : Ozi
+Galileo Offline Maps : BigPlanetTracks
+Garmin Custom Map (KMZ): Google Earth Overlay
+Geocaching Live offline map GCLive
+Glopus (PNG & KAL) : Ozi
+Glopus Map File (GMF) : TrekBuddy
+Google Earth Overlay (KMZ) : PlainImage {http://www.opengis.net/kml/2.2}
+GPS Spoprts Tracker 
+iPhone 3 Map Tiles v5 : RMapsSQLite   {http://msdn.microsoft.com/en-us/library/bb259689.aspx}
+Locus : RMapsSQLite
+Magellan (RMP)
+Maplorer atlas format  {http://maplorer.com}
+Maverick atlas format : OSMTracker    {http://www.codesector.com/maverick.php} {Map/Atlas format see http://help.codesector.com/MapsCache}
+MapBoxTiles MBTiles   {https://github.com/mapbox/mbtiles-spec/tree/master/1.1}
+MGMaps/MyTrails (MGM)
+Mobile Trail Explorer (MTE)
+NaviComputer (NMAP)
+nfComPass
+OruxMaps otrk2.xml 
+OruxMaps Sqlite (OruxMapsImages.db) : OruxMaps
+OSMAND SQLite
+OSMAND tile storage : OSMTracker
+Osmdroid ZIP            {http://sourceforge.net/p/mobac/feature-requests/162/}
+Osmdroid GEMF : OSMTracker
+Osmdroid SQLite      {http://sourceforge.net/p/mobac/patches/22/}
+OSMTracker tile storage
+OziExplorer (PNG & MAP)
+PathAway Tile Cache : OSMTracker {http://www.pathaway.com/}
+PNG + WorldFile (PNG & PGW) : Glopus {http://sourceforge.net/p/mobac/feature-requests/136/}    
+Run.GPS Atlas (RunGPS)   {http://www.rungps.net/wiki/RunGPSAtlasFormat}
+Sports Tracker (NST)
+TomTom Raster (image + SAT)   {http://sourceforge.net/p/mobac/feature-requests/225/}  {http://create.tomtom.com/manuals/create-your-own-content/index.html?map_overlays.htm}
+TrekBuddy untared atlas  {OziExplorer Map Data File Version 2.2}
+TrekBuddy tared atlas : TrekBuddy 
+Touratech QV (TTQV) : Ozi
+TwoNav (RMAP)
+Ublox
+Viewranger
+
+----
+
+OpenCPN-KAP:
+KAP/BSB see http://libbsb.sourceforge.net/
+
+Bundle - Chart BSB - Header text file
+Map - Pane(l) KAP composed file, BSB-Header, TIFF-Image

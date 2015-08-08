@@ -1,0 +1,35 @@
+<launch4jConfig>
+	<dontWrapJar>true</dontWrapJar>
+	<headerType>gui</headerType>
+	<jar>OSMChartBundler.jar</jar>
+	<outfile>..\OSMChartBundler.exe</outfile>
+	<errTitle></errTitle>
+	<cmdLine></cmdLine>
+	<chdir></chdir>
+	<priority>normal</priority>
+	<downloadUrl>http://java.com/download</downloadUrl>
+	<supportUrl></supportUrl>
+	<customProcName>false</customProcName>
+	<stayAlive>false</stayAlive>
+	<manifest></manifest>
+	<icon>osmcb.ico</icon>
+	<jre>
+		<path></path>
+		<minVersion>1.7.0_0</minVersion>
+		<maxVersion></maxVersion>
+		<jdkPreference>preferJre</jdkPreference>
+		<maxHeapSize>2048</maxHeapSize>
+	</jre>
+	<versionInfo>
+		<fileVersion>1.0.0.0</fileVersion>
+		<txtFileVersion>-</txtFileVersion>
+		<fileDescription>OSM ChartBundler Windows Launcher</fileDescription>
+		<copyright>OSMCB developers</copyright>
+		<productVersion>1.0.0.0</productVersion>
+		<txtProductVersion>-</txtProductVersion>
+		<productName>OSeaM ChartBundler</productName>
+		<companyName></companyName>
+		<internalName>OSM ChartBundler 2048MB max Heap</internalName>
+		<originalFilename>OSMChartBundler.exe</originalFilename>
+	</versionInfo>
+</launch4jConfig>
