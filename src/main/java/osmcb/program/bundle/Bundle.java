@@ -20,24 +20,10 @@ public class Bundle extends Catalog implements IfBundle
 	}
 
 	@Override
-	public long calculateTilesToDownload()
-	{
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	// @Override
-	// public IfCatalog deepClone()
-	// {
-	// // TODO Auto-generated method stub
-	// return null;
-	// }
-
-	@Override
 	public boolean isInvalid()
 	{
-		// TODO Auto-generated method stub
-		return false;
+		boolean bOK = (mBOF != null);
+		return bOK;
 	}
 
 	@Override

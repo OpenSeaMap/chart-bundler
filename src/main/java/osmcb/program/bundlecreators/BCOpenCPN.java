@@ -72,17 +72,21 @@ public class BCOpenCPN extends ACBundleCreator
 		return (mapSpace instanceof MercatorPower2MapSpace && ProjectionCategory.SPHERE.equals(mapSpace.getProjectionCategory()));
 	}
 
+	/**
+	 * creates a format specific directory name
+	 */
 	@Override
 	public void initializeBundle(IfBundle bundle, File customBundleDir) throws IOException, BundleTestException
 	{
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-hhmmss");
+		String bundleDirName = "OSM(OpenCPN-KAP)-" + bundle.getName() + "-" + sdf.format(new Date());
 		if (customBundleDir == null)
 		{
-			// top level folder for OpenCPN is 'ChartBundleRoot'
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-hhmmss");
-			String bundleDirName = "OSM-" + bundle.getName() + "-" + sdf.format(new Date());
 			File bundleOutputDir = ((OSMCBSettings) ACApp.getApp().getSettings()).getChartBundleOutputDirectory();
 			customBundleDir = new File(bundleOutputDir, bundleDirName);
 		}
+		else
+			customBundleDir = new File(customBundleDir, bundleDirName);
 		super.initializeBundle(bundle, customBundleDir);
 	}
 
@@ -739,12 +743,5 @@ public class BCOpenCPN extends ACBundleCreator
 	@Override
 	protected void testBundle() throws BundleTestException
 	{
-	}
-
-	@Override
-	public void createMap() throws MapCreationException, InterruptedException
-	{
-		// TODO Auto-generated method stub
-
 	}
 }

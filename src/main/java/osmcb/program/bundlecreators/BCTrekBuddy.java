@@ -24,21 +24,24 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 
 import javax.imageio.ImageIO;
 
 import osmb.mapsources.IfMapSource;
 import osmb.mapsources.mapspace.MercatorPower2MapSpace;
+import osmb.program.ACApp;
 import osmb.program.map.IfLayer;
 import osmb.program.map.IfMap;
 import osmb.program.map.IfMapSpace;
 import osmb.program.map.IfMapSpace.ProjectionCategory;
 import osmb.utilities.geo.GeoUtils;
+import osmcb.OSMCBSettings;
 import osmcb.program.bundle.BundleTestException;
 import osmcb.program.bundle.IfBundle;
 import osmcb.program.bundle.MapCreationException;
-import osmcb.program.bundlecreators.tileprovider.CacheTileProvider;
 import osmcb.program.bundlecreators.tileprovider.TileProvider;
 import osmcb.utilities.OSMCBUtilities;
 
@@ -60,13 +63,24 @@ public class BCTrekBuddy extends ACBundleCreator
 	}
 
 	@Override
-	public void initializeBundle(IfBundle bundle, File customAtlasDir) throws IOException, BundleTestException
+	public void initializeBundle(IfBundle bundle, File customBundleDir) throws IOException, BundleTestException
 	{
-		super.initializeBundle(bundle, customAtlasDir);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-hhmmss");
+		String bundleDirName = "OSM(TrekBuddy)-" + bundle.getName() + "-" + sdf.format(new Date());
+		if (customBundleDir == null)
+		{
+			File bundleOutputDir = ((OSMCBSettings) ACApp.getApp().getSettings()).getChartBundleOutputDirectory();
+			customBundleDir = new File(bundleOutputDir, bundleDirName);
+		}
+		else
+			customBundleDir = new File(customBundleDir, bundleDirName);
+		super.initializeBundle(bundle, customBundleDir);
 	}
 
 	/**
-	 * with default name 'cr' aka 'czech republic'
+	 * originally with the default name 'cr' aka 'czech republic' as Kruch used,
+	 * this name should in fact be a reasonable name for the bundle.
+	 * Thus said we use the bundles name for the packed file
 	 */
 	@Override
 	public void finishBundle(IfBundle bundle)
@@ -83,7 +97,6 @@ public class BCTrekBuddy extends ACBundleCreator
 		}
 		catch (IOException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		IfLayer layer = map.getLayer();
@@ -91,7 +104,7 @@ public class BCTrekBuddy extends ACBundleCreator
 		mapDir = new File(layerDir, map.getName());
 	}
 
-	protected void writeMapFile() throws IOException
+	protected void writeMapFile(IfMap map) throws IOException
 	{
 		File mapFile = new File(mapDir, map.getName() + ".map");
 		FileOutputStream mapFileStream = null;
@@ -131,24 +144,19 @@ public class BCTrekBuddy extends ACBundleCreator
 	}
 
 	@Override
-	public void createMap() throws MapCreationException, InterruptedException
+	public void createMap(IfMap map) throws MapCreationException, InterruptedException
 	{
 		try
 		{
 			OSMCBUtilities.mkDirs(mapDir);
 
 			// write the .map file containing the calibration points
-			writeMapFile();
+			writeMapFile(map);
 
 			// This means there should not be any resizing of the tiles.
 			mapTileWriter = createMapTileWriter();
 
-			// Select the tile creator instance based on whether tile image
-			// parameters has been set or not
-			if (parameters != null)
-				createCustomTiles();
-			else
-				createTiles();
+			createTiles(map);
 
 			mapTileWriter.finalizeMap();
 		}
@@ -171,34 +179,7 @@ public class BCTrekBuddy extends ACBundleCreator
 		return new FileTileWriter();
 	}
 
-	/**
-	 * New experimental custom tile size algorithm implementation.
-	 * 
-	 * It creates each custom sized tile separately. Therefore each original tile (256x256) will be loaded and painted multiple times. Therefore this
-	 * implementation needs much more CPU power as each original tile is loaded at least once and each generated tile has to be saved.
-	 * 
-	 * @throws MapCreationException
-	 */
-	protected void createCustomTiles() throws InterruptedException, MapCreationException
-	{
-		log.debug("Starting map creation using custom parameters: " + parameters);
-
-		CacheTileProvider ctp = new CacheTileProvider(mapDlTileProvider);
-		try
-		{
-			mapDlTileProvider = ctp;
-
-			MapTileBuilder mapTileBuilder = new MapTileBuilder(this, mapTileWriter, true);
-			// bundleProgress.initMapCreation(mapTileBuilder.getCustomTileCount());
-			mapTileBuilder.createTiles();
-		}
-		finally
-		{
-			ctp.cleanup();
-		}
-	}
-
-	protected void createTiles() throws InterruptedException, MapCreationException
+	protected void createTiles(IfMap map) throws InterruptedException, MapCreationException
 	{
 		int tilex = 0;
 		int tiley = 0;

@@ -46,9 +46,10 @@ import osmcb.utilities.OSMCBUtilities;
  * 
  * The general call schema is as follows:
  * <ol>
- * <li>ACBundleCreator instantiation via {@link BundleOutputFormat#createAtlasCreatorInstance()}</li>
- * <li>ACBundleCreator bundle initialization via {@link #startBundleCreation(IfBundle, File)}</li>
- * <li>n times {@link #initializeMap(IfMap, TileProvider)} followed by {@link #createMap()}</li>
+ * <li>ACBundleCreator instantiation via {@link BundleOutputFormat#createBundleCreatorInstance()}</li>
+ * <li>bundle initialization via {@link #initializeBundle(IfBundle, File)}</li>
+ * <li>layer initialization via {@link #initializeLayer(IfLayer)}</li>
+ * <li>n times {@link #initializeMap(IfMap, TileProvider)} followed by {@link #createMap(IfMap)}</li>
  * <li>ACBundleCreator bundle finalization via {@link #finishBundleCreation()}</li>
  * </ol>
  */
@@ -57,17 +58,18 @@ public abstract class ACBundleCreator
 	public static final Charset TEXT_FILE_CHARSET = Charsets.ISO_8859_1;
 	protected final Logger log;
 
-	/************************************************************/
-	/** bundle specific fields **/
-	/************************************************************/
+	/**
+	 * bundle specific fields
+	 */
 	protected IfBundle bundle;
-	protected File bundleDir;
-	protected ACBundleProgress bundleProgress = null;
+	protected File bundleDir; // base directory for all output of the bundle
+	protected ACBundleProgress bundleProgress = null; // all messages regarding the progress go there
+	protected int tileSize;
 	// protected PauseResumeHandler pauseResumeHandler = null;
 
-	/************************************************************/
-	/** iMap specific fields **/
-	/************************************************************/
+	/**
+	 * fields specific to the current map
+	 */
 	protected IfMap map;
 	protected int xMin;
 	protected int xMax;
@@ -75,14 +77,16 @@ public abstract class ACBundleCreator
 	protected int yMax;
 	protected int zoom;
 	protected IfMapSource mapSource;
-	protected int tileSize;
 
 	/**
 	 * Custom tile processing parameters. <code>null</code> if disabled in GUI
 	 */
-	protected TileImageParameters parameters;
+	protected TileImageParameters parameters = null;
 	protected BundleOutputFormat bundleOutputFormat;
 	protected TileProvider mapDlTileProvider;
+	/**
+	 * way out
+	 */
 	private boolean aborted = false;
 
 	/**
@@ -152,6 +156,15 @@ public abstract class ACBundleCreator
 	public abstract boolean testMapSource(IfMapSource mapSource);
 
 	// Bundle actions
+	/**
+	 * at least create a directory where all bundle output is placed. If no file is given, a new on is created following a general naming scheme.
+	 * This may not be appropriate for some output formats
+	 * 
+	 * @param bundle
+	 * @param customBundleDir
+	 * @throws IOException
+	 * @throws BundleTestException
+	 */
 	public void initializeBundle(IfBundle bundle, File customBundleDir) throws IOException, BundleTestException
 	{
 		this.bundle = bundle;
@@ -160,7 +173,7 @@ public abstract class ACBundleCreator
 		if (customBundleDir == null)
 		{
 			// No explicit bundle output directory has been set - generate a probably unique directory name
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HHmmss");
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-HHmmss");
 			String bundleDirName = bundle.getName() + "-" + sdf.format(new Date());
 			File bundleOutputDir = OSMCBSettings.getInstance().getChartBundleOutputDirectory();
 			bundleDir = new File(bundleOutputDir, bundleDirName);
@@ -170,14 +183,25 @@ public abstract class ACBundleCreator
 		OSMCBUtilities.mkDirs(bundleDir);
 	}
 
+	/**
+	 * usually does nothing. The actual action will be taken by the instance
+	 * 
+	 * @param bundle
+	 */
 	public void finishBundle(IfBundle bundle)
 	{
 
 	}
 
 	// Layer actions
+	/**
+	 * 
+	 * @param layer
+	 * @throws IOException
+	 */
 	public void initializeLayer(IfLayer layer) throws IOException
 	{
+		bundleProgress.initLayer(layer);
 		log.trace("initializeLayer(): '" + layer.getName() + "' started");
 	}
 
@@ -225,12 +249,6 @@ public abstract class ACBundleCreator
 	{
 
 	}
-
-	/**
-	 * @throws InterruptedException
-	 * @see AtlasCreator
-	 */
-	public abstract void createMap() throws MapCreationException, InterruptedException;
 
 	/**
 	 * Checks if the user has aborted bundle creation and if <code>true</code> an {@link InterruptedException} is thrown.
@@ -316,5 +334,4 @@ public abstract class ACBundleCreator
 			}
 		}
 	}
-
 }

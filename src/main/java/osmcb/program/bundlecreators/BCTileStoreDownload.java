@@ -17,6 +17,7 @@
 package osmcb.program.bundlecreators;
 
 import osmb.mapsources.IfMapSource;
+import osmb.program.map.IfMap;
 import osmcb.program.bundle.MapCreationException;
 
 @BundleCreatorName(value = "Tile store download only", type = "TILESTORE")
@@ -33,7 +34,7 @@ public class BCTileStoreDownload extends ACBundleCreator
 	}
 
 	@Override
-	public void createMap() throws MapCreationException, InterruptedException
+	public void createMap(IfMap map) throws MapCreationException, InterruptedException
 	{
 	}
 }

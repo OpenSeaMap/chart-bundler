@@ -127,9 +127,9 @@ public class BundleThread extends Thread implements IfBundleThread, IfDownloadJo
 		bProgress.setDownloadControlerListener(this);
 		try
 		{
-			log.info("before bundle creation");
-			createBundle();
-			log.info("Bundle creation finished");
+			log.trace("before bundle creation");
+			composeBundle();
+			log.debug("Bundle creation finished");
 			Thread.sleep(5000);
 		}
 		catch (OutOfMemoryError e)
@@ -149,17 +149,17 @@ public class BundleThread extends Thread implements IfBundleThread, IfDownloadJo
 	}
 
 	/**
-	 * Create bundle: For each iMap download the tiles and perform bundle/iMap creation
+	 * Create bundle: For each map download the tiles and perform bundle/map creation
 	 */
-	protected void createBundle() throws InterruptedException, IOException
+	protected void composeBundle() throws InterruptedException, IOException
 	{
 		long totalNrOfOnlineTiles = bundle.calculateTilesToDownload();
 
-		log.info("createBundle(): started ");
+		log.debug("composeBundle(): started ");
 
 		for (IfLayer l : bundle)
 		{
-			log.info("createBundle(): layer=" + l.getName() + " zoom=" + l.getZoomLvl());
+			log.debug("composeBundle(): layer=" + l.getName() + " zoom=" + l.getZoomLvl());
 			for (IfMap m : l)
 			{
 				// Offline map sources are not relevant for the maximum tile limit.
@@ -168,19 +168,19 @@ public class BundleThread extends Thread implements IfBundleThread, IfDownloadJo
 			}
 		}
 
-		log.info("createBundle(): tiles=" + totalNrOfOnlineTiles);
+		log.info("composeBundle(): tiles=" + totalNrOfOnlineTiles);
 
 		if (totalNrOfOnlineTiles > 500000)
 		{
 			// NumberFormat f = DecimalFormat.getInstance();
-			log.trace("createBundle(): aborted due to too much tiles to download");
+			log.debug("composeBundle(): aborted due to too much tiles to download");
 			return;
 		}
 		try
 		{
-			log.info("createBundle(): before startBundleCreation()");
+			log.trace("composeBundle(): before BC.initializeBundle()");
 			bundleCreator.initializeBundle(bundle, customBundleDir);
-			log.info("createBundle(): after startBundleCreation()");
+			log.debug("composeBundle(): after BC.initializeBundle()");
 		}
 		catch (BundleTestException e)
 		{
@@ -188,17 +188,17 @@ public class BundleThread extends Thread implements IfBundleThread, IfDownloadJo
 			return;
 		}
 
-		log.info("createBundle(): before OSMCBSettings");
+		log.trace("composeBundle(): before OSMCBSettings");
 		OSMCBSettings s = (OSMCBSettings) OSMCBApp.getApp().getSettings();
 
-		log.info("createBundle(): before JobDispatcher(), bProgress=" + bProgress);
+		log.trace("composeBundle(): before JobDispatcher(), bProgress=" + bProgress);
 		downloadJobDispatcher = new JobDispatcher(s.getDownloadThreadCount(), pauseResumeHandler, bProgress);
 		try
 		{
-			log.trace("createBundle(): jobDispatcher running");
+			log.trace("composeBundle(): jobDispatcher running");
 			for (IfLayer layer : bundle)
 			{
-				log.trace("createBundle(): layer started");
+				log.trace("composeBundle(): before BC.initializelayer()");
 				bundleCreator.initializeLayer(layer);
 				for (IfMap map : layer)
 				{
@@ -292,7 +292,7 @@ public class BundleThread extends Thread implements IfBundleThread, IfDownloadJo
 					File tileArchiveFile = File.createTempFile(tempSuffix, ".tar", DirectoryManager.tempDir);
 					// If something goes wrong the temp file only persists until the VM exits
 					tileArchiveFile.deleteOnExit();
-					log.debug("Writing downloaded tiles to " + tileArchiveFile.getPath());
+					log.trace("Writing downloaded tiles to " + tileArchiveFile.getPath());
 					tileArchive = new TarIndexedArchive(tileArchiveFile, tileCount);
 				}
 				else

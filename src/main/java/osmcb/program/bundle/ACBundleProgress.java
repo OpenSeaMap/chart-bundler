@@ -25,6 +25,7 @@ import osmb.mapsources.IfMapSourceListener;
 import osmb.program.map.IfLayer;
 import osmb.program.map.IfMap;
 import osmb.utilities.OSMBStrs;
+import osmcb.OSMCBStrs;
 
 /**
  * A window showing the progress while {@link AtlasThread} downloads and processes the map tiles.
@@ -32,9 +33,9 @@ import osmb.utilities.OSMBStrs;
  */
 public class ACBundleProgress implements IfMapSourceListener
 {
-	private static Logger log = Logger.getLogger(ACBundleProgress.class);
+	protected static Logger log = Logger.getLogger(ACBundleProgress.class);
 	private static final long serialVersionUID = -1L;
-	private static final Timer TIMER = new Timer(true);
+	protected static final Timer TIMER = new Timer(true);
 	// private JProgressBar atlasProgressBar;
 	// private JProgressBar mapDownloadProgressBar;
 	// private JProgressBar mapCreationProgressBar;
@@ -42,42 +43,42 @@ public class ACBundleProgress implements IfMapSourceListener
 	protected long initialTotalTime;
 	protected long initialMapDownloadTime;
 
-	private static class Data
+	public static class Data
 	{
-		IfBundle bundle;
-		IfLayer layer;
-		IfMap map;
-		MapInfo mapInfo;
-		long bytesDLTotal = 0;
-		long bytesCachedTotal = 0;
-		int bytesAvgTile = 0;
-		int bytesLastTile = 0;
-		int tileCurrent = 0;
-		int tilesTotal = 0;
-		int tilesDLMap = 0;
-		int mapDownloadProgress = 0;
-		int mapCreationProgress = 0;
-		int mapCurrent = 0;
-		int mapsTotal = 0;
-		int layerCurrent = 0;
-		int layersTotal = 0;
-		int bundleProgress = 0;
+		public IfBundle bundle;
+		public IfLayer layer;
+		public IfMap map;
+		public MapInfo mapInfo;
+		public long bytesDLTotal = 0;
+		public long bytesCachedTotal = 0;
+		public int bytesAvgTile = 0;
+		public int bytesLastTile = 0;
+		public int tileCurrent = 0;
+		public int tilesTotal = 0;
+		public int tilesDLMap = 0;
+		public int mapDownloadProgress = 0;
+		public int mapCreationProgress = 0;
+		public int mapCurrent = 0;
+		public int mapsTotal = 0;
+		public int layerCurrent = 0;
+		public int layersTotal = 0;
+		public int bundleProgress = 0;
 
-		long mapCreationMax = 0;
-		int mapRetryErrors = 0;
-		int mapPermanentErrors = 0;
-		int prevMapsRetryErrors = 0;
-		int prevMapsPermanentErrors = 0;
-		int totalProgressTenthPercent = 0;
-		boolean paused = false;
+		public long mapCreationMax = 0;
+		public int mapRetryErrors = 0;
+		public int mapPermanentErrors = 0;
+		public int prevMapsRetryErrors = 0;
+		public int prevMapsPermanentErrors = 0;
+		public int totalProgressTenthPercent = 0;
+		public boolean paused = false;
 	}
 
-	private final Data data = new Data();
-	private boolean aborted = false;
-	private boolean finished = false;
-	private IfBCControler downloadControlListener = null;
-	private IfBundleThread bundleThread = null;
-	private ArrayList<MapInfo> mapInfos = null;
+	protected final Data data = new Data();
+	protected boolean aborted = false;
+	protected boolean finished = false;
+	protected IfBCControler downloadControlListener = null;
+	protected IfBundleThread bundleThread = null;
+	protected ArrayList<MapInfo> mapInfos = null;
 	public String timeLeftTotal;
 	public String bps;
 
@@ -92,13 +93,13 @@ public class ACBundleProgress implements IfMapSourceListener
 		initialMapDownloadTime = System.currentTimeMillis();
 	}
 
-	private void printData()
+	protected void printData()
 	{
-		log.info(OSMBStrs.RStr("BundleProgress.Data"));
+		log.info(OSMCBStrs.RStr("BundleProgress.Data"));
 		if (data.bundle != null)
-			log.info(OSMBStrs.RStr("BundleProgress.Data") + " '" + data.bundle.getName() + "'; layer " + data.layerCurrent + " of " + data.layersTotal + "; map "
-					+ data.mapCurrent + " of " + data.mapsTotal + "; tiles " + data.tilesDLMap + " of " + data.tilesTotal + "; bytes downloaded " + data.bytesDLTotal
-					+ ", from cache " + data.bytesCachedTotal + " last tile " + data.bytesLastTile);
+			log.info(OSMCBStrs.RStr("BundleProgress.Data") + " '" + data.bundle.getName() + "'; layer '" + (data.layer != null ? data.layer.getName() : "") + "' "
+					+ data.layerCurrent + " of " + data.layersTotal + "; map " + data.mapCurrent + " of " + data.mapsTotal + "; tiles " + data.tilesDLMap + " of "
+					+ data.tilesTotal + "; bytes downloaded " + data.bytesDLTotal + ", from cache " + data.bytesCachedTotal + " last tile " + data.bytesLastTile);
 	}
 
 	public void initBundle(IfBundle bundle)
@@ -142,11 +143,12 @@ public class ACBundleProgress implements IfMapSourceListener
 	public void initLayer(IfLayer layer)
 	{
 		data.layerCurrent++;
+		data.layer = layer;
 	}
 
 	public void finishLayer(IfLayer layer)
 	{
-		log.trace(OSMBStrs.RStr("BundleProgress.LayerFinished"));
+		log.trace(OSMCBStrs.RStr("BundleProgress.LayerFinished"));
 	}
 
 	/**
@@ -160,7 +162,7 @@ public class ACBundleProgress implements IfMapSourceListener
 		data.mapCreationProgress = 0;
 		data.mapCreationMax = l;
 		initialMapDownloadTime = -1;
-		log.trace(OSMBStrs.RStr("BundleProgress.InitMapCreation"));
+		log.trace(OSMCBStrs.RStr("BundleProgress.InitMapCreation"));
 	}
 
 	/**
@@ -181,14 +183,14 @@ public class ACBundleProgress implements IfMapSourceListener
 		data.mapCreationProgress = 0;
 		data.mapDownloadProgress = 0;
 		data.mapCurrent = index + 1;
-		log.trace(OSMBStrs.RStr("BundleProgress.NextMap"));
+		log.trace(OSMCBStrs.RStr("BundleProgress.NextMap"));
 		printData();
 	}
 
 	public void finishMap()
 	{
 		data.mapCreationProgress = 100;
-		log.trace(OSMBStrs.RStr("BundleProgress.FinishMapCreation"));
+		log.trace(OSMCBStrs.RStr("BundleProgress.FinishMapCreation"));
 	}
 
 	public void setErrorCounter(int retryErrors, int permanentErrors)
@@ -269,7 +271,7 @@ public class ACBundleProgress implements IfMapSourceListener
 
 		if (longSeconds < 0)
 		{
-			timeString = OSMBStrs.RStr("dlg_download_time_unknown");
+			timeString = OSMCBStrs.RStr("dlg_download_time_unknown");
 		}
 		else
 		{
@@ -294,7 +296,7 @@ public class ACBundleProgress implements IfMapSourceListener
 
 	public void setDownloadControlerListener(IfBundleThread bundleThread)
 	{
-		log.trace("BP: setDownloadControlerListener()");
+		log.debug("BP: setDownloadControlerListener()");
 		// this.downloadControlListener = (IfBCControler) bundleThread;
 	}
 
