@@ -95,7 +95,6 @@ public class ACBundleProgress implements IfMapSourceListener
 
 	protected void printData()
 	{
-		log.info(OSMCBStrs.RStr("BundleProgress.Data"));
 		if (data.bundle != null)
 			log.info(OSMCBStrs.RStr("BundleProgress.Data") + " '" + data.bundle.getName() + "'; layer '" + (data.layer != null ? data.layer.getName() : "") + "' "
 					+ data.layerCurrent + " of " + data.layersTotal + "; map " + data.mapCurrent + " of " + data.mapsTotal + "; tiles " + data.tilesDLMap + " of "

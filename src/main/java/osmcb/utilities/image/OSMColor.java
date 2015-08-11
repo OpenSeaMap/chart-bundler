@@ -1,6 +1,7 @@
 package osmcb.utilities.image;
 
 import java.awt.Color;
+
 import org.apache.log4j.Logger;
 
 /**
@@ -118,7 +119,7 @@ public class OSMColor extends Color
 		// double oDiff = (1.0 - dDiff) * (qDiff(cCol) * qDiff(cCol)) / cCol.length();
 		double oDiff = (2.0 - dDiff) * Math.sqrt(qDiff(cCol)) / cCol.length();
 		if (oDiff <= 0)
-			log.info("oDiff(): d-Diff=" + dDiff + "; o-Diff=" + oDiff + "; qDiff=" + qDiff(cCol));
+			log.debug("oDiff(): d-Diff=" + dDiff + "; o-Diff=" + oDiff + "; qDiff=" + qDiff(cCol));
 		return oDiff;
 	}
 

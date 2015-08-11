@@ -45,7 +45,8 @@ public class OSMPaletteEntry implements Comparable
 	 * maps another color to the current one and adjusts the usage counts of both colors
 	 * 
 	 * @param tPE
-	 * @return the new usage count
+	 *          - the color to be mapped to this
+	 * @return the new usage count of this
 	 */
 	public int map(OSMPaletteEntry tPE)
 	{
@@ -63,7 +64,7 @@ public class OSMPaletteEntry implements Comparable
 	/**
 	 * 
 	 * @param nCnt
-	 * @return the new usage count
+	 * @return the new usage count of this
 	 */
 	public int setCount(int nCnt)
 	{

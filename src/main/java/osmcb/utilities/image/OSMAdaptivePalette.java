@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+
 import org.apache.log4j.Logger;
 
 /**
@@ -78,14 +79,14 @@ public class OSMAdaptivePalette
 				put(new OSMColor(img.getRGB(x, y)));
 			}
 		}
-		log.info("Palette[" + mColorList.size() + "] after put():" + toString());
+		log.debug("Palette[" + mColorList.size() + "] after put():" + toString());
 		if (mColorList.size() > mPaletteCnt)
 		{
 			reduce();
-			log.info("Palette[" + mColorList.size() + "] after reduce():" + toString());
+			log.debug("Palette[" + mColorList.size() + "] after reduce():" + toString());
 		}
 		else
-			log.info("Palette[" + mColorList.size() + "] no reduction neccessary");
+			log.debug("Palette[" + mColorList.size() + "] no reduction neccessary");
 
 		// populate the hash map with the color/index mapping
 		for (int nCol = 1; nCol < mColorList.size(); nCol++)
@@ -201,11 +202,10 @@ public class OSMAdaptivePalette
 	public void reduce()
 	{
 		int nCLSize = mColorList.size(); // the size of the list will not change, mapped - hence unused - colors will be moved to the end of the list.
-		// the palette is traversed in reverse sorting order, which is in ascending usage count order
-		// for (int nCol = mCL.size() - 1; nCol >= 2; nCol--)
 		// The palette is traversed in 'normal' order, which is descending in the usage count. This means, often used colors are mapped first, and hopefully
 		// prevents color drifting while chained mapping.
-		// It stops when the usage count of the color has reached 0, so colors which have been mapped earlier are skipped.
+		// It stops when the usage count of the color has reached 0, so colors which have already been mapped earlier are skipped.
+		// The first round maps neatly matching colors, so the most often used colors move to the front of the palette
 		for (int nTCol = 1; nTCol < nCLSize - 1; nTCol++)
 		{
 			boolean bMapped = false;
@@ -240,16 +240,22 @@ public class OSMAdaptivePalette
 		{
 			findBestMatch(nTCol);
 		}
+
 		// Now look for the best overall matching pair
 		// OSMColorPair tCP = mTM.ceilingEntry(0.0).getValue();
 		Entry<Double, OSMColorPair> tME = mMatchesTM.pollFirstEntry();
 		OSMColorPair tCP = tME.getValue();
 		int nTCol = tCP.mIdx;
 		int nSCol = tCP.mMIdx;
-		OSMPaletteEntry tSPE = mColorList.get(nSCol);
-		OSMPaletteEntry tTPE = mColorList.get(nTCol);
-		log.info("map: " + tSPE + " to " + tTPE + " diff=" + tME.getKey());
-		mColorList.get(nTCol).map(tSPE);
+		if ((nSCol < mColorList.size()) && (nTCol < mColorList.size()))
+		{
+			OSMPaletteEntry tSPE = mColorList.get(nSCol); // oob!
+			OSMPaletteEntry tTPE = mColorList.get(nTCol);
+			log.info("map: " + tSPE + " to " + tTPE + " diff=" + tME.getKey());
+			mColorList.get(nTCol).map(tSPE);
+		}
+		else
+			log.debug("map match: Tgt=" + nTCol + " or Src=" + nSCol + " invalid: " + mColorList.size());
 		// Reconstruct the entry for the current color.
 		findBestMatch(nTCol);
 	}
@@ -281,7 +287,7 @@ public class OSMAdaptivePalette
 			{
 				tTPE = mColorList.get(nTCol);
 				dDiff = dNewDiff;
-				log.info("DIFF: " + tSPE + " to " + tTPE + " diff=" + dNewDiff + "; qDiff=" + tTCol.qDiff(tSCol));
+				log.trace("DIFF: " + tSPE + " to " + tTPE + " diff=" + dNewDiff + "; qDiff=" + tTCol.qDiff(tSCol));
 			}
 		}
 		// Fill list with color distances.
@@ -291,6 +297,7 @@ public class OSMAdaptivePalette
 	/**
 	 * this creates a specific String in the format required by the BSB KAP file format
 	 * it runs 'only' over the first mPaletteCnt entries in the palette
+	 * it ends with a 0x0D,0x0A sequence("\r\n").
 	 */
 	public String asBSBStr()
 	{
@@ -387,6 +394,20 @@ public class OSMAdaptivePalette
 	}
 
 	/**
+	 * returns the mapped color index in the palette for the given color. Be aware that KAP palettes start with color number 1 not 0
+	 * 
+	 * @param tCol
+	 * @return
+	 */
+	public int getMIdx(OSMColor tCol)
+	{
+		int nIdx = 0;
+		if ((nIdx = mColorList.get(getIdx(tCol)).getMIndex()) == -1)
+			nIdx = getIdx(tCol);
+		return nIdx;
+	}
+
+	/**
 	 * performs a linear search for the best matching color. It only tries to substitute with a color which is at least used as often as the original - this
 	 * means, it only tests against the entries forward in the palette
 	 * it is only matched against unmatched colors to avoid chaining
@@ -412,13 +433,13 @@ public class OSMAdaptivePalette
 				{
 					tTPE = mColorList.get(nTCol);
 					dDiff = nNewDiff;
-					log.info("DIFF: " + tSPE + " to " + tTPE + " diff=" + nNewDiff + "; qDiff=" + tTCol.qDiff(tSCol));
+					log.trace("DIFF: " + tSPE + " to " + tTPE + " diff=" + nNewDiff + "; qDiff=" + tTCol.qDiff(tSCol));
 				}
 			}
 			nTCol--;
 		}
 		tTPE.map(tSPE);
-		log.info("Mapped: " + tSPE + " to " + tTPE);
+		log.debug("Mapped: " + tSPE + " to " + tTPE);
 		return tTPE;
 	}
 
@@ -448,13 +469,13 @@ public class OSMAdaptivePalette
 				{
 					tTPE = mColorList.get(nTCol);
 					dDiff = nNewDiff;
-					log.info("DIFF: " + tSPE + " to " + tTPE + " diff=" + nNewDiff + "; qDiff=" + tTCol.qDiff(tSCol));
+					log.trace("DIFF: " + tSPE + " to " + tTPE + " diff=" + nNewDiff + "; qDiff=" + tTCol.qDiff(tSCol));
 				}
 			}
 			nTCol--;
 		}
 		tTPE.map(tSPE);
-		log.info("Mapped: " + tSPE + " to " + tTPE);
+		log.debug("Mapped: " + tSPE + " to " + tTPE);
 		return tTPE;
 	}
 
@@ -484,14 +505,14 @@ public class OSMAdaptivePalette
 			{
 				tTPE = mColorList.get(nTCol);
 				nDiff = nNewDiff;
-				log.info("DIFF: " + tSPE + " to " + tTPE + " diff=" + nNewDiff);
+				log.trace("DIFF: " + tSPE + " to " + tTPE + " diff=" + nNewDiff);
 			}
 			nTCol--;
 		}
 		if (tTPE != null)
 		{
 			tTPE.map(tSPE);
-			log.info("Mapped: " + tSPE + " to " + tTPE);
+			log.debug("Mapped: " + tSPE + " to " + tTPE);
 		}
 		// else
 		// log.trace(tSPE + " no match");

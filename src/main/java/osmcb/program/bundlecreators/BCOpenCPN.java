@@ -55,7 +55,7 @@ import osmcb.utilities.OSMCBUtilities;
 import osmcb.utilities.image.OSMAdaptivePalette;
 import osmcb.utilities.image.OSMColor;
 
-@BundleCreatorName(value = "OpenCPN KAP bundle")
+@BundleCreatorName(value = "OpenCPN KAP bundle", type = "OpenCPN")
 // @SupportedTIParameters(names = {Name.format, Name.height, Name.width})
 public class BCOpenCPN extends ACBundleCreator
 {
@@ -328,19 +328,19 @@ public class BCOpenCPN extends ACBundleCreator
 			log.trace("Writing bsb file");
 			OutputStreamWriter bsbWriter = new OutputStreamWriter(bsbFileStream, TEXT_FILE_CHARSET);
 
-			bsbWriter.write("! - AHTest BSB File\r\n");
-			bsbWriter.write("CRR/2014, OSeamM. All rights reserved.\r\n");
-			bsbWriter.write("CHT/NA=" + map.getName() + ",NU=123\r\n");
+			bsbWriter.write("! - BSB File\r\n");
+			bsbWriter.write("CRR/2014, OpenSeamMap. All rights reserved.\r\n");
+			bsbWriter.write("CHT/NA=" + map.getName() + ",NU=" + map.getNumber() + "\r\n");
 			bsbWriter.write("CHF/" + strCHF + "\r\n");
 			bsbWriter.write("CED/SE=1,RE=1,ED=" + strDate + "\r\n");
 			bsbWriter.write("NTM/NE=70.00,ND=" + strDate + ",BF=on,BD=" + strDate + "\r\n");
 			bsbWriter.write("VER/3.0\r\n");
 			bsbWriter.write("CHK/1," + map.getName() + "\r\n");
-			bsbWriter.write("ORG/OSeaM\r\n");
-			bsbWriter.write("MFR/OSeaM\r\n");
+			bsbWriter.write("ORG/OpenSeaMap\r\n");
+			bsbWriter.write("MFR/OpenSeaMap\r\n");
 			// bsbWriter.write("CGD/unknown\r\n");
 			// bsbWriter.write("RGN/unknown\r\n");
-			bsbWriter.write("K01/NU=" + map.getName() + ",TY=BASE,FN=" + map.getName() + "_1.kap\r\n");
+			bsbWriter.write("K01/NU=" + map.getNumber() + ",TY=BASE,FN=" + map.getName() + "_1.kap\r\n");
 			// bsbWriter.write("DTM/0,0\r\n");
 			// bsbWriter.write("CPH/0\r\n");
 			// bsbWriter.write("IFM/7\r\n");
@@ -375,27 +375,30 @@ public class BCOpenCPN extends ACBundleCreator
 			OSMAdaptivePalette sPal = makePalette(img);
 			mFS = Files.newOutputStream(mapFile, CREATE);
 
-			log.trace("Writing map file");
-
-			writeMapHeader(map, mFS, sPal);
+			log.debug("Writing map file (.kap)");
 
 			ImageOutputStream ios = ImageIO.createImageOutputStream(mFS);
-			writeMapImage(map, img, ios, sPal);
+			writeMapHeader(map, mFS, sPal);
 
-			// these are here for testing purposes
-			File test = new File(mapDir, map.getName() + ".png");
-			ImageIO.write(img, "png", test);
+			long pos = Files.size(mapFile);
 
-			// File testTiff = new File(mapDir, map.getName() + ".tiff");
-			// ImageIO.write(img, "tiff", testTiff);
-			//
-			// File testTiff2 = new File(mapDir, map.getName() + "_2.tiff");
-			// ImageIO.write(img, "tiff", testTiff2);
+			writeMapImage(map, img, ios, sPal, pos);
 		}
 		finally
 		{
 			OSMCBUtilities.closeStream(mFS);
 		}
+
+		log.debug("Writing test map file (.png)");
+		// these are here for testing purposes
+		File test = new File(mapDir, map.getName() + ".png");
+		ImageIO.write(img, "png", test);
+
+		// File testTiff = new File(mapDir, map.getName() + ".tiff");
+		// ImageIO.write(img, "tiff", testTiff);
+
+		// File testTiff2 = new File(mapDir, map.getName() + "_2.tiff");
+		// ImageIO.write(img, "tiff", testTiff2);
 	}
 
 	protected void writeMapHeader(IfMap map, OutputStream os, OSMAdaptivePalette sPal) throws IOException
@@ -433,9 +436,9 @@ public class BCOpenCPN extends ACBundleCreator
 				strCHF = "Coastal";
 				break;
 			case 14:
+			case 15:
 				strCHF = "Approach";
 				break;
-			case 15:
 			case 16:
 			case 17:
 			case 18:
@@ -500,30 +503,17 @@ public class BCOpenCPN extends ACBundleCreator
 		// SD - Sounding Datum e.g. MEAN LOWER LOW WATER, HHWLT or normally LAT
 		// DU - Drawing Units in pixels/inch (same as DPI resolution) e.g. 50, 150, 175, 254, 300
 
-		/*
-		 * Write KAP header
-		 * }
-		 * 
-		 * fprintf(out,"    NU=UNKNOWN,RA=%d,%d,DU=%d\r\n",widthout,heightout,dpi);
-		 * fprintf(out,"    DX=%.2f,DY=%.2f\r\n", sunits, sd,dx,dy);
-		 * 
-		 * 
-		 * result = writeimgkap(out,&bitmap,optkap,color,(Color32 *)palette,widthin,heightin,widthout,heightout);
-		 * FreeImage_Unload(bitmap);
-		 * fclose(out);
-		 */
-
 		int width = (xMax - xMin + 1) * tileSize;
 		int height = (yMax - yMin + 1) * tileSize;
-		osw.write("! - AHTest KAP File\r\n");
+		osw.write("! - KAP File\r\n");
 		osw.write("VER/3.0\r\n");
-		osw.write("CRR/2014, OSeamM. All rights reserved.\r\n");
-		osw.write("CHT/NA=" + map.getName() + ",NU=UNKNOWN\r\n");
+		osw.write("CRR/2015, OpenSeamMap. All rights reserved.\r\n");
+		osw.write("CHT/NA=" + map.getName() + ",NU=" + map.getNumber() + "\r\n");
 		osw.write("CED/SE=1,RE=1,ED=" + strDate + "\r\n");
 		osw.write("CHF/" + strCHF + "\r\n");
-		osw.write("BSB/NA=OSM-KAP-Test,NU=UNKNOWN,RA=" + width + "," + height + ",DU=220\r\n");
-		osw.write("ORG/OSeaM\r\n");
-		osw.write("MFR/OSeaM\r\n");
+		osw.write("BSB/NA=" + map.getName() + ",NU=" + map.getNumber() + ",RA=" + width + "," + height + ",DU=220\r\n");
+		osw.write("ORG/OpenSeaMap\r\n");
+		osw.write("MFR/OpenSeaMap\r\n");
 		osw.write("KNP/PR=MERCATOR,GD=WGS84,SC=" + ((500000000) / Math.pow(2.0, map.getZoom())) + ",SD=LAT,UN=METRES,SK=0.0,TA=90.0,PI=UNKNOWN,SP=UNKNOWN,PP="
 				+ (laMax - laMin) / 2 + "\r\n");
 		osw.write("REF/1,0,0," + laMax + "," + loMin + "\r\n");
@@ -542,8 +532,9 @@ public class BCOpenCPN extends ACBundleCreator
 		// - we create a new colortable for each map by some sophisticated algorithm (technically preferred, but nyr)
 		osw.write(sPal.asBSBStr());
 		osw.flush();
-		os.write(26);
-		os.write(0);
+		// write the separator before the image description
+		os.write(0x1A);
+		os.write(0x00);
 	}
 
 	protected OSMAdaptivePalette makePalette(BufferedImage img)
@@ -553,7 +544,15 @@ public class BCOpenCPN extends ACBundleCreator
 		return tPal;
 	}
 
-	protected void writeMapImage(IfMap map, BufferedImage img, ImageOutputStream ios, OSMAdaptivePalette tPal)
+	/**
+	 * This writes a map image to the kap-file. The kap image description consists of the bits per pixel info, the scan lines and a scan line index
+	 * 
+	 * @param map
+	 * @param img
+	 * @param ios
+	 * @param tPal
+	 */
+	protected void writeMapImage(IfMap map, BufferedImage img, ImageOutputStream ios, OSMAdaptivePalette tPal, long nPos)
 	{
 		ArrayList<Long> tLIdx = new ArrayList<Long>(img.getHeight());
 		try
@@ -561,49 +560,56 @@ public class BCOpenCPN extends ACBundleCreator
 			// write the bits per color (currently fixed to 7 - meaning we have 127 color in the palette)
 			ios.write(7);
 
-			// write the image pixel by pixel
-			// line numbers start with 1 not 0
+			// write the image pixel by pixel we use rle (see ...)
+			// the line numbers start with 1 not 0
 			for (int nY = 1; nY <= img.getHeight(); nY++)
 			{
-				// write the line index
+				// write the line index, we get the offset of the first scan line in the file from the outside by file.size() after writeMapHeader()
+				// know no way to ask ios about that
+				tLIdx.add(ios.getStreamPosition() + nPos);
 				if (nY < 128)
 					ios.write(nY);
 				else
 				{
-					ios.write(nY / 128 + 0x80);
-					ios.write(nY % 128);
+					ios.write(((nY >> 7) & 0x7F) | 0x80);
+					ios.write(nY & 0x7F);
 				}
+				// now look for encodable runs
 				for (int nX = 0; nX < img.getWidth(); nX++)
 				{
 					int nCnt = 1;
-					int nColVal = 0;
 					OSMColor tCol = new OSMColor(img.getRGB(nX, nY - 1));
+					int nPalIdx = tPal.getMIdx(tCol);
 
-					while ((nX < img.getWidth() - 1) && ((nColVal = img.getRGB(nX + 1, nY - 1)) == tCol.getRGB()))
+					// should compare the mapped colors
+					// while ((nX < img.getWidth() - 1) && (img.getRGB(nX + 1, nY - 1) == tCol.getRGB()))
+					while ((nX < img.getWidth() - 1) && (tPal.getMIdx(new OSMColor(img.getRGB(nX + 1, nY - 1))) == nPalIdx))
 					{
 						nCnt++;
 						nX++;
 					}
 
-					// for 7bit palette the first Byte is the color index, so the count will follow -> set bit 7
-					ios.write(tPal.getIdx(tCol) + 0x80);
+					if (nPalIdx > 127)
+						log.error("palette index wrong=" + nPalIdx + " used=" + (nPalIdx & 0x7F));
+					// for our 7bit palette the whole first Byte is used by the color index, so the count will follow -> set bit 7
+					ios.write((nPalIdx & 0x7F) | 0x80);
+					// calculate the run count
 					if (nCnt > 0x1FFFFF)
 					{
-						ios.write((nCnt - 1) / (128 * 128 * 128) + 0x80);
+						ios.write(((nCnt >> 21) & 0x7F) | 0x80);
 					}
 					if (nCnt > 0x3FFF)
 					{
-						ios.write((nCnt - 1) / (128 * 128) + 0x80);
+						ios.write(((nCnt >> 14) & 0x7F) | 0x80);
 					}
 					if (nCnt > 0x7F)
 					{
-						ios.write((nCnt - 1) / 128 + 0x80);
+						ios.write(((nCnt >> 7) & 0x7F) | 0x80);
 					}
 					ios.write((nCnt - 1) % 128);
 				}
 				// write the line end marker
 				ios.write(0);
-				tLIdx.add(ios.getStreamPosition());
 			}
 			ios.writeInt(0);
 			// write the line offset index table
