@@ -19,7 +19,6 @@ package osmcb.program.bundle;
 import java.io.File;
 import java.io.IOException;
 
-import osmb.program.map.IfMap;
 import osmcb.program.bundlecreators.ACBundleCreator;
 
 /**
@@ -51,15 +50,7 @@ public interface IfBundleThread
 	/**
 	 * Create bundle: For each Layer and for each map download the tiles and perform bundle/map creation
 	 */
-	void makeBundle() throws InterruptedException, IOException;
-
-	/**
-	 * 
-	 * @param map
-	 * @return true if map creation process was finished and false if something went wrong and the user decided to retry map download
-	 * @throws Exception
-	 */
-	public boolean makeMap(IfMap map) throws Exception;
+	public void composeBundle() throws InterruptedException, IOException;
 
 	public void pauseResumeBundleCreation();
 

@@ -37,4 +37,10 @@ public class BCTileStoreDownload extends ACBundleCreator
 	public void createMap(IfMap map) throws MapCreationException, InterruptedException
 	{
 	}
+
+	@Override
+	public void createInfoFile()
+	{
+		// Nothing to do for this output format
+	}
 }

@@ -90,11 +90,6 @@ public class BCOpenCPN extends ACBundleCreator
 		super.initializeBundle(bundle, customBundleDir);
 	}
 
-	public void createBundle(IfBundle bundle) throws IOException, InterruptedException
-	{
-		// Nothing to do here
-	}
-
 	/**
 	 * name can be configured
 	 */
@@ -105,15 +100,23 @@ public class BCOpenCPN extends ACBundleCreator
 		bundleProgress.finishBundle();
 	}
 
+	/**
+	 * Currently it creates a simple user agreement.
+	 * The bundle file is a simple description and license information about the charts in this bundle
+	 * 
+	 * In the future it should also create a file containing some information about the bundles contents.
+	 * This text should be composed of one part incorporated in the catalog, containing information about what is included in the catalog;
+	 * and a second part coming from the bundle format stating which format it is and suited fpr which application.
+	 */
+	@Override
 	public void createInfoFile()
 	{
-		// the bundle file is a simple description and license information about the charts in this bundle
 		File crtba = new File(bundleDir.getAbsolutePath(), "UserAgreement-OpenSeaMap.txt");
 		try
 		{
 			FileWriter fw = new FileWriter(crtba);
-			fw.write("OSM Charts KAP Bundle 0.0\r\n");
-			fw.write("This Charts is useable for testing ONLY, it is fit for navigational purposes in no way.\r\n");
+			fw.write("OpenSeaMap Charts KAP Bundle 0.1\r\n");
+			fw.write("This Charts is useable for testing ONLY, it is in no way fit for navigational purposes.\r\n");
 			fw.write("\r\n");
 			fw.write("OpenSeaMap does not give any warranty, that the data shown in this map are real.\r\n");
 			fw.write("Even if you use it for testing, any damage resulting from this test will be solely your problem.\r\n");
@@ -323,13 +326,14 @@ public class BCOpenCPN extends ACBundleCreator
 					break;
 			}
 			Date editionDate = new Date();
-			String strDate = "01/20/2015";
+			SimpleDateFormat sdf = new SimpleDateFormat("dd/mm/yyyy");
+			String strDate = sdf.format(editionDate);
 
 			log.trace("Writing bsb file");
 			OutputStreamWriter bsbWriter = new OutputStreamWriter(bsbFileStream, TEXT_FILE_CHARSET);
 
 			bsbWriter.write("! - BSB File\r\n");
-			bsbWriter.write("CRR/2014, OpenSeamMap. All rights reserved.\r\n");
+			bsbWriter.write("CRR/2015, OpenSeamMap. All rights reserved.\r\n");
 			bsbWriter.write("CHT/NA=" + map.getName() + ",NU=" + map.getNumber() + "\r\n");
 			bsbWriter.write("CHF/" + strCHF + "\r\n");
 			bsbWriter.write("CED/SE=1,RE=1,ED=" + strDate + "\r\n");
@@ -421,7 +425,8 @@ public class BCOpenCPN extends ACBundleCreator
 		log.info("start writing image file for='" + map.getName() + "'");
 
 		Date editionDate = new Date();
-		String strDate = "01/18/2015";
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/mm/yyyy");
+		String strDate = sdf.format(editionDate);
 
 		String strCHF = null;
 		switch (map.getLayer().getZoomLvl())
@@ -590,10 +595,11 @@ public class BCOpenCPN extends ACBundleCreator
 					}
 
 					if (nPalIdx > 127)
-						log.error("palette index wrong=" + nPalIdx + " used=" + (nPalIdx & 0x7F));
+						log.error("palette index wrong=" + nPalIdx + ", used=" + (nPalIdx & 0x7F));
 					// for our 7bit palette the whole first Byte is used by the color index, so the count will follow -> set bit 7
 					ios.write((nPalIdx & 0x7F) | 0x80);
 					// calculate the run count
+					nCnt--;
 					if (nCnt > 0x1FFFFF)
 					{
 						ios.write(((nCnt >> 21) & 0x7F) | 0x80);
@@ -606,12 +612,101 @@ public class BCOpenCPN extends ACBundleCreator
 					{
 						ios.write(((nCnt >> 7) & 0x7F) | 0x80);
 					}
-					ios.write((nCnt - 1) % 128);
+					ios.write((nCnt) & 0x7F);
 				}
 				// write the line end marker
 				ios.write(0);
 			}
 			ios.writeInt(0);
+			// write the line offset index table
+			for (int nY = 0; nY < img.getHeight(); nY++)
+			{
+				long nIdx = tLIdx.get(nY);
+				ios.write(((int) nIdx & 0xFF000000) >> 24);
+				ios.write(((int) nIdx & 0xFF0000) >> 16);
+				ios.write(((int) nIdx & 0xFF00) >> 8);
+				ios.write(((int) nIdx & 0xFF) >> 0);
+			}
+			ios.close();
+			log.info("finished writing image file for='" + map.getName() + "'");
+		}
+		catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * This writes a test map image to the kap-file.
+	 * It creates a two colored square with a diagonal division.
+	 */
+	protected void writeTestMapImage(IfMap map, BufferedImage img, ImageOutputStream ios, OSMAdaptivePalette tPal, long nPos)
+	{
+		ArrayList<Long> tLIdx = new ArrayList<Long>(img.getHeight());
+		try
+		{
+			// write the bits per color (currently fixed to 7 - meaning we have 127 color in the palette)
+			ios.write(7);
+
+			// write the image pixel by pixel we use rle (see ...)
+			// the line numbers start with 1 not 0
+			for (int nY = 1; nY <= img.getHeight(); nY++)
+			{
+				// write the line index, we get the offset of the first scan line in the file from the outside by file.size() after writeMapHeader()
+				// know no way to ask ios about that
+				tLIdx.add(ios.getStreamPosition() + nPos);
+				if (nY < 128)
+					ios.write(nY);
+				else
+				{
+					ios.write(((nY >> 7) & 0x7F) | 0x80);
+					ios.write(nY & 0x7F);
+				}
+
+				// now write encoded runs
+				{
+					int nCnt = nY - 1;
+					// for our 7bit palette the whole first Byte is used by the color index, so the count will follow -> set bit 7
+					ios.write((1 & 0x7F) | 0x80);
+					// calculate the run count
+					if (nCnt > 0x1FFFFF)
+					{
+						ios.write(((nCnt >> 21) & 0x7F) | 0x80);
+					}
+					if (nCnt > 0x3FFF)
+					{
+						ios.write(((nCnt >> 14) & 0x7F) | 0x80);
+					}
+					if (nCnt > 0x7F)
+					{
+						ios.write((((nCnt >> 7)) & 0x7F) | 0x80);
+					}
+					ios.write((nCnt) & 0x7F);
+
+					nCnt = img.getWidth() - nY - 1;
+					// for our 7bit palette the whole first Byte is used by the color index, so the count will follow -> set bit 7
+					ios.write((2 & 0x7F) | 0x80);
+					// calculate the run count
+					if (nCnt > 0x1FFFFF)
+					{
+						ios.write(((nCnt >> 21) & 0x7F) | 0x80);
+					}
+					if (nCnt > 0x3FFF)
+					{
+						ios.write(((nCnt >> 14) & 0x7F) | 0x80);
+					}
+					if (nCnt > 0x7F)
+					{
+						ios.write((((nCnt >> 7)) & 0x7F) | 0x80);
+					}
+					ios.write((nCnt) & 0x7F);
+				}
+				// write the line end marker
+				ios.write(0);
+			}
+			ios.writeInt(0);
+
 			// write the line offset index table
 			for (int nY = 0; nY < img.getHeight(); nY++)
 			{
@@ -667,7 +762,7 @@ public class BCOpenCPN extends ACBundleCreator
 					}
 					else
 					{
-						log.trace(String.format("Tile x=%d y=%d not found in tile archive - creating default", tilex, tiley));
+						log.debug(String.format("Tile x=%d y=%d not found in tile archive - creating default", tilex, tiley));
 						// mapTileWriter.writeTile(tilex, tiley, tileType, emptyTileData);
 						gc.drawImage(tile, tilex * tileSize, tiley * tileSize, tileSize, tileSize, null);
 					}

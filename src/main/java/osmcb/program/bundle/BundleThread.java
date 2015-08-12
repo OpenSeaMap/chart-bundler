@@ -19,8 +19,6 @@ package osmcb.program.bundle;
 import java.io.File;
 import java.io.IOException;
 
-import javax.swing.JOptionPane;
-
 import org.apache.log4j.Logger;
 
 import osmb.mapsources.IfFileBasedMapSource;
@@ -97,7 +95,7 @@ public class BundleThread extends Thread implements IfBundleThread, IfDownloadJo
 				{
 					IfMapSource mapSource = map.getMapSource();
 					if (!bundleCreator.testMapSource(mapSource))
-						throw new BundleTestException("The selected bundle output format \"" + bundle.getOutputFormat() + "\" does not support the iMap source \""
+						throw new BundleTestException("The selected bundle output format \"" + bundle.getOutputFormat() + "\" does not support the map source \""
 								+ map.getMapSource() + "\"");
 				}
 			}
@@ -149,9 +147,10 @@ public class BundleThread extends Thread implements IfBundleThread, IfDownloadJo
 	}
 
 	/**
-	 * Create bundle: For each map download the tiles and perform bundle/map creation
+	 * Compose bundle: For each map download the tiles and perform bundle/map creation
 	 */
-	protected void composeBundle() throws InterruptedException, IOException
+	@Override
+	public void composeBundle() throws InterruptedException, IOException
 	{
 		long totalNrOfOnlineTiles = bundle.calculateTilesToDownload();
 
@@ -184,7 +183,7 @@ public class BundleThread extends Thread implements IfBundleThread, IfDownloadJo
 		}
 		catch (BundleTestException e)
 		{
-			JOptionPane.showMessageDialog(null, e.getMessage(), "Bundle format restriction violated", JOptionPane.ERROR_MESSAGE);
+			log.error(OSMCBStrs.RStr("BundleThread.CB.FormatInvalid") + e.getMessage());
 			return;
 		}
 
@@ -422,7 +421,7 @@ public class BundleThread extends Thread implements IfBundleThread, IfDownloadJo
 		synchronized (this)
 		{
 			activeDownloads--;
-			// jobsCompleted++;
+			jobsCompleted++;
 		}
 	}
 
@@ -473,19 +472,4 @@ public class BundleThread extends Thread implements IfBundleThread, IfDownloadJo
 	{
 		return bProgress;
 	}
-
-	@Override
-	public void makeBundle() throws InterruptedException, IOException
-	{
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public boolean makeMap(IfMap map) throws Exception
-	{
-		// TODO Auto-generated method stub
-		return false;
-	}
-
 }

@@ -155,6 +155,17 @@ public abstract class ACBundleCreator
 	 */
 	public abstract boolean testMapSource(IfMapSource mapSource);
 
+	/**
+	 * Currently it creates a simple user agreement.
+	 * The bundle file is a simple description and license information about the charts in this bundle
+	 * 
+	 * In the future it should also create a file containing some information about the bundles contents.
+	 * (as well as a graphical representation);
+	 * This text should be composed of one part incorporated in the catalog, containing information about what is included in the catalog
+	 * and a second part coming from the bundle format stating which format it is and suited fpr which application.
+	 */
+	public abstract void createInfoFile();
+
 	// Bundle actions
 	/**
 	 * at least create a directory where all bundle output is placed. If no file is given, a new on is created following a general naming scheme.
@@ -245,10 +256,7 @@ public abstract class ACBundleCreator
 		// pauseResumeHandler = at.getPauseResumeHandler();
 	}
 
-	public void createMap(IfMap map) throws MapCreationException, InterruptedException
-	{
-
-	}
+	abstract public void createMap(IfMap map) throws MapCreationException, InterruptedException;
 
 	/**
 	 * Checks if the user has aborted bundle creation and if <code>true</code> an {@link InterruptedException} is thrown.

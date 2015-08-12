@@ -29,24 +29,24 @@ public class OSMAdaptivePalette
 	private static final long serialVersionUID = 1L;
 	protected final Logger log;
 	/**
-	 * 'index' Map containing all colors. It maps the color value to the palette index.
+	 * 'index' Map containing all colors found in the map image. It maps the color values to the palette index.
 	 */
-	private HashMap<OSMColor, Integer> mHM = new HashMap<OSMColor, Integer>();
+	private HashMap<OSMColor, Integer> mColorsHM = new HashMap<OSMColor, Integer>();
 	/**
-	 * 'Index' Map containing all colors. It maps the usage count to the color value. It is sorted by usage count, which is not unique.
-	 */
-	private TreeMap<Integer, OSMColor> mCM = new TreeMap<Integer, OSMColor>();
-	/**
-	 * Map containing the 'best matches'. It maps the distance to the target and the source indices in the palette
-	 */
+	 * Map containing the 'best matching pairs'. It maps the distance and the (target and the source) indices in the palette.
+	 * It is sorted by ascending distance.
+	 * !This is an insecure usage since it is not guaranteed that there are not two ColorPairs with the same distance!
+	 * But even in the very unlikely case, that there are - and they are the least distance of all too, we don't give a damn and use one of the pairs.
+	 * */
 	private TreeMap<Double, OSMColorPair> mMatchesTM = new TreeMap<Double, OSMColorPair>();
 	/**
-	 * List containing all colors existing in the image. It is initially sorted by usage count. It will not be resorted even if the usage count changes due to
-	 * mapping.
+	 * List containing all colors found in the map image. It is initially sorted by usage count.
+	 * It will be resorted if the usage count changes due to mapping.
+	 * A new sorting would invalidates the entries in mHM. The modified entries have to be updated via mColorsHM.put()
 	 */
 	private ArrayList<OSMPaletteEntry> mColorList = new ArrayList<OSMPaletteEntry>(128);
 
-	private int mPaletteCnt = 128; // the BSB-KAP TIFF allows up to 128 colors, including the unused color 0
+	private int mPaletteCnt = 128; // the BSB-KAP allows up to 128 colors, including the unused color 0
 	private int mStdColors = 0;
 
 	class OSMColorPair
@@ -80,120 +80,124 @@ public class OSMAdaptivePalette
 			}
 		}
 		log.debug("Palette[" + mColorList.size() + "] after put():" + toString());
+		// populate the hash map with the initial color/index mapping
+		for (OSMPaletteEntry tPE : mColorList)
+		{
+			mColorsHM.put(tPE.getColor(), tPE.getIndex());
+		}
 		if (mColorList.size() > mPaletteCnt)
 		{
-			reduce();
+			reduceBwd();
 			log.debug("Palette[" + mColorList.size() + "] after reduce():" + toString());
+
+			// populate the hash map with the modified color/index mapping
+			for (OSMPaletteEntry tPE : mColorList)
+			{
+				if (tPE.getMIndex() != -1)
+					mColorsHM.put(tPE.getColor(), tPE.getMIndex());
+				else
+					mColorsHM.put(tPE.getColor(), tPE.getIndex());
+			}
 		}
 		else
 			log.debug("Palette[" + mColorList.size() + "] no reduction neccessary");
-
-		// populate the hash map with the color/index mapping
-		for (int nCol = 1; nCol < mColorList.size(); nCol++)
-		{
-			OSMPaletteEntry tPE = mColorList.get(nCol);
-			if (tPE.getMIndex() == -1)
-				mHM.put(tPE.getColor(), tPE.getIndex());
-			else
-				mHM.put(tPE.getColor(), tPE.getMIndex());
-		}
 	}
 
-	// /**
-	// * reduces the palette to mPaletteCnt entries by mapping the least used entries to the mPaletteCnt most used ones.
-	// * this is done recursively from the end on.
-	// */
-	// public void reduce()
-	// {
-	// int nPCol = 0;
-	// int nTgtCol = 0;
-	// int nTgtNCol = 0;
-	// int nTgtCnt = 0;
-	// // the palette is traversed in reverse sorting order, which is in ascending usage count order
-	// for (int nCol = mCL.size() - 1; nCol >= 2; nCol--)
-	// {
-	// // OSMPaletteEntry tPE = mCL.remove(nCol);
-	// OSMPaletteEntry tPE = mCL.get(nCol);
-	// OSMPaletteEntry tTgt = substituteLim(tPE, 17);
-	// if (tTgt != null)
-	// {
-	// nTgtCnt = tTgt.getCount();
-	// // check if the modified entry has to be moved upwards in the list
-	// nTgtCol = tTgt.getIndex();
-	// nPCol = nTgtCol - 1;
-	// if ((nTgtCol > 1) && (mCL.get(nPCol).getCount() < nTgtCnt))
-	// {
-	// while ((mCL.get(nPCol - 1).getCount() < nTgtCnt) && (nPCol - 1 > 0))
-	// {
-	// nPCol--;
-	// }
-	// nTgtNCol = nPCol;
-	// mCL.remove(nTgtCol);
-	// tTgt.setIndex(nTgtNCol);
-	// mCL.add(nTgtNCol, tTgt);
-	// tPE.setMIndex(nTgtNCol);
-	// }
-	// mCL.remove(nCol);
-	// tPE.setCount(0);
-	// mCL.add(tPE);
-	// for (nPCol++; nPCol <= mCL.size() - 1; nPCol++)
-	// {
-	// tPE = mCL.get(nPCol);
-	// tPE.setIndex(nPCol);
-	// int nMIdx = tPE.getMIndex();
-	// if (nMIdx == nCol)
-	// tPE.setMIndex(nTgtNCol);
-	// else if ((nMIdx >= nTgtNCol) && (nMIdx < nTgtCol))
-	// tPE.setMIndex(nMIdx + 1);
-	// if (nMIdx > nCol)
-	// tPE.setMIndex(nMIdx - 1);
-	// }
-	// }
-	// }
-	//
-	// for (int nCol = mCL.size() - 1; nCol >= mPaletteCnt; nCol--)
-	// {
-	// // OSMPaletteEntry tPE = mCL.remove(nCol);
-	// OSMPaletteEntry tPE = mCL.get(nCol);
-	// if (tPE.getCount() > 0)
-	// {
-	// OSMPaletteEntry tTgt = substitute(tPE);
-	// // nCnt = tTgt.map(tPE);
-	// nTgtCnt = tTgt.getCount();
-	// // check if the modified entry has to be moved upwards in the list
-	// nTgtCol = mCL.indexOf(tTgt);
-	// nPCol = nTgtCol - 1;
-	// if ((nTgtCol > 1) && (mCL.get(nPCol).getCount() < nTgtCnt))
-	// {
-	// while ((mCL.get(nPCol - 1).getCount() < nTgtCnt) && (nPCol - 1 > 0))
-	// {
-	// nPCol--;
-	// }
-	// nTgtNCol = nPCol;
-	// mCL.remove(nTgtCol);
-	// tTgt.setIndex(nTgtNCol);
-	// mCL.add(nTgtNCol, tTgt);
-	// tPE.setMIndex(nTgtNCol);
-	// }
-	// mCL.remove(nCol);
-	// tPE.setCount(0);
-	// mCL.add(tPE);
-	// // adjust the idx data
-	// for (nPCol++; nPCol < mCL.size(); nPCol++)
-	// {
-	// tPE = mCL.get(nPCol);
-	// tPE.setIndex(nPCol);
-	// int nMIdx = tPE.getMIndex();
-	// if (nMIdx == nCol)
-	// tPE.setMIndex(nTgtNCol);
-	// else if ((nMIdx >= nTgtNCol) && (nMIdx < nTgtCol))
-	// tPE.setMIndex(nMIdx + 1);
-	// if (nMIdx > nCol)
-	// tPE.setMIndex(nMIdx - 1);
-	// }
-	// }
-	// }
-	// }
+	/**
+	 * reduces the palette to mPaletteCnt entries by mapping the least used entries to the mPaletteCnt most used ones.
+	 * this is done recursively from the end on.
+	 */
+	public void reduceBwd()
+	{
+		int nPCol = 0;
+		int nTgtCol = 0;
+		int nTgtNCol = 0;
+		int nTgtCnt = 0;
+		// the palette is traversed in reverse sorting order, which is in ascending usage count order
+		for (int nCol = mColorList.size() - 1; nCol >= 2; nCol--)
+		{
+			// OSMPaletteEntry tPE = mCL.remove(nCol);
+			OSMPaletteEntry tPE = mColorList.get(nCol);
+			OSMPaletteEntry tTgt = substituteLim(tPE, 17);
+			if (tTgt != null)
+			{
+				nTgtCnt = tTgt.getCount();
+				// check if the modified entry has to be moved upwards in the list
+				nTgtCol = tTgt.getIndex();
+				nPCol = nTgtCol - 1;
+				if ((nTgtCol > 1) && (mColorList.get(nPCol).getCount() < nTgtCnt))
+				{
+					while ((mColorList.get(nPCol - 1).getCount() < nTgtCnt) && (nPCol - 1 > 0))
+					{
+						nPCol--;
+					}
+					nTgtNCol = nPCol;
+					mColorList.remove(nTgtCol);
+					tTgt.setIndex(nTgtNCol);
+					mColorList.add(nTgtNCol, tTgt);
+					tPE.setMIndex(nTgtNCol);
+				}
+				mColorList.remove(nCol);
+				tPE.setCount(0);
+				mColorList.add(tPE);
+				for (nPCol++; nPCol <= mColorList.size() - 1; nPCol++)
+				{
+					tPE = mColorList.get(nPCol);
+					tPE.setIndex(nPCol);
+					int nMIdx = tPE.getMIndex();
+					if (nMIdx == nCol)
+						tPE.setMIndex(nTgtNCol);
+					else if ((nMIdx >= nTgtNCol) && (nMIdx < nTgtCol))
+						tPE.setMIndex(nMIdx + 1);
+					if (nMIdx > nCol)
+						tPE.setMIndex(nMIdx - 1);
+				}
+			}
+		}
+
+		for (int nCol = mColorList.size() - 1; nCol >= mPaletteCnt; nCol--)
+		{
+			// OSMPaletteEntry tPE = mCL.remove(nCol);
+			OSMPaletteEntry tPE = mColorList.get(nCol);
+			if (tPE.getCount() > 0)
+			{
+				OSMPaletteEntry tTgt = substitute(tPE);
+				// nCnt = tTgt.map(tPE);
+				nTgtCnt = tTgt.getCount();
+				// check if the modified entry has to be moved upwards in the list
+				nTgtCol = mColorList.indexOf(tTgt);
+				nPCol = nTgtCol - 1;
+				if ((nTgtCol > 1) && (mColorList.get(nPCol).getCount() < nTgtCnt))
+				{
+					while ((mColorList.get(nPCol - 1).getCount() < nTgtCnt) && (nPCol - 1 > 0))
+					{
+						nPCol--;
+					}
+					nTgtNCol = nPCol;
+					mColorList.remove(nTgtCol);
+					tTgt.setIndex(nTgtNCol);
+					mColorList.add(nTgtNCol, tTgt);
+					tPE.setMIndex(nTgtNCol);
+				}
+				mColorList.remove(nCol);
+				tPE.setCount(0);
+				mColorList.add(tPE);
+				// adjust the idx data
+				for (nPCol++; nPCol < mColorList.size(); nPCol++)
+				{
+					tPE = mColorList.get(nPCol);
+					tPE.setIndex(nPCol);
+					int nMIdx = tPE.getMIndex();
+					if (nMIdx == nCol)
+						tPE.setMIndex(nTgtNCol);
+					else if ((nMIdx >= nTgtNCol) && (nMIdx < nTgtCol))
+						tPE.setMIndex(nMIdx + 1);
+					if (nMIdx > nCol)
+						tPE.setMIndex(nMIdx - 1);
+				}
+			}
+		}
+	}
 
 	/**
 	 * reduces the palette to mPaletteCnt entries by mapping the least used entries to the mPaletteCnt most used ones.
@@ -206,9 +210,9 @@ public class OSMAdaptivePalette
 		// prevents color drifting while chained mapping.
 		// It stops when the usage count of the color has reached 0, so colors which have already been mapped earlier are skipped.
 		// The first round maps neatly matching colors, so the most often used colors move to the front of the palette
+		Entry<Integer, OSMColor> c = null;
 		for (int nTCol = 1; nTCol < nCLSize - 1; nTCol++)
 		{
-			boolean bMapped = false;
 			OSMPaletteEntry tTPE = mColorList.get(nTCol);
 			for (int nSCol = nTCol + 1; nSCol < nCLSize; ++nSCol)
 			{
@@ -222,11 +226,6 @@ public class OSMAdaptivePalette
 					tTPE.map(tSPE);
 				}
 			}
-			// If other colors are mapped to the current, check if it has to be moved up in the list.
-			if (bMapped)
-			{
-
-			}
 			// reached the unused (or already mapped) colors
 			if (tTPE.getCount() == 0)
 				break;
@@ -236,7 +235,7 @@ public class OSMAdaptivePalette
 		// For each color in the list the best matching color is found. Then the best color match, i.e. the one with the least difference is mapped.
 		// This is repeated until only the 127 colors in the map remain.
 		// We need a sorted map with the distances and the indices
-		for (int nTCol = 1; nTCol < nCLSize; nTCol++)
+		for (int nTCol = 1; nTCol < (nCLSize - 1); nTCol++)
 		{
 			findBestMatch(nTCol);
 		}
@@ -256,12 +255,13 @@ public class OSMAdaptivePalette
 		}
 		else
 			log.debug("map match: Tgt=" + nTCol + " or Src=" + nSCol + " invalid: " + mColorList.size());
-		// Reconstruct the entry for the current color.
+		// Rebuild the entry for the current color.
 		findBestMatch(nTCol);
 	}
 
 	/**
-	 * Looks for the color best matching the current one. This color(indices) will be put into the TreeMap mTM, which is sorted by the colors distance.
+	 * Looks for the color best matching the current one. Both colors(indices) will be put into the TreeMap mMatchesTM,
+	 * which is sorted by the distance of the two colors .
 	 * It allows to solve mapping in the sequence of the distances between the color pairs.
 	 * 
 	 * @param nTCol
@@ -269,34 +269,39 @@ public class OSMAdaptivePalette
 	private void findBestMatch(int nTCol)
 	{
 		OSMPaletteEntry tTPE = mColorList.get(nTCol);
+		OSMPaletteEntry tMPE = tTPE;
+		;
 		OSMColor tTCol = tTPE.getColor();
+		// OSMColor tMCol;
 		double dDiff = 1e100;
-		int nSCol = 0;
+		int nSCol = 0, nMCol = 0;
 		int nCLSize = mColorList.size();
 
 		for (nSCol = nTCol + 1; nSCol < nCLSize; nSCol++)
 		{
 			OSMPaletteEntry tSPE = mColorList.get(nSCol);
-			OSMColor tSCol = mColorList.get(nSCol).getColor();
+			OSMColor tSCol = tSPE.getColor();
 			double dNewDiff = 0;
 
-			if (tSPE.getCount() == 0)
-				break;
+			// if (tSPE.getCount() == 0)
+			// break;
 
-			if ((nTCol != nSCol) && (dNewDiff = tTCol.oDiff(tSCol)) < dDiff)
+			if ((tSPE.getCount() > 0) && ((dNewDiff = tTCol.oDiff(tSCol)) < dDiff) && (nTCol != nSCol))
 			{
-				tTPE = mColorList.get(nTCol);
+				tMPE = mColorList.get(nSCol);
+				nMCol = nSCol;
 				dDiff = dNewDiff;
-				log.trace("DIFF: " + tSPE + " to " + tTPE + " diff=" + dNewDiff + "; qDiff=" + tTCol.qDiff(tSCol));
+				log.trace("DIFF: " + tMPE + " to " + tTPE + " oDiff=" + dNewDiff + "; qDiff=" + tTCol.qDiff(tSCol));
 			}
 		}
 		// Fill list with color distances.
-		mMatchesTM.put(dDiff, new OSMColorPair(nTCol, nSCol));
+		log.debug("match DIFF: " + tMPE + " to " + tTPE + " oDiff=" + dDiff);
+		mMatchesTM.put(dDiff, new OSMColorPair(nTCol, nMCol));
 	}
 
 	/**
-	 * this creates a specific String in the format required by the BSB KAP file format
-	 * it runs 'only' over the first mPaletteCnt entries in the palette
+	 * this creates a specific String in the format required by the BSB-KAP file format
+	 * it runs at most over the first mPaletteCnt entries in the palette
 	 * it ends with a 0x0D,0x0A sequence("\r\n").
 	 */
 	public String asBSBStr()
@@ -388,8 +393,8 @@ public class OSMAdaptivePalette
 	public int getIdx(OSMColor tCol)
 	{
 		int nIdx = 1;
-		if (mHM.containsKey(tCol))
-			nIdx = mHM.get(tCol);
+		if (mColorsHM.containsKey(tCol))
+			nIdx = mColorsHM.get(tCol);
 		return nIdx;
 	}
 
@@ -486,11 +491,11 @@ public class OSMAdaptivePalette
 	 * 
 	 * @param tSPE
 	 *          - the 'source' entry in the palette
-	 * @param nMinDiff
-	 *          - only a difference smaller then nMinDiff will be counted as match
+	 * @param nMaxDiff
+	 *          - only a difference smaller then nMaxDiff will be counted as match
 	 * @return the best matching entry in the palette
 	 */
-	protected OSMPaletteEntry substituteLim(OSMPaletteEntry tSPE, int nMinDiff)
+	protected OSMPaletteEntry substituteLim(OSMPaletteEntry tSPE, int nMaxDiff)
 	{
 		OSMPaletteEntry tTPE = null;
 		long nDiff = Integer.MAX_VALUE;
@@ -498,10 +503,10 @@ public class OSMAdaptivePalette
 		int nSCol = tSPE.getIndex(), nTCol = nSCol - 1;
 		OSMColor tSCol = tSPE.getColor(), tTCol = null;
 
-		while ((nTCol > 0) && (nDiff > nMinDiff))
+		while ((nTCol > 0) && (nDiff > nMaxDiff))
 		{
 			tTCol = mColorList.get(nTCol).getColor();
-			if ((tTCol != tSCol) && ((nNewDiff = tTCol.qDiff(tSCol)) < nDiff) && (nNewDiff < nMinDiff))
+			if ((tTCol != tSCol) && ((nNewDiff = tTCol.qDiff(tSCol)) < nDiff) && (nNewDiff < nMaxDiff))
 			{
 				tTPE = mColorList.get(nTCol);
 				nDiff = nNewDiff;
@@ -527,11 +532,11 @@ public class OSMAdaptivePalette
 	 * 
 	 * @param tSPE
 	 *          - the 'source' entry in the palette
-	 * @param nMinDiff
-	 *          - only a difference smaller then nMinDiff will be counted as match
+	 * @param nMaxDiff
+	 *          - only a difference smaller then nMaxDiff will be counted as match
 	 * @return the best matching entry in the palette
 	 */
-	protected OSMPaletteEntry substituteLimUp(OSMPaletteEntry tSPE, int nMinDiff)
+	protected OSMPaletteEntry substituteLimUp(OSMPaletteEntry tSPE, int nMaxDiff)
 	{
 		OSMPaletteEntry tTPE = null;
 		long nDiff = Integer.MAX_VALUE;
@@ -539,10 +544,10 @@ public class OSMAdaptivePalette
 		int nSCol = tSPE.getIndex(), nTCol = nSCol + 1;
 		OSMColor tSCol = tSPE.getColor(), tTCol = null;
 
-		while ((nTCol < mColorList.size()) && (nDiff > nMinDiff))
+		while ((nTCol < mColorList.size()) && (nDiff > nMaxDiff))
 		{
 			tTCol = mColorList.get(nTCol).getColor();
-			if ((tTCol != tSCol) && ((nNewDiff = tTCol.qDiff(tSCol)) < nDiff) && (nNewDiff < nMinDiff))
+			if ((tTCol != tSCol) && ((nNewDiff = tTCol.qDiff(tSCol)) < nDiff) && (nNewDiff < nMaxDiff))
 			{
 				tTPE = mColorList.get(nTCol);
 				nDiff = nNewDiff;
@@ -604,6 +609,5 @@ public class OSMAdaptivePalette
 					tPE.setMIndex(nMIdx - 1);
 			}
 		}
-
 	}
 }

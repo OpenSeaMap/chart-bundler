@@ -131,13 +131,13 @@ public class OSMColor extends Color
 
 	String toStringRGB()
 	{
-		String str = getRed() + "," + getBlue() + "," + getGreen();
+		String str = getRed() + "," + getGreen() + "," + getBlue();
 		return str;
 	}
 
 	String toStringRGBA()
 	{
-		String str = getRed() + "," + getBlue() + "," + getGreen() + "," + getAlpha();
+		String str = getRed() + "," + getGreen() + "," + getBlue() + "," + getAlpha();
 		return str;
 	}
 
