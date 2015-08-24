@@ -52,6 +52,7 @@ import osmcb.program.bundle.IfBundle;
 import osmcb.program.bundle.MapCreationException;
 import osmcb.program.bundlecreators.tileprovider.TileProvider;
 import osmcb.utilities.OSMCBUtilities;
+import osmcb.utilities.image.IFOSMPalette;
 import osmcb.utilities.image.OSMAdaptivePalette;
 import osmcb.utilities.image.OSMColor;
 
@@ -376,7 +377,7 @@ public class BCOpenCPN extends ACBundleCreator
 		// it consists of a BSB-header part and an image part (see misc/BSB-KAP Format.txt)
 		try
 		{
-			OSMAdaptivePalette sPal = makePalette(img);
+			IFOSMPalette sPal = makePalette(img);
 			mFS = Files.newOutputStream(mapFile, CREATE);
 
 			log.debug("Writing map file (.kap)");
@@ -405,7 +406,7 @@ public class BCOpenCPN extends ACBundleCreator
 		// ImageIO.write(img, "tiff", testTiff2);
 	}
 
-	protected void writeMapHeader(IfMap map, OutputStream os, OSMAdaptivePalette sPal) throws IOException
+	protected void writeMapHeader(IfMap map, OutputStream os, IFOSMPalette sPal) throws IOException
 	{
 		IfMapSpace mapSpace = mapSource.getMapSpace();
 		int tileSize = map.getTileSize().width;
@@ -542,10 +543,11 @@ public class BCOpenCPN extends ACBundleCreator
 		os.write(0x00);
 	}
 
-	protected OSMAdaptivePalette makePalette(BufferedImage img)
+	protected IFOSMPalette makePalette(BufferedImage img)
 	{
 		OSMAdaptivePalette tPal = new OSMAdaptivePalette(img);
-		log.trace(tPal.toString());
+		// OSMFixedHSLPalette tPal = new OSMFixedHSLPalette(img);
+		log.debug("final Palette:" + tPal.toString());
 		return tPal;
 	}
 
@@ -557,7 +559,7 @@ public class BCOpenCPN extends ACBundleCreator
 	 * @param ios
 	 * @param tPal
 	 */
-	protected void writeMapImage(IfMap map, BufferedImage img, ImageOutputStream ios, OSMAdaptivePalette tPal, long nPos)
+	protected void writeMapImage(IfMap map, BufferedImage img, ImageOutputStream ios, IFOSMPalette tPal, long nPos)
 	{
 		ArrayList<Long> tLIdx = new ArrayList<Long>(img.getHeight());
 		try
@@ -583,18 +585,17 @@ public class BCOpenCPN extends ACBundleCreator
 				for (int nX = 0; nX < img.getWidth(); nX++)
 				{
 					int nCnt = 1;
-					OSMColor tCol = new OSMColor(img.getRGB(nX, nY - 1));
-					int nPalIdx = tPal.getMIdx(tCol);
+					int nPalIdx = tPal.getPID(new OSMColor(img.getRGB(nX, nY - 1)));
 
 					// should compare the mapped colors
 					// while ((nX < img.getWidth() - 1) && (img.getRGB(nX + 1, nY - 1) == tCol.getRGB()))
-					while ((nX < img.getWidth() - 1) && (tPal.getMIdx(new OSMColor(img.getRGB(nX + 1, nY - 1))) == nPalIdx))
+					while ((nX < img.getWidth() - 1) && (tPal.getPID(new OSMColor(img.getRGB(nX + 1, nY - 1))) == nPalIdx))
 					{
 						nCnt++;
 						nX++;
 					}
 
-					if (nPalIdx > 127)
+					if ((nPalIdx > 127) || (nPalIdx == 0))
 						log.error("palette index wrong=" + nPalIdx + ", used=" + (nPalIdx & 0x7F));
 					// for our 7bit palette the whole first Byte is used by the color index, so the count will follow -> set bit 7
 					ios.write((nPalIdx & 0x7F) | 0x80);

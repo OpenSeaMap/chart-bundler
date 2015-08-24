@@ -15,16 +15,16 @@ public class OSMPaletteEntry implements Comparable
 	private static final long serialVersionUID = 1L;
 
 	protected OSMColor mColor; // the color in the image
-	protected int mCount; // the number of pixels of this color in the image
-	protected int mColIdx; // the color index in the palette
+	// protected int mCount; // the number of pixels of this color in the image
+	// protected int mColIdx; // the color index in the palette
 	protected int mMapIdx = -1; // index of the color used in the mapped image
 
 	@SuppressWarnings("unused")
 	private OSMPaletteEntry()
 	{
 		mColor = new OSMColor(0);
-		mCount = 0;
-		mColIdx = 0;
+		// mCount = 0;
+		// mColIdx = 0;
 	}
 
 	/**
@@ -37,8 +37,13 @@ public class OSMPaletteEntry implements Comparable
 	public OSMPaletteEntry(OSMColor tCol, int nCnt, int nIdx)
 	{
 		mColor = tCol;
-		mCount = nCnt;
-		mColIdx = nIdx;
+		// mCount = nCnt;
+		// mColIdx = nIdx;
+	}
+
+	public OSMPaletteEntry(OSMColor tCol)
+	{
+		mColor = tCol;
 	}
 
 	/**
@@ -48,40 +53,40 @@ public class OSMPaletteEntry implements Comparable
 	 *          - the color to be mapped to this
 	 * @return the new usage count of this
 	 */
-	public int map(OSMPaletteEntry tPE)
-	{
-		tPE.setMIndex(mColIdx);
-		mCount += tPE.getCount();
-		tPE.setCount(0);
-		return mCount;
-	}
+	// public int map(OSMPaletteEntry tPE)
+	// {
+	// tPE.setMIndex(mColIdx);
+	// mCount += tPE.getCount();
+	// tPE.setCount(0);
+	// return mCount;
+	// }
 
-	public int getCount()
-	{
-		return mCount;
-	}
+	// public int getCount()
+	// {
+	// return mCount;
+	// }
 
 	/**
 	 * 
 	 * @param nCnt
 	 * @return the new usage count of this
 	 */
-	public int setCount(int nCnt)
-	{
-		mCount = nCnt;
-		return mCount;
-	}
+	// public int setCount(int nCnt)
+	// {
+	// mCount = nCnt;
+	// return mCount;
+	// }
 
-	public int getIndex()
-	{
-		return mColIdx;
-	}
+	// public int getIndex()
+	// {
+	// return mColIdx;
+	// }
 
-	public int setIndex(int nIdx)
-	{
-		mColIdx = nIdx;
-		return mColIdx;
-	}
+	// public int setIndex(int nIdx)
+	// {
+	// mColIdx = nIdx;
+	// return mColIdx;
+	// }
 
 	public int getMIndex()
 	{
@@ -102,7 +107,8 @@ public class OSMPaletteEntry implements Comparable
 	@Override
 	public String toString()
 	{
-		return ("PE: Col=(" + getColor().toStringRGB() + "), Cnt=" + getCount() + ", Idx=" + mColIdx + ", MIdx=" + mMapIdx);
+		// return ("PE: Col=(" + getColor().toStringRGB() + "), Cnt=" + getCount() + ", Idx=" + mColIdx + ", MIdx=" + mMapIdx);
+		return ("PE: Col=(" + getColor().toStringRGB() + "), MIdx=" + mMapIdx);
 	}
 
 	/*
@@ -120,7 +126,7 @@ public class OSMPaletteEntry implements Comparable
 	}
 
 	/*
-	 * (non-Javadoc)
+	 * two palette entries are equal if they have the same color values
 	 * 
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
@@ -155,8 +161,6 @@ public class OSMPaletteEntry implements Comparable
 	}
 
 	/**
-	 * is used to impose a natural ordering descending on the usage count. Misclassed or null objects were placed at the end (lowest usage) of the list
-	 * 
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
 	@Override
@@ -174,15 +178,11 @@ public class OSMPaletteEntry implements Comparable
 		{
 			return 1;
 		}
-		OSMPaletteEntry other = (OSMPaletteEntry) obj;
-		if (mCount > other.getCount())
-		{
-			return -1;
-		}
-		else if (mCount == other.getCount())
-		{
-			return 0;
-		}
 		return 1;
+	}
+
+	public int getMID(OSMColor tColor)
+	{
+		return mMapIdx;
 	}
 }
