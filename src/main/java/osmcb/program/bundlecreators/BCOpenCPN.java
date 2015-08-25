@@ -74,20 +74,23 @@ public class BCOpenCPN extends ACBundleCreator
 	}
 
 	/**
-	 * creates a format specific directory name
+	 * Creates a format specific directory for all OpenCPN-KAP bundles
+	 * Creates a format specific directory name
 	 */
 	@Override
 	public void initializeBundle(IfBundle bundle, File customBundleDir) throws IOException, BundleTestException
 	{
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-hhmmss");
-		String bundleDirName = "OSM(OpenCPN-KAP)-" + bundle.getName() + "-" + sdf.format(new Date());
+		File bundleOutputDir = ((OSMCBSettings) ACApp.getApp().getSettings()).getChartBundleOutputDirectory();
+		bundleOutputDir = new File(bundleOutputDir, "OpenCPN-KAP");
+		OSMCBUtilities.mkDirs(bundleOutputDir);
+
 		if (customBundleDir == null)
 		{
-			File bundleOutputDir = ((OSMCBSettings) ACApp.getApp().getSettings()).getChartBundleOutputDirectory();
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-hhmmss");
+			String bundleDirName = "OSM(OpenCPN-KAP)-" + bundle.getName() + "-" + sdf.format(new Date());
 			customBundleDir = new File(bundleOutputDir, bundleDirName);
 		}
-		else
-			customBundleDir = new File(customBundleDir, bundleDirName);
+
 		super.initializeBundle(bundle, customBundleDir);
 	}
 
