@@ -39,13 +39,10 @@ import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageOutputStream;
 
 import osmb.exceptions.InvalidNameException;
-import osmb.mapsources.IfMapSource;
-import osmb.mapsources.mapspace.MercatorPower2MapSpace;
 import osmb.program.ACApp;
 import osmb.program.map.IfLayer;
 import osmb.program.map.IfMap;
 import osmb.program.map.IfMapSpace;
-import osmb.program.map.IfMapSpace.ProjectionCategory;
 import osmcb.OSMCBSettings;
 import osmcb.program.bundle.BundleTestException;
 import osmcb.program.bundle.IfBundle;
@@ -56,22 +53,23 @@ import osmcb.utilities.image.IFOSMPalette;
 import osmcb.utilities.image.OSMAdaptivePalette;
 import osmcb.utilities.image.OSMColor;
 
-@BundleCreatorName(value = "OpenCPN KAP bundle", type = "OpenCPN")
+/**
+ * BCOpenCPN2 does nearly the same as BCOpenCPN.
+ * The difference is that this only uses the even zoom layer. This is done to decrement the bundles size and the number of maps included.
+ * OpenCPN can effectively handle bundles with a wider spacing of zoom level. It is not necessary to have all zoom level in the bundle.
+ * 
+ * @author humbach
+ *
+ */
+@BundleCreatorName(value = "OpenCPN KAP bundle", type = "OpenCPN2")
 // @SupportedTIParameters(names = {Name.format, Name.height, Name.width})
-public class BCOpenCPN extends ACBundleCreator
+public class BCOpenCPN2 extends BCOpenCPN
 {
 	protected static final String FILENAME_PATTERN = "t_%d_%d.%s";
 	protected File layerDir = null;
 	protected File mapDir = null;
 
 	// protected MapTileWriter mapTileWriter;
-
-	@Override
-	public boolean testMapSource(IfMapSource mapSource)
-	{
-		IfMapSpace mapSpace = mapSource.getMapSpace();
-		return (mapSpace instanceof MercatorPower2MapSpace && ProjectionCategory.SPHERE.equals(mapSpace.getProjectionCategory()));
-	}
 
 	/**
 	 * Creates a format specific directory for all OpenCPN-KAP bundles
@@ -81,13 +79,13 @@ public class BCOpenCPN extends ACBundleCreator
 	public void initializeBundle(IfBundle bundle, File customBundleDir) throws IOException, BundleTestException
 	{
 		File bundleOutputDir = ((OSMCBSettings) ACApp.getApp().getSettings()).getChartBundleOutputDirectory();
-		bundleOutputDir = new File(bundleOutputDir, "OpenCPN-KAP");
+		bundleOutputDir = new File(bundleOutputDir, "OpenCPN-KAP2");
 		OSMCBUtilities.mkDirs(bundleOutputDir);
 
-		// if (customBundleDir == null)
+		if (customBundleDir == null)
 		{
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-hhmmss");
-			String bundleDirName = "OSM(OpenCPN-KAP)-" + bundle.getName() + "-" + sdf.format(new Date());
+			String bundleDirName = "OSM(OpenCPN-KAP2)-" + bundle.getName() + "-" + sdf.format(new Date());
 			customBundleDir = new File(bundleOutputDir, bundleDirName);
 		}
 
@@ -154,20 +152,24 @@ public class BCOpenCPN extends ACBundleCreator
 	@Override
 	public void initializeMap(IfMap map, TileProvider mapTileProvider) throws IOException
 	{
-		// each map goes in its own folder BUT all maps are in the same folder 'ChartBundleRoot'
-		// NOAA has its own numbering scheme for the charts with more digits for smaller charts, but not a clear description to make subdivisions
-		// 'L00-M0000' will be the map folder name. Each chart includes one map L00-M0000.kap
-		super.initializeMap(map, mapTileProvider);
-		try
+		// only do maps in even zoom layers
+		if ((map.getZoom() & 0x1) == 0x0)
 		{
-			map.setName(map.getName().replace(" ", "M"));
+			// each map goes in its own folder BUT all maps are in the same folder 'ChartBundleRoot'
+			// NOAA has its own numbering scheme for the charts with more digits for smaller charts, but not a clear description to make subdivisions
+			// 'L00-M0000' will be the map folder name. Each chart includes one map L00-M0000.kap
+			super.initializeMap(map, mapTileProvider);
+			try
+			{
+				map.setName(map.getName().replace(" ", "M"));
+			}
+			catch (InvalidNameException e)
+			{
+				log.error("", e);
+			}
+			mapDir = new File(bundleDir, map.getName());
+			OSMCBUtilities.mkDirs(mapDir);
 		}
-		catch (InvalidNameException e)
-		{
-			log.error("", e);
-		}
-		mapDir = new File(bundleDir, map.getName());
-		OSMCBUtilities.mkDirs(mapDir);
 	}
 
 	/**
@@ -176,29 +178,34 @@ public class BCOpenCPN extends ACBundleCreator
 	@Override
 	public void createMap(IfMap map) throws MapCreationException, InterruptedException
 	{
-		BufferedImage img = null;
-		// the map is stored as a single file, so all tiles have to be put together
-		try
+		// only do maps in even zoom layers
+		if ((map.getZoom() & 0x1) == 0x0)
 		{
-			img = createMapFromTiles(map);
+			BufferedImage img = null;
+			// the map is stored as a single file, so all tiles have to be put together
+			try
+			{
+				img = createMapFromTiles(map);
 
-			writeMapFile(map, img);
-			writeBsbFile(map);
-		}
-		catch (MapCreationException e)
-		{
-			throw e;
-		}
-		catch (InterruptedException e)
-		{
-			throw e;
-		}
-		catch (Exception e)
-		{
-			throw new MapCreationException(map, e);
+				writeMapFile(map, img);
+				writeBsbFile(map);
+			}
+			catch (MapCreationException e)
+			{
+				throw e;
+			}
+			catch (InterruptedException e)
+			{
+				throw e;
+			}
+			catch (Exception e)
+			{
+				throw new MapCreationException(map, e);
+			}
 		}
 	}
 
+	@Override
 	protected void writeBsbFile(IfMap map)
 	{
 		File bsbFile = new File(mapDir, map.getName() + ".bsb");
@@ -370,6 +377,7 @@ public class BCOpenCPN extends ACBundleCreator
 		}
 	}
 
+	@Override
 	protected void writeMapFile(IfMap map, BufferedImage img) throws IOException
 	{
 		OutputStream mFS = null;
@@ -409,6 +417,7 @@ public class BCOpenCPN extends ACBundleCreator
 		// ImageIO.write(img, "tiff", testTiff2);
 	}
 
+	@Override
 	protected void writeMapHeader(IfMap map, OutputStream os, IFOSMPalette sPal) throws IOException
 	{
 		IfMapSpace mapSpace = mapSource.getMapSpace();
@@ -546,11 +555,12 @@ public class BCOpenCPN extends ACBundleCreator
 		os.write(0x00);
 	}
 
+	@Override
 	protected IFOSMPalette makePalette(BufferedImage img)
 	{
 		OSMAdaptivePalette tPal = new OSMAdaptivePalette(img);
 		// OSMFixedHSLPalette tPal = new OSMFixedHSLPalette(img);
-		log.debug("final Palette:" + tPal.toString());
+		log.trace("final Palette:" + tPal.toString());
 		return tPal;
 	}
 
@@ -562,6 +572,7 @@ public class BCOpenCPN extends ACBundleCreator
 	 * @param ios
 	 * @param tPal
 	 */
+	@Override
 	protected void writeMapImage(IfMap map, BufferedImage img, ImageOutputStream ios, IFOSMPalette tPal, long nPos)
 	{
 		ArrayList<Long> tLIdx = new ArrayList<Long>(img.getHeight());
@@ -645,6 +656,7 @@ public class BCOpenCPN extends ACBundleCreator
 	 * This writes a test map image to the kap-file.
 	 * It creates a two colored square with a diagonal division.
 	 */
+	@Override
 	protected void writeTestMapImage(IfMap map, BufferedImage img, ImageOutputStream ios, OSMAdaptivePalette tPal, long nPos)
 	{
 		ArrayList<Long> tLIdx = new ArrayList<Long>(img.getHeight());
@@ -730,11 +742,13 @@ public class BCOpenCPN extends ACBundleCreator
 		}
 	}
 
+	@Override
 	protected MapTileWriter createMapTileWriter() throws IOException
 	{
 		return new FileTileWriter();
 	}
 
+	@Override
 	protected BufferedImage createMapFromTiles(IfMap map) throws InterruptedException, MapCreationException
 	{
 		int tileSize = map.getTileSize().width;

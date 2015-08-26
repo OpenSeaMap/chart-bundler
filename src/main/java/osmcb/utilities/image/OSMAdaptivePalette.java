@@ -84,7 +84,7 @@ public class OSMAdaptivePalette implements IFOSMPalette
 				put(new OSMColor(img.getRGB(x, y)));
 			}
 		}
-		log.debug("Palette[" + mColorsHM.size() + "," + mColorsHM.getMColorCnt() + "] after put()");
+		log.trace("Palette[" + mColorsHM.size() + "," + mColorsHM.getMColorCnt() + "] after put()");
 		log.trace("Colors:" + toString());
 
 		mColorsHM.usageSet();
@@ -92,12 +92,12 @@ public class OSMAdaptivePalette implements IFOSMPalette
 		if (mColorsHM.size() > mPaletteCnt)
 		{
 			reduce();
-			log.debug("Palette[" + mColorsHM.size() + "," + mColorsHM.getMColorCnt() + "] after reduce()");
-			log.debug("Colors:" + toString());
-			log.debug("BSB:" + asBSBStr());
+			log.trace("Palette[" + mColorsHM.size() + "," + mColorsHM.getMColorCnt() + "] after reduce()");
+			log.trace("Colors:" + toString());
+			log.trace("BSB:" + asBSBStr());
 		}
 		else
-			log.debug("Palette[" + mColorsHM.size() + "," + mColorsHM.getMColorCnt() + "] no reduction neccessary");
+			log.trace("Palette[" + mColorsHM.size() + "," + mColorsHM.getMColorCnt() + "] no reduction neccessary");
 	}
 
 	/**
@@ -111,7 +111,7 @@ public class OSMAdaptivePalette implements IFOSMPalette
 		// prevents color drifting while chained mapping.
 		// It stops when the usage count of the color has reached 0, so colors which have already been mapped earlier are skipped.
 		// The first round maps neatly matching colors, so the most often used colors move to the front of the palette
-		log.debug("start");
+		log.trace("start");
 
 		int nSrcColor = 1;
 		for (Iterator<Map.Entry<OSMColor, ColorInfo>> iColor = mColorsHM.getUsageIt(); iColor.hasNext();)
@@ -150,7 +150,7 @@ public class OSMAdaptivePalette implements IFOSMPalette
 
 		log.trace("\r\n");
 		log.debug("Palette[" + mColorsHM.size() + "," + mColorsHM.getMColorCnt() + "] after first round()");
-		log.debug("Colors:" + toString());
+		log.trace("Colors:" + toString());
 
 		// Second round: now map the colors more different. Here one has to be careful. We use OSMColor.oDiff() instead of OSMColor.dDiff()
 		// For each color in the list the best matching color is found. Then the best color match, i.e. the one with the least difference is mapped.
@@ -175,7 +175,7 @@ public class OSMAdaptivePalette implements IFOSMPalette
 			Map.Entry<OSMColor, ColorInfo> tPE = mColorsHM.getBestODist();
 			ColorInfo tCI = tPE.getValue();
 			OSMColor tCBM = tCI.getBestMatch();
-			log.debug("tgt color[" + nTstColor + "]=RGB(" + tPE.getKey().toStringRGB() + "), HSL(" + tPE.getKey().toStringHSL() + "), cnt="
+			log.trace("tgt color[" + nTstColor + "]=RGB(" + tPE.getKey().toStringRGB() + "), HSL(" + tPE.getKey().toStringHSL() + "), cnt="
 					+ tPE.getValue().getCount());
 			if ((tCI.getCount() == 0) || (tCI.getMColor() != null) || (mColorsHM.getMColor(tCBM) != null))
 			{
@@ -184,7 +184,7 @@ public class OSMAdaptivePalette implements IFOSMPalette
 				if (mColorsHM.getMColor(tCBM) != null)
 					log.trace("best match already mapped to= " + mColorsHM.getMColor(tCBM).toStringRGB());
 				findBestMatch(tPE, true);
-				log.debug("tgt rematch");
+				log.trace("tgt rematch");
 			}
 			else
 			{
@@ -192,7 +192,7 @@ public class OSMAdaptivePalette implements IFOSMPalette
 				{
 					// map best match to this color
 					tCI.incCount(mColorsHM.get(tCBM).setMColor(tPE.getKey()));
-					log.debug("tgt < color[" + nTstColor + "]=RGB(" + tPE.getKey().toStringRGB() + "), HSL(" + tPE.getKey().toStringHSL() + "), cnt=" + tCI.getCount()
+					log.trace("tgt < color[" + nTstColor + "]=RGB(" + tPE.getKey().toStringRGB() + "), HSL(" + tPE.getKey().toStringHSL() + "), cnt=" + tCI.getCount()
 							+ ", < best match mapped=RGB(" + tCBM.toStringRGB() + "), m-cnt=" + mColorsHM.getCount(tCBM) + ", dist=" + tCI.getDist());
 					findBestMatch(tPE, true);
 					++nSrcColor;
@@ -202,7 +202,7 @@ public class OSMAdaptivePalette implements IFOSMPalette
 					// map this color to the best match
 					// tPE.getValue().incCount(mColorsHM.get(tPE.getValue().getBestMatch()).setMColor(tPE.getKey()));
 					mColorsHM.get(tCBM).incCount(tCI.setMColor(tCBM));
-					log.debug("tgt > color[" + nTstColor + "]=RGB(" + tPE.getKey().toStringRGB() + "), HSL(" + tPE.getKey().toStringHSL() + "), cnt=" + tCI.getCount()
+					log.trace("tgt > color[" + nTstColor + "]=RGB(" + tPE.getKey().toStringRGB() + "), HSL(" + tPE.getKey().toStringHSL() + "), cnt=" + tCI.getCount()
 							+ ", mapped to RGB(" + tCBM.toStringRGB() + "), m-cnt=" + mColorsHM.getCount(tCBM) + ", dist=" + tCI.getDist());
 					++nSrcColor;
 				}
@@ -210,7 +210,7 @@ public class OSMAdaptivePalette implements IFOSMPalette
 			}
 			++nTstColor;
 		}
-		log.debug("mapped colors[" + nSrcColor + "] of [" + nTstColor + "]-" + mColorsHM.getMColorCnt());
+		log.trace("mapped colors[" + nSrcColor + "] of [" + nTstColor + "]-" + mColorsHM.getMColorCnt());
 
 		// collect the actual indices in the final palette
 		nSrcColor = 1;
@@ -240,7 +240,7 @@ public class OSMAdaptivePalette implements IFOSMPalette
 
 		log.trace("\r\n");
 		log.debug("Palette[" + mColorsHM.size() + "," + mColorsHM.getMColorCnt() + "] after reduce():");
-		log.debug("Colors:" + toString());
+		log.trace("Colors:" + toString());
 	}
 
 	/**
