@@ -25,6 +25,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import osmcb.program.bundlecreators.ACBundleCreator;
+import osmcb.program.bundlecreators.BCOSMAND_SQlite;
 import osmcb.program.bundlecreators.BCOpenCPN;
 import osmcb.program.bundlecreators.BCOpenCPN2;
 import osmcb.program.bundlecreators.BCTileStoreDownload;
@@ -46,6 +47,7 @@ public class BundleOutputFormat implements Comparable<BundleOutputFormat>
 		FORMATS.add(createByClass(BCTrekBuddyTared.class));
 		FORMATS.add(createByClass(BCOpenCPN.class));
 		FORMATS.add(createByClass(BCOpenCPN2.class));
+		FORMATS.add(createByClass(BCOSMAND_SQlite.class));
 		// FORMATS.add(createByClass(BCAFTrack.class));
 		// FORMATS.add(createByClass(BCAlpineQuestMap.class));
 		// FORMATS.add(createByClass(BCAndNav.class));

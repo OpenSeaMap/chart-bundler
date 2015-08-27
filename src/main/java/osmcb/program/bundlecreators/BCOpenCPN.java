@@ -90,7 +90,6 @@ public class BCOpenCPN extends ACBundleCreator
 			String bundleDirName = "OSM(OpenCPN-KAP)-" + bundle.getName() + "-" + sdf.format(new Date());
 			customBundleDir = new File(bundleOutputDir, bundleDirName);
 		}
-
 		super.initializeBundle(bundle, customBundleDir);
 	}
 

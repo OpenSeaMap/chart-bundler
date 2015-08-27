@@ -93,16 +93,6 @@ public class BCOpenCPN2 extends BCOpenCPN
 	}
 
 	/**
-	 * name can be configured
-	 */
-	@Override
-	public void finishBundle(IfBundle bundle)
-	{
-		createInfoFile();
-		bundleProgress.finishBundle();
-	}
-
-	/**
 	 * Currently it creates a simple user agreement.
 	 * The bundle file is a simple description and license information about the charts in this bundle
 	 * 
@@ -405,10 +395,10 @@ public class BCOpenCPN2 extends BCOpenCPN
 			OSMCBUtilities.closeStream(mFS);
 		}
 
-		log.debug("Writing test map file (.png)");
-		// these are here for testing purposes
-		File test = new File(mapDir, map.getName() + ".png");
-		ImageIO.write(img, "png", test);
+		// log.debug("Writing test map file (.png)");
+		// // these are here for testing purposes
+		// File test = new File(mapDir, map.getName() + ".png");
+		// ImageIO.write(img, "png", test);
 
 		// File testTiff = new File(mapDir, map.getName() + ".tiff");
 		// ImageIO.write(img, "tiff", testTiff);
