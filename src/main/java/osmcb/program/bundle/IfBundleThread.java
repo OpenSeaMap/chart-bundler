@@ -17,9 +17,8 @@
 package osmcb.program.bundle;
 
 import java.io.File;
-import java.io.IOException;
 
-import osmcb.program.bundlecreators.ACBundleCreator;
+import osmcb.program.bundlecreators.IfBundleCreator;
 
 /**
  * Thread to create bundles
@@ -34,7 +33,7 @@ public interface IfBundleThread
 	// DownloadJobProducerThread djp = null;
 	// JobDispatcher downloadJobDispatcher = null;
 	IfBundle bundle = null;
-	ACBundleCreator bundleCreator = null;
+	IfBundleCreator bundleCreator = null;
 	// PauseResumeHandler pauseResumeHandler = null;
 	int activeDownloads = 0;
 	int jobsCompleted = 0;
@@ -43,41 +42,41 @@ public interface IfBundleThread
 	int maxDownloadRetries = 1;
 	ACBundleProgress bProgress = null;
 
-	void testBundle() throws BundleTestException;
+	// void testBundle() throws BundleTestException;
 
 	public void run();
 
 	/**
 	 * Create bundle: For each Layer and for each map download the tiles and perform bundle/map creation
 	 */
-	public void composeBundle() throws InterruptedException, IOException;
+	// public void composeBundle() throws InterruptedException, IOException;
 
-	public void pauseResumeBundleCreation();
+	// public void pauseResumeBundleCreation();
 
-	public boolean isPaused();
+	// public boolean isPaused();
 
 	// public PauseResumeHandler getPauseResumeHandler();
 
 	/**
 	 * Stop listener from {@link AtlasProgressGUI}
 	 */
-	public void abortBundleCreation();
+	// public void abortBundleCreation();
 
-	public int getActiveDownloads();
-
-	public void jobStarted();
-
-	public void jobFinishedSuccessfully(int bytesDownloaded);
-
-	public void jobFinishedWithError(boolean retry);
-
-	public int getMaxDownloadRetries();
-
-	public File getCustomBundleDir();
-
-	public void setCustomBundleDir(File customAtlasDir);
-
-	public void setQuitOsmcbAfterBundleCreation(boolean bQuit);
+	// public int getActiveDownloads();
+	//
+	// public void jobStarted();
+	//
+	// public void jobFinishedSuccessfully(int bytesDownloaded);
+	//
+	// public void jobFinishedWithError(boolean retry);
+	//
+	// public int getMaxDownloadRetries();
+	//
+	// public File getCustomBundleDir();
+	//
+	// public void setCustomBundleDir(File customAtlasDir);
+	//
+	// public void setQuitOsmcbAfterBundleCreation(boolean bQuit);
 
 	/**
 	 * 

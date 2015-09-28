@@ -17,6 +17,8 @@
 package osmcb;
 
 import java.io.File;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.imageio.ImageIO;
 import javax.xml.bind.JAXBException;
@@ -35,7 +37,7 @@ import osmcb.program.Logging;
 import osmcb.program.ProgramInfo;
 import osmcb.program.bundle.Bundle;
 import osmcb.program.bundle.BundleOutputFormat;
-import osmcb.program.bundle.BundleThread;
+import osmcb.program.bundlecreators.ACBundleCreator;
 
 /**
  * main starter class
@@ -107,31 +109,44 @@ public class OSMCBApp extends ACConsoleApp
 
 	private void runWithoutMainGUI()
 	{
-		if (true)
+		try
 		{
-			try
-			{
-				createBundle(mCmdlParser.getOptionValue(new StringOption('c', "create"), "OSM-Std"),
-						mCmdlParser.getOptionValue(new StringOption('f', "format"), "OpenCPN-KAP"));
-			}
-			catch (Exception e)
-			{
-				GUIExceptionHandler.processException(e);
-			}
+			createBundle(mCmdlParser.getOptionValue(new StringOption('c', "create"), "OSM-Std"),
+			    mCmdlParser.getOptionValue(new StringOption('f', "format"), "OpenCPN-KAP"));
+		}
+		catch (Exception e)
+		{
+			GUIExceptionHandler.processException(e);
 		}
 	}
 
+	/**
+	 * This tries to create one bundle (One catalog for one format). In the near future it will check a specified directory for catalogs and automatically create
+	 * all catalogs for all formats available.
+	 * 
+	 * @param catalogName
+	 * @param strBundleFormat
+	 */
 	public void createBundle(String catalogName, String strBundleFormat)
 	{
+		ExecutorService mBCExec = Executors.newFixedThreadPool(1);
 		try
 		{
 			IfCatalog cat = Catalog.load(new File(ACSettings.getInstance().getCatalogsDirectory(), Catalog.getCatalogFileName(catalogName)));
 			Bundle bundle = new Bundle(cat, BundleOutputFormat.getFormatByName(strBundleFormat));
-			BundleThread bundleThread = new BundleThread(bundle);
-			if (pSets.getChartBundleOutputDirectory() != null)
-				bundleThread.setCustomBundleDir(pSets.getChartBundleOutputDirectory());
-			bundleThread.setQuitOsmcbAfterBundleCreation(true);
-			bundleThread.start();
+			ACBundleCreator bundleCreator = bundle.createBundleCreatorInstance();
+			// testBundle();
+			// maxDownloadRetries = OSMCBSettings.getInstance().getDownloadRetryCount();
+			mBCExec = Executors.newSingleThreadExecutor();
+			mBCExec.execute(bundleCreator);
+			mBCExec.shutdown();
+			while (!mBCExec.isTerminated())
+			{
+				Thread.sleep(1000);
+				log.debug("still running");
+			}
+			log.debug("bundle creator thread shutdown.");
+			ACSiTileStore.getInstance().closeAll();
 		}
 		catch (Exception e)
 		{
@@ -145,28 +160,6 @@ public class OSMCBApp extends ACConsoleApp
 	 * service/daemon -h[elp] shows a short help file
 	 */
 	@Override
-	// protected void parseCommandLine()
-	// {
-	// if ((ARGS != null) && (ARGS.length >= 2))
-	// {
-	// if (OSMCBStrs.RStr("OSMCBApp.create").equalsIgnoreCase(ARGS[0]) || OSMCBStrs.RStr("OSMCBApp.c").equalsIgnoreCase(ARGS[0]))
-	// {
-	// if (ARGS.length > 2)
-	// cmdl = new CmdlCreateBundle(ARGS[1], ARGS[2]);
-	// else
-	// cmdl = new CmdlCreateBundle(ARGS[1]);
-	// return;
-	// }
-	// if (OSMCBStrs.RStr("OSMCBApp.format").equalsIgnoreCase(ARGS[0]) || OSMCBStrs.RStr("OSMCBApp.f").equalsIgnoreCase(ARGS[0]))
-	// {
-	// if (ARGS.length > 2)
-	// cmdl = new CmdlCreateBundle(ARGS[1], ARGS[2]);
-	// else
-	// cmdl = new CmdlCreateBundle(ARGS[1]);
-	// return;
-	// }
-	// }
-	// }
 	protected void parseCommandLine()
 	{
 		mCmdlParser = getCmdlParser();

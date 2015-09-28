@@ -42,7 +42,6 @@ import osmcb.OSMCBSettings;
 import osmcb.program.bundle.BundleTestException;
 import osmcb.program.bundle.IfBundle;
 import osmcb.program.bundle.MapCreationException;
-import osmcb.program.bundlecreators.tileprovider.TileProvider;
 import osmcb.utilities.OSMCBUtilities;
 
 @BundleCreatorName(value = "TrekBuddy untared bundle", type = "UntaredAtlas")
@@ -50,9 +49,29 @@ import osmcb.utilities.OSMCBUtilities;
 public class BCTrekBuddy extends ACBundleCreator
 {
 	protected static final String FILENAME_PATTERN = "t_%d_%d.%s";
-	protected File layerDir = null;
-	protected File mapDir = null;
-	protected MapTileWriter mapTileWriter;
+	// protected File layerDir = null;
+	// protected File mapDir = null;
+	protected IfMapTileWriter mapTileWriter;
+
+	public BCTrekBuddy()
+	{
+		super();
+	}
+
+	public BCTrekBuddy(IfBundle bundle, File bundleOutputDir)
+	{
+		super(bundle, bundleOutputDir);
+	}
+
+	protected BCTrekBuddy(IfBundle bundle, IfLayer layer, File layerOutputDir)
+	{
+		super(bundle, layer, layerOutputDir);
+	}
+
+	protected BCTrekBuddy(IfBundle bundle, IfLayer layer, IfMap map, File mapOutputDir)
+	{
+		super(bundle, layer, map, mapOutputDir);
+	}
 
 	@Override
 	public boolean testMapSource(IfMapSource mapSource)
@@ -63,50 +82,61 @@ public class BCTrekBuddy extends ACBundleCreator
 	}
 
 	@Override
-	public void initializeBundle(IfBundle bundle, File customBundleDir) throws IOException, BundleTestException
+	public void initializeBundle() throws IOException, BundleTestException
 	{
+		File bundleOutputDir = ((OSMCBSettings) ACApp.getApp().getSettings()).getChartBundleOutputDirectory();
+		bundleOutputDir = new File(bundleOutputDir, "TrekBuddy-Atlas");
+		OSMCBUtilities.mkDirs(bundleOutputDir);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-hhmmss");
-		String bundleDirName = "OSM(TrekBuddy)-" + bundle.getName() + "-" + sdf.format(new Date());
-		if (customBundleDir == null)
-		{
-			File bundleOutputDir = ((OSMCBSettings) ACApp.getApp().getSettings()).getChartBundleOutputDirectory();
-			customBundleDir = new File(bundleOutputDir, bundleDirName);
-		}
-		else
-			customBundleDir = new File(customBundleDir, bundleDirName);
-		super.initializeBundle(bundle, customBundleDir);
+		String bundleDirName = "OSM-TrekBuddy-" + mBundle.getName() + "-" + sdf.format(new Date());
+		bundleOutputDir = new File(bundleOutputDir, bundleDirName);
+		super.initializeBundle(bundleOutputDir);
 	}
 
 	/**
-	 * originally with the default name 'cr' aka 'czech republic' as Kruch used,
-	 * this name should in fact be a reasonable name for the bundle.
-	 * Thus said we use the bundles name for the packed file
+	 * Originally with the default name 'cr' aka 'czech republic' as Kruch used it,
+	 * This name should in fact be a reasonable name for the bundle. Thus said we use the bundles name for the packed file.
 	 */
 	@Override
-	public void finishBundle(IfBundle bundle)
+	public void finishBundle()
 	{
-		createAtlasTbaFile(bundle.getName());
+		createAtlasTbaFile(mBundle.getName());
+	}
+
+	// public void initializeMap(TileProvider mapTileProvider)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see osmcb.program.bundlecreators.ACBundleCreator#initializeLayer()
+	 */
+	@Override
+	public void initializeLayer() throws IOException, InterruptedException
+	{
+		mLayerDir = new File(mBundleDir, mLayer.getName());
+		OSMCBUtilities.mkDirs(mLayerDir);
+		super.initializeLayer();
 	}
 
 	@Override
-	public void initializeMap(IfMap map, TileProvider mapTileProvider)
+	public void initializeMap() throws IOException
 	{
 		try
 		{
-			super.initializeMap(map, mapTileProvider);
+			super.initializeMap();
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
-		IfLayer layer = map.getLayer();
-		layerDir = new File(bundleDir, layer.getName());
-		mapDir = new File(layerDir, map.getName());
+		IfLayer layer = mMap.getLayer();
+		mMapDir = new File(mLayerDir, mMap.getName());
+		OSMCBUtilities.mkDirs(mMapDir);
 	}
 
-	protected void writeMapFile(IfMap map) throws IOException
+	protected void writeMapFile() throws IOException
 	{
-		File mapFile = new File(mapDir, map.getName() + ".map");
+		File mapFile = new File(mMapDir, mMap.getName() + ".map");
 		FileOutputStream mapFileStream = null;
 		try
 		{
@@ -121,7 +151,7 @@ public class BCTrekBuddy extends ACBundleCreator
 
 	protected void writeMapFile(OutputStream stream) throws IOException
 	{
-		writeMapFile("t_." + mapSource.getTileImageType().getFileExt(), stream);
+		writeMapFile("t_." + mMap.getMapSource().getTileImageType().getFileExt(), stream);
 	}
 
 	protected void writeMapFile(String imageFileName, OutputStream stream) throws IOException
@@ -129,34 +159,34 @@ public class BCTrekBuddy extends ACBundleCreator
 		log.trace("Writing map file");
 		OutputStreamWriter mapWriter = new OutputStreamWriter(stream, TEXT_FILE_CHARSET);
 
-		IfMapSpace mapSpace = mapSource.getMapSpace();
+		IfMapSpace mapSpace = mMap.getMapSource().getMapSpace();
 
-		double longitudeMin = mapSpace.cXToLon(xMin * tileSize, zoom);
-		double longitudeMax = mapSpace.cXToLon((xMax + 1) * tileSize - 1, zoom);
-		double latitudeMin = mapSpace.cYToLat((yMax + 1) * tileSize - 1, zoom);
-		double latitudeMax = mapSpace.cYToLat(yMin * tileSize, zoom);
+		double longitudeMin = mapSpace.cXToLon(mMap.getXMin() * tileSize, mMap.getZoom());
+		double longitudeMax = mapSpace.cXToLon((mMap.getXMax() + 1) * tileSize - 1, mMap.getZoom());
+		double latitudeMin = mapSpace.cYToLat((mMap.getYMax() + 1) * tileSize - 1, mMap.getZoom());
+		double latitudeMax = mapSpace.cYToLat(mMap.getYMin() * tileSize, mMap.getZoom());
 
-		int width = (xMax - xMin + 1) * tileSize;
-		int height = (yMax - yMin + 1) * tileSize;
+		int width = (mMap.getXMax() - mMap.getXMin() + 1) * tileSize;
+		int height = (mMap.getYMax() - mMap.getYMin() + 1) * tileSize;
 
 		mapWriter.write(prepareMapString(imageFileName, longitudeMin, longitudeMax, latitudeMin, latitudeMax, width, height));
 		mapWriter.flush();
 	}
 
 	@Override
-	public void createMap(IfMap map) throws MapCreationException, InterruptedException
+	public void createMap() throws MapCreationException, InterruptedException
 	{
 		try
 		{
-			OSMCBUtilities.mkDirs(mapDir);
+			// OSMCBUtilities.mkDirs(mMapDir);
 
 			// write the .map file containing the calibration points
-			writeMapFile(map);
+			writeMapFile();
 
 			// This means there should not be any resizing of the tiles.
 			mapTileWriter = createMapTileWriter();
 
-			createTiles(map);
+			createTiles();
 
 			mapTileWriter.finalizeMap();
 		}
@@ -170,16 +200,16 @@ public class BCTrekBuddy extends ACBundleCreator
 		}
 		catch (Exception e)
 		{
-			throw new MapCreationException(map, e);
+			throw new MapCreationException(mMap, e);
 		}
 	}
 
-	protected MapTileWriter createMapTileWriter() throws IOException
+	protected IfMapTileWriter createMapTileWriter() throws IOException
 	{
 		return new FileTileWriter();
 	}
 
-	protected void createTiles(IfMap map) throws InterruptedException, MapCreationException
+	protected void createTiles() throws InterruptedException, MapCreationException
 	{
 		int tilex = 0;
 		int tiley = 0;
@@ -187,14 +217,14 @@ public class BCTrekBuddy extends ACBundleCreator
 		// bundleProgress.initMapCreation((xMax - xMin + 1) * (yMax - yMin + 1));
 
 		ImageIO.setUseCache(false);
-		byte[] emptyTileData = OSMCBUtilities.createEmptyTileData(mapSource);
-		String tileType = mapSource.getTileImageType().getFileExt();
-		for (int x = xMin; x <= xMax; x++)
+		byte[] emptyTileData = OSMCBUtilities.createEmptyTileData(mMap.getMapSource());
+		String tileType = mMap.getMapSource().getTileImageType().getFileExt();
+		for (int x = mMap.getXMin(); x <= mMap.getXMax(); x++)
 		{
 			tiley = 0;
-			for (int y = yMin; y <= yMax; y++)
+			for (int y = mMap.getYMin(); y <= mMap.getYMax(); y++)
 			{
-				checkUserAbort();
+				// checkUserAbort();
 				// bundleProgress.incMapCreationProgress();
 				try
 				{
@@ -211,7 +241,7 @@ public class BCTrekBuddy extends ACBundleCreator
 				}
 				catch (IOException e)
 				{
-					throw new MapCreationException("Error writing tile image: " + e.getMessage(), map, e);
+					throw new MapCreationException("Error writing tile image: " + e.getMessage(), mMap, e);
 				}
 				tiley++;
 			}
@@ -219,7 +249,7 @@ public class BCTrekBuddy extends ACBundleCreator
 		}
 	}
 
-	private class FileTileWriter implements MapTileWriter
+	private class FileTileWriter implements IfMapTileWriter
 	{
 		File setFolder;
 		Writer setFileWriter;
@@ -230,10 +260,10 @@ public class BCTrekBuddy extends ACBundleCreator
 		public FileTileWriter() throws IOException
 		{
 			super();
-			setFolder = new File(mapDir, "set");
+			setFolder = new File(mMapDir, "set");
 			OSMCBUtilities.mkDir(setFolder);
 			log.debug("Writing tiles to set folder: " + setFolder);
-			File setFile = new File(mapDir, map.getName() + ".set");
+			File setFile = new File(mMapDir, mMap.getName() + ".set");
 			if (parameters != null)
 			{
 				tileHeight = parameters.getHeight();
@@ -351,7 +381,7 @@ public class BCTrekBuddy extends ACBundleCreator
 
 	public void createAtlasTbaFile(String name)
 	{
-		File crtba = new File(bundleDir.getAbsolutePath(), name + ".tba");
+		File crtba = new File(mBundleDir.getAbsolutePath(), name + ".tba");
 		try
 		{
 			FileWriter fw = new FileWriter(crtba);

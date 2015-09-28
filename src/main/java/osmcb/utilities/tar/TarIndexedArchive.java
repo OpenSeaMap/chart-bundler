@@ -29,9 +29,12 @@ public class TarIndexedArchive extends TarArchive {
 
 	private TarIndexTable tarIndex;
 
-	public TarIndexedArchive(File tarFile, int approxFileCount) throws IOException {
+	public TarIndexedArchive(File tarFile, long nTileCnt) throws Exception {
 		super(tarFile, null);
-		tarIndex = new TarIndexTable(approxFileCount);
+		if (nTileCnt <= Integer.MAX_VALUE)
+			tarIndex = new TarIndexTable((int) nTileCnt);
+		else
+			throw new Exception();
 	}
 
 	@Override

@@ -23,10 +23,12 @@ import org.apache.log4j.Logger;
 import osmb.program.map.IfMap;
 import osmcb.program.JobDispatcher.Job;
 import osmcb.program.bundle.BundleThread;
+import osmcb.program.bundlecreators.IfBundleCreator;
 import osmcb.utilities.tar.TarIndexedArchive;
 
 /**
- * Creates the jobs for downloading tiles. If the job queue is full it will block on {@link JobDispatcher#addJob(Job)}
+ * Creates the jobs for downloading tiles. If the job queue is full it will
+ * block on {@link JobDispatcher#addJob(Job)}
  */
 public class DownloadJobProducerThread extends Thread
 {
@@ -34,13 +36,18 @@ public class DownloadJobProducerThread extends Thread
 	final JobDispatcher downloadJobDispatcher;
 	final Enumeration<Job> jobEnumerator;
 
-	public DownloadJobProducerThread(BundleThread bundleThread, JobDispatcher downloadJobDispatcher, TarIndexedArchive tileArchive, IfMap de)
+	public DownloadJobProducerThread(BundleThread bundleThread, JobDispatcher downloadJobDispatcher, TarIndexedArchive tileArchive, IfMap map)
 	{
 		this.downloadJobDispatcher = downloadJobDispatcher;
-		// jobEnumerator = de.getDownloadJobs(tileArchive, bundleThread);
-		jobEnumerator = new DownloadJobEnumerator(de, de.getMapSource(), tileArchive, bundleThread);
+		jobEnumerator = new DownloadJobEnumerator(map, map.getMapSource(), tileArchive, bundleThread);
 
 		start();
+	}
+
+	public DownloadJobProducerThread(IfBundleCreator acBundleCreator, JobDispatcher downloadJobDispatcher2, TarIndexedArchive tileArchive, IfMap map)
+	{
+		downloadJobDispatcher = downloadJobDispatcher2;
+		jobEnumerator = new DownloadJobEnumerator(map, map.getMapSource(), tileArchive, null);
 	}
 
 	@Override

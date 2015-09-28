@@ -22,27 +22,56 @@ import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import osmb.mapsources.IfMapSource;
-import osmb.mapsources.mapspace.MercatorPower2MapSpace;
 import osmb.program.map.IfLayer;
 import osmb.program.map.IfMap;
-import osmb.program.map.IfMapSpace;
-import osmb.program.map.IfMapSpace.ProjectionCategory;
 import osmb.utilities.OSMBUtilities;
 import osmcb.program.bundle.BundleTestException;
+import osmcb.program.bundle.IfBundle;
 import osmcb.program.bundle.MapCreationException;
 
+/**
+ * This composes a plain tile store containing each map as a png-image
+ * 
+ * @author humbach
+ *
+ */
 public abstract class ACPlainImage extends ACBundleCreator
 {
-	@Override
-	public boolean testMapSource(IfMapSource mapSource)
+	public ACPlainImage(IfBundle bundle, File bundleOutputDir)
 	{
-		IfMapSpace mapSpace = mapSource.getMapSpace();
-		return (mapSpace instanceof MercatorPower2MapSpace && ProjectionCategory.SPHERE.equals(mapSpace.getProjectionCategory()));
+		super(bundle, bundleOutputDir);
+	}
+
+	protected ACPlainImage(IfBundle bundle, IfLayer layer, File layerOutputDir)
+	{
+		super(bundle, layer, layerOutputDir);
+	}
+
+	protected ACPlainImage(IfBundle bundle, IfLayer layer, IfMap map, File mapOutputDir)
+	{
+		super(bundle, layer, map, mapOutputDir);
+	}
+
+	/**
+	 * @see osmcb.program.bundlecreators.ACBundleCreator#run()
+	 */
+	@Override
+	public void run()
+	{
+	}
+
+	/**
+	 * @see osmcb.program.bundlecreators.ACBundleCreator#createInfoFile()
+	 */
+	@Override
+	public void createInfoFile()
+	{
+		super.createInfoFile("OpenSeaMap Charts Plain Image Bundle 0.1\r\n");
 	}
 
 	@Override
@@ -50,9 +79,11 @@ public abstract class ACPlainImage extends ACBundleCreator
 	{
 		Runtime r = Runtime.getRuntime();
 		long heapMaxSize = r.maxMemory();
-		int maxMapSize = (int) (Math.sqrt(heapMaxSize / 3d) * 0.8); // reduce maximum by 20%
+		int maxMapSize = (int) (Math.sqrt(heapMaxSize / 3d) * 0.8); // reduce
+		// maximum
+		// by 20%
 		maxMapSize = (maxMapSize / 100) * 100; // round by 100;
-		for (IfLayer layer : bundle)
+		for (IfLayer layer : mBundle)
 		{
 			for (IfMap map : layer)
 			{
@@ -65,7 +96,7 @@ public abstract class ACPlainImage extends ACBundleCreator
 	}
 
 	@Override
-	public void createMap(IfMap map) throws MapCreationException, InterruptedException
+	public void createMap() throws MapCreationException, InterruptedException
 	{
 		try
 		{
@@ -81,12 +112,13 @@ public abstract class ACPlainImage extends ACBundleCreator
 		}
 		catch (Exception e)
 		{
-			throw new MapCreationException(map, e);
+			throw new MapCreationException(mMap, e);
 		}
 	}
 
 	/**
-	 * @return maximum image height and width. In case an image is larger it will be scaled to fit.
+	 * @return maximum image height and width. In case an image is larger it
+	 *         will be scaled to fit.
 	 */
 	protected int getMaxImageSize()
 	{
@@ -100,11 +132,12 @@ public abstract class ACPlainImage extends ACBundleCreator
 
 	protected void createImage() throws InterruptedException, MapCreationException
 	{
-		// bundleProgress.initMapCreation((xMax - xMin + 1) * (yMax - yMin + 1));
+		// bundleProgress.initMapCreation((xMax - xMin + 1) * (yMax - yMin +
+		// 1));
 		ImageIO.setUseCache(false);
 
-		int mapWidth = (xMax - xMin + 1) * tileSize;
-		int mapHeight = (yMax - yMin + 1) * tileSize;
+		int mapWidth = (mMap.getXMax() - mMap.getXMin() + 1) * tileSize;
+		int mapHeight = (mMap.getYMax() - mMap.getYMin() + 1) * tileSize;
 
 		int maxImageSize = getMaxImageSize();
 		int imageWidth = Math.min(maxImageSize, mapWidth);
@@ -126,10 +159,10 @@ public abstract class ACPlainImage extends ACBundleCreator
 			}
 		}
 		if (imageHeight < 0 || imageWidth < 0)
-			throw new MapCreationException("Invalid map size: (width/height: " + imageWidth + "/" + imageHeight + ")", map);
+			throw new MapCreationException("Invalid map size: (width/height: " + imageWidth + "/" + imageHeight + ")", mMap);
 		long imageSize = 3l * (imageWidth) * (imageHeight);
 		if (imageSize > Integer.MAX_VALUE)
-			throw new MapCreationException("Map image too large: (width/height: " + imageWidth + "/" + imageHeight + ") - reduce the map size and try again", map);
+			throw new MapCreationException("Map image too large: (width/height: " + imageWidth + "/" + imageHeight + ") - reduce the map size and try again", mMap);
 		BufferedImage tileImage = OSMBUtilities.safeCreateBufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_3BYTE_BGR);
 		Graphics2D graphics = tileImage.createGraphics();
 		try
@@ -140,12 +173,11 @@ public abstract class ACPlainImage extends ACBundleCreator
 				graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 			}
 			int lineY = 0;
-			for (int y = yMin; y <= yMax; y++)
+			for (int y = mMap.getYMin(); y <= mMap.getYMax(); y++)
 			{
 				int lineX = 0;
-				for (int x = xMin; x <= xMax; x++)
+				for (int x = mMap.getXMin(); x <= mMap.getXMax(); x++)
 				{
-					checkUserAbort();
 					// bundleProgress.incMapCreationProgress();
 					try
 					{

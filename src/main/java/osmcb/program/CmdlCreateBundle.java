@@ -17,13 +17,15 @@
 package osmcb.program;
 
 import java.io.File;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import osmb.program.IfCommandLine;
 import osmb.program.catalog.Catalog;
 import osmb.program.catalog.IfCatalogProfile;
 import osmb.utilities.GUIExceptionHandler;
-import osmcb.program.bundle.BundleThread;
 import osmcb.program.bundle.IfBundle;
+import osmcb.program.bundlecreators.ACBundleCreator;
 
 public class CmdlCreateBundle implements IfCommandLine
 {
@@ -56,8 +58,12 @@ public class CmdlCreateBundle implements IfCommandLine
 			outputDir = null;
 	}
 
+	/**
+	 * This creates one bundle and quits osmcb afterwards.
+	 */
 	public void createBundle()
 	{
+		ExecutorService mExec = Executors.newFixedThreadPool(1);
 		try
 		{
 			IfCatalogProfile p = new Catalog(catalogName);
@@ -78,11 +84,15 @@ public class CmdlCreateBundle implements IfCommandLine
 			// e.printStackTrace();
 			// System.exit(1);
 			// }
-			BundleThread bundleThread = new BundleThread(bundle);
-			if (outputDir != null)
-				bundleThread.setCustomBundleDir(outputDir);
-			bundleThread.setQuitOsmcbAfterBundleCreation(true);
-			bundleThread.start();
+
+			ACBundleCreator bc = bundle.createBundleCreatorInstance();
+			mExec.execute(bc);
+
+			// BundleThread bundleThread = new BundleThread(bundle);
+			// if (outputDir != null)
+			// bundleThread.setCustomBundleDir(outputDir);
+			// bundleThread.setQuitOsmcbAfterBundleCreation(true);
+			// bundleThread.start();
 		}
 		catch (Exception e)
 		{

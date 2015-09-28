@@ -14,22 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package osmcb.program.bundlecreators;
+package osmcb.program.bundlecreators.SQLite;
 
 import osmb.mapsources.IfMapSource;
+import osmb.mapsources.mapspace.MercatorPower2MapSpace;
 import osmcb.program.bundle.IfBundle;
+import osmcb.program.bundlecreators.BundleCreatorName;
 
-@BundleCreatorName(value = "Tile store download only", type = "TILESTORE")
-public class BCTileStoreDownload extends ACBundleCreator
+@BundleCreatorName(value = "OsmAnd SQLite DB", type = "OSMAND_SQlite")
+public class BCOSMAND_SQlite extends BCRMapsSQLite
 {
-	public BCTileStoreDownload(IfBundle bundle)
+	public BCOSMAND_SQlite(IfBundle bundle)
 	{
-		super(bundle, null);
+		super(bundle);
 	}
 
 	@Override
 	public boolean testMapSource(IfMapSource mapSource)
 	{
-		return true;
+		return MercatorPower2MapSpace.INSTANCE_256.equals(mapSource.getMapSpace());
 	}
 }

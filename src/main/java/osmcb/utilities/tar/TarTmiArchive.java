@@ -48,9 +48,9 @@ public class TarTmiArchive extends TarArchive
 	}
 
 	@Override
-	public void writeEndofArchive() throws IOException
+	public void writeEndOfArchive() throws IOException
 	{
-		super.writeEndofArchive();
+		super.writeEndOfArchive();
 		tmiWriter.flush();
 	}
 

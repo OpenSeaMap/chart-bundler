@@ -2,6 +2,7 @@ package osmcb.program.bundle;
 
 import osmb.program.catalog.Catalog;
 import osmb.program.catalog.IfCatalog;
+import osmcb.program.bundlecreators.ACBundleCreator;
 
 public class Bundle extends Catalog implements IfBundle
 {
@@ -15,7 +16,6 @@ public class Bundle extends Catalog implements IfBundle
 	public Bundle(IfCatalog ifCatalog, BundleOutputFormat bundleOutputFormat)
 	{
 		super(ifCatalog);
-		// this.layers = ifCatalog.
 		mBOF = bundleOutputFormat;
 	}
 
@@ -36,5 +36,13 @@ public class Bundle extends Catalog implements IfBundle
 	public BundleOutputFormat getOutputFormat()
 	{
 		return mBOF;
+	}
+
+	@Override
+	public ACBundleCreator createBundleCreatorInstance() throws InstantiationException, IllegalAccessException
+	{
+		ACBundleCreator bc = this.mBOF.getBundleCreatorClass().newInstance();
+		bc.init(this);
+		return bc;
 	}
 }

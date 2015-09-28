@@ -97,8 +97,8 @@ public class ACBundleProgress implements IfMapSourceListener
 	{
 		if (data.bundle != null)
 			log.info(OSMCBStrs.RStr("BundleProgress.Data") + " '" + data.bundle.getName() + "'; layer '" + (data.layer != null ? data.layer.getName() : "") + "' "
-					+ data.layerCurrent + " of " + data.layersTotal + "; map " + data.mapCurrent + " of " + data.mapsTotal + "; tiles " + data.tilesDLMap + " of "
-					+ data.tilesTotal + "; bytes downloaded " + data.bytesDLTotal + ", from cache " + data.bytesCachedTotal + " last tile " + data.bytesLastTile);
+			    + data.layerCurrent + " of " + data.layersTotal + "; map " + data.mapCurrent + " of " + data.mapsTotal + "; tiles " + data.tilesDLMap + " of "
+			    + data.tilesTotal + "; bytes downloaded " + data.bytesDLTotal + ", from cache " + data.bytesCachedTotal + " last tile " + data.bytesLastTile);
 	}
 
 	public void initBundle(IfBundle bundle)
@@ -186,7 +186,7 @@ public class ACBundleProgress implements IfMapSourceListener
 		printData();
 	}
 
-	public void finishMap()
+	public void finishMap(IfMap mMap)
 	{
 		data.mapCreationProgress = 100;
 		log.trace(OSMCBStrs.RStr("BundleProgress.FinishMapCreation"));
@@ -220,7 +220,7 @@ public class ACBundleProgress implements IfMapSourceListener
 	{
 		data.mapCreationProgress = progress;
 		data.bundleProgress = data.mapInfo.tileCountOnStart + data.mapInfo.mapTiles
-				+ (int) (((long) data.mapInfo.mapTiles) * data.mapCreationProgress / data.mapCreationMax);
+		    + (int) (((long) data.mapInfo.mapTiles) * data.mapCreationProgress / data.mapCreationMax);
 		printData();
 	}
 
@@ -337,5 +337,10 @@ public class ACBundleProgress implements IfMapSourceListener
 		public void pauseResumeBundleCreation();
 
 		public boolean isPaused();
+	}
+
+	public void setJobs(int nJobs)
+	{
+		log.debug("BP: concurrent jobs=" + nJobs);
 	}
 }

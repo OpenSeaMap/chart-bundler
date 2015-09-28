@@ -25,13 +25,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import osmcb.program.bundlecreators.ACBundleCreator;
-import osmcb.program.bundlecreators.BCOSMAND_SQlite;
-import osmcb.program.bundlecreators.BCOpenCPN;
-import osmcb.program.bundlecreators.BCOpenCPN2;
 import osmcb.program.bundlecreators.BCTileStoreDownload;
 import osmcb.program.bundlecreators.BCTrekBuddy;
 import osmcb.program.bundlecreators.BCTrekBuddyTared;
 import osmcb.program.bundlecreators.BundleCreatorName;
+import osmcb.program.bundlecreators.KAPImages.BCOpenCPN;
+import osmcb.program.bundlecreators.KAPImages.BCOpenCPN2;
+import osmcb.program.bundlecreators.SQLite.BCOSMAND_SQlite;
 
 @XmlRootElement
 @XmlJavaTypeAdapter(BundleOutputFormatAdapter.class)
@@ -129,7 +129,7 @@ public class BundleOutputFormat implements Comparable<BundleOutputFormat>
 
 	private BundleOutputFormat(Class<? extends ACBundleCreator> bundleCreatorClass, String typeName, String name)
 	{
-		this.bundleCreatorClass = bundleCreatorClass;
+		this.setBundleCreatorClass(bundleCreatorClass);
 		this.typeName = typeName;
 		this.name = name;
 	}
@@ -142,7 +142,7 @@ public class BundleOutputFormat implements Comparable<BundleOutputFormat>
 
 	public Class<? extends ACBundleCreator> getMapCreatorClass()
 	{
-		return bundleCreatorClass;
+		return getBundleCreatorClass();
 	}
 
 	public String getTypeName()
@@ -152,11 +152,11 @@ public class BundleOutputFormat implements Comparable<BundleOutputFormat>
 
 	public ACBundleCreator createBundleCreatorInstance()
 	{
-		if (bundleCreatorClass == null)
+		if (getBundleCreatorClass() == null)
 			return null;
 		try
 		{
-			return bundleCreatorClass.newInstance();
+			return getBundleCreatorClass().newInstance();
 		}
 		catch (Throwable t)
 		{
@@ -168,5 +168,15 @@ public class BundleOutputFormat implements Comparable<BundleOutputFormat>
 	public int compareTo(BundleOutputFormat o)
 	{
 		return getTypeName().compareTo(o.toString());
+	}
+
+	public Class<? extends ACBundleCreator> getBundleCreatorClass()
+	{
+		return bundleCreatorClass;
+	}
+
+	public void setBundleCreatorClass(Class<? extends ACBundleCreator> bundleCreatorClass)
+	{
+		this.bundleCreatorClass = bundleCreatorClass;
 	}
 }

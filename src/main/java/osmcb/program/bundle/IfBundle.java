@@ -17,6 +17,7 @@
 package osmcb.program.bundle;
 
 import osmb.program.catalog.IfCatalog;
+import osmcb.program.bundlecreators.ACBundleCreator;
 
 /**
  * The bundle is a catalog to be written in a specific offline chart package format
@@ -29,4 +30,6 @@ public interface IfBundle extends IfCatalog
 	void setOutputFormat(BundleOutputFormat bundleOutputFormat);
 
 	BundleOutputFormat getOutputFormat();
+
+	ACBundleCreator createBundleCreatorInstance() throws InstantiationException, IllegalAccessException;
 }

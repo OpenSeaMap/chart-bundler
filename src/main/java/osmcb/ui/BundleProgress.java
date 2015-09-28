@@ -97,24 +97,21 @@ public class BundleProgress extends ACBundleProgress
 	// }
 
 	/**
-	 * called by BundleThread
+	 * called by BundleThread NO
 	 * 
 	 * @param map
 	 */
 	@Override
-	public void initMapDownload(IfMap iMap)
+	public void initMapDownload(IfMap map)
 	{
-		int index = mapInfos.indexOf(new MapInfo(iMap, 0, 0));
-		data.mapInfo = mapInfos.get(index);
 		// data.totalProgress = data.mapInfo.tileCountOnStart;
-		data.map = iMap;
-		data.tilesDLMap = (int) iMap.calculateTilesToDownload();
+		data.map = map;
+		data.tilesDLMap = (int) map.calculateTilesToDownload();
 		initialMapDownloadTime = System.currentTimeMillis();
 		data.prevMapsPermanentErrors += data.mapPermanentErrors;
 		data.prevMapsRetryErrors += data.mapRetryErrors;
 		data.mapCreationProgress = 0;
 		data.mapDownloadProgress = 0;
-		data.mapCurrent = index + 1;
 		log.trace(OSMCBStrs.RStr("BundleProgress.NextMap"));
 		printData();
 	}

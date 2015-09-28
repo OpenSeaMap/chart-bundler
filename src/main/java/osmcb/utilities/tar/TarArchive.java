@@ -124,7 +124,7 @@ public class TarArchive
 		tarFileStream.write(th.getBytes());
 	}
 
-	public void writeEndofArchive() throws IOException
+	public void writeEndOfArchive() throws IOException
 	{
 		byte[] endOfArchive = new byte[1024];
 		tarFileStream.write(endOfArchive);
