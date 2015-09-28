@@ -208,7 +208,7 @@ public class ACBundleCreator implements Runnable, IfBundleCreator
 	protected void runBundle()
 	{
 		// log.trace("creation of bundle='" + mBundle.getName() + "' started with some tests");
-		log.debug("BundleThread.CB.ModeUnknown", mBundle.getName());
+		// log.debug(OSMCBStrs.RStr("BundleThread.CB.ModeUnknown", mBundle.getName()));
 		// do some top-level preflight checks
 		try
 		{
