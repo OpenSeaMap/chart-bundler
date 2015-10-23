@@ -24,9 +24,9 @@ import osmb.mapsources.IfMapSource.LoadMethod;
 import osmb.program.tiles.TileException;
 
 /**
- * A {@link TileProvider} implementation that retrieves all tiles directly from the {@link IfMapSource}.
+ * A {@link IfTileProvider} implementation that retrieves all tiles directly from the {@link IfMapSource}.
  */
-public class MapSourceProvider implements TileProvider
+public class MapSourceProvider implements IfTileProvider
 {
 	protected final IfMapSource mapSource;
 	protected final int zoom;

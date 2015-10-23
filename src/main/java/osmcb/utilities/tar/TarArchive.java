@@ -27,10 +27,11 @@ import osmcb.utilities.stream.CountingOutputStream;
 
 /**
  * Creates a new tar file and allows to add files from the file system or "virtual files" that only exist in memory as <code>byte[]</code>.
+ * 
+ * @TODO 2015 AH should be updated to use streams.
  */
 public class TarArchive
 {
-
 	protected CountingOutputStream tarFileStream;
 	protected File tarFile;
 	protected File baseDir;
@@ -43,7 +44,8 @@ public class TarArchive
 	 *          <code>null</code>
 	 * @throws FileNotFoundException
 	 */
-	public TarArchive(File tarFile, File baseDir) throws FileNotFoundException {
+	public TarArchive(File tarFile, File baseDir) throws FileNotFoundException
+	{
 		this.tarFile = tarFile;
 		this.tarFileStream = new CountingOutputStream(new BufferedOutputStream(new FileOutputStream(tarFile, false)));
 		this.baseDir = baseDir;
@@ -62,7 +64,7 @@ public class TarArchive
 		writeTarHeader(th);
 		File[] files = dirToAdd.listFiles();
 		Arrays.sort(files);
-		for (File f: files)
+		for (File f : files)
 		{
 			if (!f.isDirectory())
 				writeFile(f);
@@ -91,7 +93,7 @@ public class TarArchive
 	}
 
 	/**
-	 * Writes a "file" into tar archive that does only exists in memory
+	 * Writes a "file" into tar archive that does only exist in memory
 	 * 
 	 * @param fileName
 	 * @param data
@@ -103,7 +105,7 @@ public class TarArchive
 	}
 
 	/**
-	 * Writes a "file" into tar archive that does only exists in memory
+	 * Writes a "file" into tar archive that does only exist in memory
 	 * 
 	 * @param fileName
 	 * @param data
@@ -147,5 +149,4 @@ public class TarArchive
 	{
 		return tarFile;
 	}
-
 }

@@ -24,7 +24,7 @@ import org.apache.log4j.Logger;
 import osmb.program.map.IfMap;
 import osmcb.OSMCBStrs;
 import osmcb.program.bundle.ACBundleProgress;
-import osmcb.program.bundle.BundleThread;
+import osmcb.program.bundlecreators.ACBundleCreator;
 
 /**
  * A window showing the progress while {@link BundleThread} downloads and processes the map tiles.
@@ -42,7 +42,7 @@ public class BundleProgress extends ACBundleProgress
 	// private Container background;
 
 	private IfBCControler downloadControlListener = null;
-	private BundleThread bundleThread = null;
+	// private BundleThread bundleThread = null;
 	private ArrayList<MapInfo> mapInfos = null;
 	public String timeLeftTotal;
 	public String bps;
@@ -51,9 +51,9 @@ public class BundleProgress extends ACBundleProgress
 	// private static String TEXT_PERCENT = OSMCBStrs.RStr("dlg_download_done_percent");
 	// private static String TEXT_TENTHPERCENT = OSMCBStrs.RStr("dlg_download_done_tenthpercent");
 
-	public BundleProgress(BundleThread bundleThread)
+	public BundleProgress(ACBundleCreator acBundleCreator)
 	{
-		super(bundleThread);
+		super(acBundleCreator);
 	}
 
 	// private void printData()
@@ -127,13 +127,13 @@ public class BundleProgress extends ACBundleProgress
 		data.mapCreationProgress = 0;
 		data.mapCreationMax = maxTilesToProcess;
 		initialMapDownloadTime = -1;
-		log.trace(OSMCBStrs.RStr("BundleProgress.InitMapCreation"));
+		log.trace(OSMCBStrs.RStr("BundleProgress.InitMap"));
 	}
 
 	public void finishedMapCreation()
 	{
 		data.mapCreationProgress = 100;
-		log.trace(OSMCBStrs.RStr("BundleProgress.InitMapCreation"));
+		log.trace(OSMCBStrs.RStr("BundleProgress.MapFinished"));
 	}
 
 	@Override
@@ -219,7 +219,7 @@ public class BundleProgress extends ACBundleProgress
 
 		if (longSeconds < 0)
 		{
-			timeString = OSMCBStrs.RStr("dlg_download_time_unknown");
+			timeString = OSMCBStrs.RStr("BundleProgress.TimeUnknown");
 		}
 		else
 		{
@@ -249,9 +249,9 @@ public class BundleProgress extends ACBundleProgress
 		return downloadControlListener;
 	}
 
-	public void setDownloadControlerListener(BundleThread bundleThread)
-	{
-		log.trace("BP: setDownloadControlerListener()");
-		// this.downloadControlListener = (IfBCControler) bundleThread;
-	}
+	// public void setDownloadControlerListener(BundleThread bundleThread)
+	// {
+	// log.trace("BP: setDownloadControlerListener()");
+	// // this.downloadControlListener = (IfBCControler) bundleThread;
+	// }
 }

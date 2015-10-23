@@ -75,7 +75,8 @@ public class BCRMapsSQLite extends ACBundleCreator implements IfRequiresSQLite
 
 	public BCRMapsSQLite(IfBundle bundle)
 	{
-		super(bundle, ((OSMCBSettings) ACApp.getApp().getSettings()).getChartBundleOutputDirectory());
+		super();
+		init(bundle, ((OSMCBSettings) ACApp.getApp().getSettings()).getChartBundleOutputDirectory());
 		SQLiteLoader.loadSQLiteOrShowError();
 	}
 
@@ -105,7 +106,7 @@ public class BCRMapsSQLite extends ACBundleCreator implements IfRequiresSQLite
 		String bundleDirName = "OSM-OsmAnd-sqlitedb-" + mBundle.getName() + "-" + sdf.format(new Date());
 		bundleOutputDir = new File(bundleOutputDir, bundleDirName);
 		super.initializeBundle(bundleOutputDir);
-		databaseFile = new File(mBundleDir, getDatabaseFileName());
+		databaseFile = new File(mOutputDir, getDatabaseFileName());
 		log.debug("SQLite Database file: " + databaseFile);
 	}
 
@@ -114,7 +115,7 @@ public class BCRMapsSQLite extends ACBundleCreator implements IfRequiresSQLite
 	{
 		try
 		{
-			OSMCBUtilities.mkDir(mBundleDir);
+			OSMCBUtilities.mkDir(mOutputDir);
 		}
 		catch (IOException e)
 		{
@@ -149,13 +150,13 @@ public class BCRMapsSQLite extends ACBundleCreator implements IfRequiresSQLite
 		}
 	}
 
-	@Override
-	protected void abort()
-	{
-		SQLiteLoader.closeConnection(conn);
-		conn = null;
-	}
-
+	// @Override
+	// protected void abort()
+	// {
+	// SQLiteLoader.closeConnection(conn);
+	// conn = null;
+	// }
+	//
 	@Override
 	public void finishBundle()
 	{

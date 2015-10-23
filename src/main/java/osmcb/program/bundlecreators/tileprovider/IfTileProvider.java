@@ -16,16 +16,30 @@
  ******************************************************************************/
 package osmcb.program.bundlecreators.tileprovider;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+
 import osmb.mapsources.IfMapSource;
-import osmb.mapsources.IfMapSource.LoadMethod;
 
 /**
- * A {@link IfTileProvider} implementation that retrieves all tiles from the tile store (if the <code>mapSource</code> supports that).
+ * A TileProvider provides image tiles, i.e. 256x256 pixel squares, from a specified map source.
+ * The map source is usually an online source and the already downloaded tiles are hold in a local tile store.
+ * 
+ * @author humbach
+ *
  */
-public class TileStoreTileProvider extends MapSourceProvider
+public interface IfTileProvider
 {
-	public TileStoreTileProvider(IfMapSource mapSource, int zoom)
-	{
-		super(mapSource, zoom, LoadMethod.CACHE);
-	}
+	public byte[] getTileData(int x, int y) throws IOException;
+
+	public BufferedImage getTileImage(int x, int y) throws IOException;
+
+	public IfMapSource getMapSource();
+
+	/**
+	 * Indicates if subsequent filter in the filter-chain should prefer the {@link #getTileImage(int, int)} or {@link #getTileData(int, int)} method.
+	 * 
+	 * @return
+	 */
+	public boolean preferTileImageUsage();
 }

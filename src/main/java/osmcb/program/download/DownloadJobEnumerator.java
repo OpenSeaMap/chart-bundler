@@ -20,16 +20,16 @@ import java.awt.Point;
 import java.util.Enumeration;
 
 import osmb.mapsources.IfMapSource;
+import osmb.program.IfJob;
 import osmb.program.map.IfMap;
 import osmb.program.tiles.IfTileFilter;
 import osmcb.program.DownloadJob;
-import osmcb.program.JobDispatcher.Job;
 import osmcb.utilities.tar.TarIndexedArchive;
 
 /**
  * Enumerates / creates the download jobs for a regular rectangle single layer map.
  */
-public class DownloadJobEnumerator implements Enumeration<Job>
+public class DownloadJobEnumerator implements Enumeration<IfJob>
 {
 	final protected IfTileFilter tileFilter;
 	final protected IfDownloadJobListener listener;
@@ -41,7 +41,7 @@ public class DownloadJobEnumerator implements Enumeration<Job>
 	final protected TarIndexedArchive tileArchive;
 
 	protected int x, y;
-	protected Job nextJob;
+	protected IfJob nextJob;
 
 	/**
 	 * This enumerator is the unfolded version for two encapsulated loops:
@@ -49,10 +49,10 @@ public class DownloadJobEnumerator implements Enumeration<Job>
 	 * <pre>
 	 * for (int y = yMin; y &lt;= yMax; y++)
 	 * {
-	 * 	for (int x = xMin; x &lt;= xMax; x++)
-	 * 	{
-	 * 		DownloadJob job = new DownloadJob(downloadDestinationDir, tileSource, x, y, zoom, BundleThread.this);
-	 * 	}
+	 *   for (int x = xMin; x &lt;= xMax; x++)
+	 *   {
+	 *     DownloadJob job = new DownloadJob(downloadDestinationDir, tileSource, x, y, zoom, BundleThread.this);
+	 *   }
 	 * }
 	 * </pre>
 	 * 
@@ -89,9 +89,9 @@ public class DownloadJobEnumerator implements Enumeration<Job>
 	}
 
 	@Override
-	public Job nextElement()
+	public IfJob nextElement()
 	{
-		Job job = nextJob;
+		IfJob job = nextJob;
 		boolean filter = false;
 		do
 		{

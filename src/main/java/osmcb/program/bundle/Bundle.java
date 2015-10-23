@@ -42,7 +42,21 @@ public class Bundle extends Catalog implements IfBundle
 	public ACBundleCreator createBundleCreatorInstance() throws InstantiationException, IllegalAccessException
 	{
 		ACBundleCreator bc = this.mBOF.getBundleCreatorClass().newInstance();
-		bc.init(this);
+		// bc.init(this);
+		return bc;
+	}
+
+	@Override
+	public ACBundleCreator createLayerCreatorInstance() throws InstantiationException, IllegalAccessException
+	{
+		ACBundleCreator bc = this.mBOF.getBundleCreatorClass().newInstance();
+		return bc;
+	}
+
+	@Override
+	public ACBundleCreator createMapCreatorInstance() throws InstantiationException, IllegalAccessException
+	{
+		ACBundleCreator bc = this.mBOF.getBundleCreatorClass().newInstance();
 		return bc;
 	}
 }

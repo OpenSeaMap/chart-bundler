@@ -20,33 +20,32 @@ import java.util.Enumeration;
 
 import org.apache.log4j.Logger;
 
+import osmb.program.IfJob;
+import osmb.program.JobDispatcher;
 import osmb.program.map.IfMap;
-import osmcb.program.JobDispatcher.Job;
-import osmcb.program.bundle.BundleThread;
 import osmcb.program.bundlecreators.IfBundleCreator;
 import osmcb.utilities.tar.TarIndexedArchive;
 
 /**
  * Creates the jobs for downloading tiles. If the job queue is full it will
- * block on {@link JobDispatcher#addJob(Job)}
+ * block on {@link JobDispatcher#addJob(IfJob)}
  */
 public class DownloadJobProducerThread extends Thread
 {
 	private Logger log = Logger.getLogger(DownloadJobProducerThread.class);
-	final JobDispatcher downloadJobDispatcher;
-	final Enumeration<Job> jobEnumerator;
+	final JobDispatcher mDLJobDispatcher = JobDispatcher.getInstance();
+	final Enumeration<IfJob> jobEnumerator;
 
-	public DownloadJobProducerThread(BundleThread bundleThread, JobDispatcher downloadJobDispatcher, TarIndexedArchive tileArchive, IfMap map)
+	// public DownloadJobProducerThread(BundleThread bundleThread, JobDispatcher downloadJobDispatcher, TarIndexedArchive tileArchive, IfMap map)
+	// {
+	// this.downloadJobDispatcher = downloadJobDispatcher;
+	// jobEnumerator = new DownloadJobEnumerator(map, map.getMapSource(), tileArchive, bundleThread);
+	//
+	// start();
+	// }
+
+	public DownloadJobProducerThread(IfBundleCreator acBundleCreator, TarIndexedArchive tileArchive, IfMap map)
 	{
-		this.downloadJobDispatcher = downloadJobDispatcher;
-		jobEnumerator = new DownloadJobEnumerator(map, map.getMapSource(), tileArchive, bundleThread);
-
-		start();
-	}
-
-	public DownloadJobProducerThread(IfBundleCreator acBundleCreator, JobDispatcher downloadJobDispatcher2, TarIndexedArchive tileArchive, IfMap map)
-	{
-		downloadJobDispatcher = downloadJobDispatcher2;
 		jobEnumerator = new DownloadJobEnumerator(map, map.getMapSource(), tileArchive, null);
 	}
 
@@ -57,15 +56,16 @@ public class DownloadJobProducerThread extends Thread
 		{
 			while (jobEnumerator.hasMoreElements())
 			{
-				Job job = jobEnumerator.nextElement();
-				downloadJobDispatcher.addJob(job);
+				IfJob job = jobEnumerator.nextElement();
+				mDLJobDispatcher.addJob(job);
 				log.trace("Job added: " + job);
 			}
-			log.debug("All download jobs has been generated");
+			log.debug("All download jobs have been generated");
 		}
-		catch (InterruptedException e)
+		// catch (InterruptedException e)
+		catch (Exception e)
 		{
-			downloadJobDispatcher.cancelOutstandingJobs();
+			mDLJobDispatcher.cancelOutstandingJobs();
 			log.error("Download job generation interrupted");
 		}
 	}

@@ -18,9 +18,9 @@ package osmcb.program;
 
 import java.util.Enumeration;
 
+import osmb.program.IfJob;
 import osmb.program.map.IfLayer;
 import osmb.program.map.IfMap;
-import osmcb.program.JobDispatcher.Job;
 import osmcb.program.bundle.IfBundle;
 import osmcb.program.download.IfDownloadJobListener;
 import osmcb.utilities.tar.TarIndexedArchive;
@@ -37,7 +37,7 @@ public interface IfDownloadableElement
 	 * 
 	 * @param tileArchive
 	 * @param listener
-	 * @return An enumeration that returns {@link Job} objects. Each job should download one map tile from the providing web server (or from the tile cache).
+	 * @return An enumeration that returns {@link IfJob} objects. Each job should download one map tile from the providing web server (or from the tile cache).
 	 */
-	public Enumeration<Job> getDownloadJobs(TarIndexedArchive tileArchive, IfDownloadJobListener listener);
+	public Enumeration<IfJob> getDownloadJobs(TarIndexedArchive tileArchive, IfDownloadJobListener listener);
 }

@@ -17,8 +17,6 @@
 package osmcb;
 
 import java.io.File;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.imageio.ImageIO;
 import javax.xml.bind.JAXBException;
@@ -29,6 +27,7 @@ import osmb.program.ACSettings;
 import osmb.program.EnvironmentSetup;
 import osmb.program.JArgs.Option.StringOption;
 import osmb.program.JArgs.OptionException;
+import osmb.program.JobDispatcher;
 import osmb.program.catalog.Catalog;
 import osmb.program.catalog.IfCatalog;
 import osmb.program.tilestore.ACSiTileStore;
@@ -129,15 +128,13 @@ public class OSMCBApp extends ACConsoleApp
 	 */
 	public void createBundle(String catalogName, String strBundleFormat)
 	{
-		ExecutorService mBCExec = Executors.newFixedThreadPool(1);
 		try
 		{
+			JobDispatcher mBCExec = new JobDispatcher();
 			IfCatalog cat = Catalog.load(new File(ACSettings.getInstance().getCatalogsDirectory(), Catalog.getCatalogFileName(catalogName)));
 			Bundle bundle = new Bundle(cat, BundleOutputFormat.getFormatByName(strBundleFormat));
 			ACBundleCreator bundleCreator = bundle.createBundleCreatorInstance();
-			// testBundle();
-			// maxDownloadRetries = OSMCBSettings.getInstance().getDownloadRetryCount();
-			mBCExec = Executors.newSingleThreadExecutor();
+			bundleCreator.init(bundle, null);
 			mBCExec.execute(bundleCreator);
 			mBCExec.shutdown();
 			while (!mBCExec.isTerminated())
@@ -152,6 +149,7 @@ public class OSMCBApp extends ACConsoleApp
 		{
 			// System.err.println("Error loading catalog \"" + catalogName + "\".");
 			GUIExceptionHandler.processException(e);
+			ACSiTileStore.getInstance().closeAll();
 		}
 	}
 

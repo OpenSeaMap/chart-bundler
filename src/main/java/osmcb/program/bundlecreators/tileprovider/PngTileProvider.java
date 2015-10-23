@@ -32,7 +32,7 @@ public class PngTileProvider extends FilterTileProvider
 {
 	final IfTileImageDataWriter writer;
 
-	public PngTileProvider(TileProvider tileProvider)
+	public PngTileProvider(IfTileProvider tileProvider)
 	{
 		super(tileProvider);
 		writer = new TileImagePngDataWriter();

@@ -25,20 +25,20 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 
 import osmb.program.map.IfMapSpace;
-import osmcb.program.bundlecreators.tileprovider.TileProvider;
+import osmcb.program.bundlecreators.tileprovider.IfTileProvider;
 
 public class OsmcbTile
 {
 	private static final Logger log = Logger.getLogger(OsmcbTile.class);
 
-	private final TileProvider tileProvider;
+	private final IfTileProvider tileProvider;
 	private final int tilex;
 	private final int tiley;
 	private BufferedImage image;
 
 	private BoundingRect boundingRect;
 
-	public OsmcbTile(TileProvider tileProvider, IfMapSpace mapSpace, int tilex, int tiley, int zoom)
+	public OsmcbTile(IfTileProvider tileProvider, IfMapSpace mapSpace, int tilex, int tiley, int zoom)
 	{
 		this.tileProvider = tileProvider;
 		this.tilex = tilex;

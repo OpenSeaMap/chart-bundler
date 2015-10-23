@@ -24,7 +24,8 @@ public class BCTileStoreDownload extends ACBundleCreator
 {
 	public BCTileStoreDownload(IfBundle bundle)
 	{
-		super(bundle, null);
+		super();
+		init(bundle, null);
 	}
 
 	@Override

@@ -1,19 +1,3 @@
-/*******************************************************************************
- * Copyright (c) OSMCB developers
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- ******************************************************************************/
 package osmcb.program;
 
 import java.net.ConnectException;
@@ -23,15 +7,13 @@ import org.apache.log4j.Logger;
 
 import osmb.mapsources.IfMapSource;
 import osmb.mapsources.IfMapSource.LoadMethod;
-import osmb.program.IfJob;
-import osmb.program.JobDispatcher;
 import osmb.program.tiles.DownloadFailedException;
 import osmb.program.tiles.UnrecoverableDownloadException;
 import osmcb.program.bundlecreators.tileprovider.DownloadedTileProvider;
 import osmcb.program.download.IfDownloadJobListener;
 import osmcb.utilities.tar.TarIndexedArchive;
 
-public class DownloadJob implements IfJob
+public class TileDownloader implements Runnable
 {
 	static Logger log = Logger.getLogger(DownloadJob.class);
 	int errorCounter = 0;
@@ -42,7 +24,7 @@ public class DownloadJob implements IfJob
 	final TarIndexedArchive tileArchive;
 	final IfDownloadJobListener listener;
 
-	public DownloadJob(IfMapSource mapSource, int xValue, int yValue, int zoomValue, TarIndexedArchive tileArchive, IfDownloadJobListener listener)
+	public TileDownloader(IfMapSource mapSource, int xValue, int yValue, int zoomValue, TarIndexedArchive tileArchive, IfDownloadJobListener listener)
 	{
 		this.mapSource = mapSource;
 		this.xValue = xValue;
@@ -53,7 +35,7 @@ public class DownloadJob implements IfJob
 	}
 
 	@Override
-	public void run(JobDispatcher dispatcher) throws Exception
+	public void run()
 	{
 		try
 		{
@@ -77,7 +59,7 @@ public class DownloadJob implements IfJob
 		}
 		catch (InterruptedException e)
 		{
-			throw e;
+			// throw e;
 		}
 		// catch (StopAllDownloadsException e)
 		// {
@@ -85,24 +67,24 @@ public class DownloadJob implements IfJob
 		// }
 		catch (SocketTimeoutException e)
 		{
-			processError(dispatcher, e);
+			processError(e);
 		}
 		catch (ConnectException e)
 		{
-			processError(dispatcher, e);
+			processError(e);
 		}
 		catch (DownloadFailedException e)
 		{
-			processError(dispatcher, e);
+			processError(e);
 		}
 		catch (Exception e)
 		{
-			processError(dispatcher, e);
-			throw e;
+			processError(e);
+			// throw e;
 		}
 	}
 
-	private void processError(JobDispatcher dispatcher, Exception e)
+	private void processError(Exception e)
 	{
 		errorCounter++;
 		// Reschedule job to try it later again
@@ -112,7 +94,6 @@ public class DownloadJob implements IfJob
 			log.warn("Download of tile z" + zoomValue + "_x" + xValue + "_y" + yValue + " failed: \"" + e.getMessage() + "\" (tries: " + errorCounter
 			    + ") - rescheduling download job");
 			// dispatcher.addErrorJob(this);
-			dispatcher.addJob(this);
 		}
 		else
 		{
@@ -127,12 +108,4 @@ public class DownloadJob implements IfJob
 	{
 		return "DownloadJob x=" + xValue + " y=" + yValue + " z=" + zoomValue;
 	}
-
-	@Override
-	public void run()
-	{
-		// TODO Auto-generated method stub
-
-	}
-
 }

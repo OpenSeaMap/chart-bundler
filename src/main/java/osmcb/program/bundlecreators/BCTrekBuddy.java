@@ -34,7 +34,6 @@ import osmb.mapsources.IfMapSource;
 import osmb.mapsources.mapspace.MercatorPower2MapSpace;
 import osmb.program.ACApp;
 import osmb.program.map.IfLayer;
-import osmb.program.map.IfMap;
 import osmb.program.map.IfMapSpace;
 import osmb.program.map.IfMapSpace.ProjectionCategory;
 import osmb.utilities.geo.GeoUtils;
@@ -60,19 +59,20 @@ public class BCTrekBuddy extends ACBundleCreator
 
 	public BCTrekBuddy(IfBundle bundle, File bundleOutputDir)
 	{
-		super(bundle, bundleOutputDir);
+		super();
+		init(bundle, bundleOutputDir);
 	}
 
-	protected BCTrekBuddy(IfBundle bundle, IfLayer layer, File layerOutputDir)
-	{
-		super(bundle, layer, layerOutputDir);
-	}
-
-	protected BCTrekBuddy(IfBundle bundle, IfLayer layer, IfMap map, File mapOutputDir)
-	{
-		super(bundle, layer, map, mapOutputDir);
-	}
-
+	// protected BCTrekBuddy(IfBundle bundle, IfLayer layer, File layerOutputDir)
+	// {
+	// super(bundle, layer, layerOutputDir);
+	// }
+	//
+	// protected BCTrekBuddy(IfBundle bundle, IfLayer layer, IfMap map, File mapOutputDir)
+	// {
+	// super(bundle, layer, map, mapOutputDir);
+	// }
+	//
 	@Override
 	public boolean testMapSource(IfMapSource mapSource)
 	{
@@ -113,8 +113,9 @@ public class BCTrekBuddy extends ACBundleCreator
 	@Override
 	public void initializeLayer() throws IOException, InterruptedException
 	{
-		mLayerDir = new File(mBundleDir, mLayer.getName());
-		OSMCBUtilities.mkDirs(mLayerDir);
+		log.trace("initializeLayer() called, layer='" + mLayer.getName() + "', dir='" + mOutputDir);
+		mOutputDir = new File(mOutputDir, mLayer.getName());
+		OSMCBUtilities.mkDirs(mOutputDir);
 		super.initializeLayer();
 	}
 
@@ -130,13 +131,13 @@ public class BCTrekBuddy extends ACBundleCreator
 			e.printStackTrace();
 		}
 		IfLayer layer = mMap.getLayer();
-		mMapDir = new File(mLayerDir, mMap.getName());
-		OSMCBUtilities.mkDirs(mMapDir);
+		mOutputDir = new File(mOutputDir, mMap.getName());
+		OSMCBUtilities.mkDirs(mOutputDir);
 	}
 
 	protected void writeMapFile() throws IOException
 	{
-		File mapFile = new File(mMapDir, mMap.getName() + ".map");
+		File mapFile = new File(mOutputDir, mMap.getName() + ".map");
 		FileOutputStream mapFileStream = null;
 		try
 		{
@@ -260,10 +261,10 @@ public class BCTrekBuddy extends ACBundleCreator
 		public FileTileWriter() throws IOException
 		{
 			super();
-			setFolder = new File(mMapDir, "set");
+			setFolder = new File(mOutputDir, "set");
 			OSMCBUtilities.mkDir(setFolder);
 			log.debug("Writing tiles to set folder: " + setFolder);
-			File setFile = new File(mMapDir, mMap.getName() + ".set");
+			File setFile = new File(mOutputDir, mMap.getName() + ".set");
 			if (parameters != null)
 			{
 				tileHeight = parameters.getHeight();
@@ -381,7 +382,7 @@ public class BCTrekBuddy extends ACBundleCreator
 
 	public void createAtlasTbaFile(String name)
 	{
-		File crtba = new File(mBundleDir.getAbsolutePath(), name + ".tba");
+		File crtba = new File(mOutputDir.getAbsolutePath(), name + ".tba");
 		try
 		{
 			FileWriter fw = new FileWriter(crtba);

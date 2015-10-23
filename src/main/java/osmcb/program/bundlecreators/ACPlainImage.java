@@ -44,19 +44,20 @@ public abstract class ACPlainImage extends ACBundleCreator
 {
 	public ACPlainImage(IfBundle bundle, File bundleOutputDir)
 	{
-		super(bundle, bundleOutputDir);
+		super();
+		init(bundle, bundleOutputDir);
 	}
 
-	protected ACPlainImage(IfBundle bundle, IfLayer layer, File layerOutputDir)
-	{
-		super(bundle, layer, layerOutputDir);
-	}
-
-	protected ACPlainImage(IfBundle bundle, IfLayer layer, IfMap map, File mapOutputDir)
-	{
-		super(bundle, layer, map, mapOutputDir);
-	}
-
+	// protected ACPlainImage(IfBundle bundle, IfLayer layer, File layerOutputDir)
+	// {
+	// super(bundle, layer, layerOutputDir);
+	// }
+	//
+	// protected ACPlainImage(IfBundle bundle, IfLayer layer, IfMap map, File mapOutputDir)
+	// {
+	// super(bundle, layer, map, mapOutputDir);
+	// }
+	//
 	/**
 	 * @see osmcb.program.bundlecreators.ACBundleCreator#run()
 	 */
