@@ -27,7 +27,8 @@ import osmcb.OSMCBSettings;
 import osmcb.program.bundle.BundleTestException;
 import osmcb.program.bundle.IfBundle;
 import osmcb.program.bundle.MapCreationException;
-import osmcb.program.bundlecreators.BundleCreatorName;
+import osmcb.program.bundlecreators.ACBundleCreator;
+import osmcb.program.bundlecreators.IfBundleCreatorName;
 import osmcb.utilities.OSMCBUtilities;
 
 /**
@@ -38,7 +39,7 @@ import osmcb.utilities.OSMCBUtilities;
  * @author humbach
  *
  */
-@BundleCreatorName(value = "OpenCPN KAP bundle", type = "OpenCPN2")
+@IfBundleCreatorName(value = "OpenCPN KAP bundle (even zoom levels)", type = "OpenCPN2")
 // @SupportedTIParameters(names = {Name.format, Name.height, Name.width})
 public class BCOpenCPN2 extends BCOpenCPN
 {
@@ -47,6 +48,10 @@ public class BCOpenCPN2 extends BCOpenCPN
 	protected File mapDir = null;
 
 	// protected MapTileWriter mapTileWriter;
+	public BCOpenCPN2()
+	{
+		super();
+	}
 
 	public BCOpenCPN2(IfBundle bundle, File bundleOutputDir)
 	{
@@ -99,8 +104,19 @@ public class BCOpenCPN2 extends BCOpenCPN
 		{
 			if ((tMap.getZoom() & 0x1) == 0x0)
 			{
-				// IfBundleCreator mapCreator = new ACBundleCreator(mBundle, mLayer, tMap, mapOutputDir);
-				// mExec.execute(mapCreator);
+				ACBundleCreator mapCreator;
+				try
+				{
+					mapCreator = mBundle.createMapCreatorInstance();
+					mapCreator.init(mBundle, mLayer, tMap, mapOutputDir);
+					mExec.execute(mapCreator);
+					jobStarted();
+				}
+				catch (InstantiationException | IllegalAccessException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 		log.trace("layer='" + mLayer.getName() + "' created");

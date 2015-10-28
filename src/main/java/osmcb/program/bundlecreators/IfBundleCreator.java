@@ -39,16 +39,9 @@ public interface IfBundleCreator extends Runnable
 	// Map actions. These has to be overridden by the actual implementation
 	public void initializeMap() throws IOException;
 
-	/**
-	 * 
-	 * @param map
-	 * @return true if map creation process was finished and false if something
-	 *         went wrong and the user decided to retry map download
-	 * @throws Exception
-	 */
-	public boolean downloadMapTiles() throws Exception;
-
 	public void createMap() throws MapCreationException, InterruptedException;
 
 	public void finishMap();
+
+	boolean loadMapTiles() throws Exception;
 }

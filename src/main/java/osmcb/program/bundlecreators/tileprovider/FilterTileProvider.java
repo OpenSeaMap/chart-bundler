@@ -22,6 +22,7 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 
 import osmb.mapsources.IfMapSource;
+import osmb.program.tiles.IfTileProvider;
 
 /**
  * Base implementation of an {@link IfTileProvider} that changes somehow the images, e.g. combines two layers to one or paints something onto a tile image.

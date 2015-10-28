@@ -21,6 +21,7 @@ import java.io.IOException;
 
 import osmb.mapsources.IfMapSource;
 import osmb.mapsources.IfMapSource.LoadMethod;
+import osmb.program.tiles.IfTileProvider;
 import osmb.program.tiles.TileException;
 
 /**
@@ -79,12 +80,6 @@ public class MapSourceProvider implements IfTileProvider
 		{
 			throw new RuntimeException(e);
 		}
-	}
-
-	@Override
-	public boolean preferTileImageUsage()
-	{
-		return false;
 	}
 
 	@Override

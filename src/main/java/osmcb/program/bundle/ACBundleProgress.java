@@ -195,6 +195,23 @@ public class ACBundleProgress implements IfMapSourceListener
 		printData();
 	}
 
+	public void finishMapDownload(IfMap map)
+	{
+		// int index = mapInfos.indexOf(new MapInfo(map, 0, 0));
+		// data.mapInfo = mapInfos.get(index);
+		// data.bundleProgress = data.mapInfo.tileCountOnStart;
+		// data.map = map;
+		// data.tilesDLMap = (int) map.calculateTilesToDownload();
+		// initialMapDownloadTime = System.currentTimeMillis();
+		// data.prevMapsPermanentErrors += data.mapPermanentErrors;
+		// data.prevMapsRetryErrors += data.mapRetryErrors;
+		// data.mapCreationProgress = 0;
+		// data.mapDownloadProgress = 0;
+		// data.mapCurrent = index + 1;
+		// log.trace(OSMCBStrs.RStr("BundleProgress.NextMap"));
+		// printData();
+	}
+
 	public void finishMap(IfMap mMap)
 	{
 		data.mapCreationProgress = 100;

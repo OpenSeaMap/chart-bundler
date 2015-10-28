@@ -19,9 +19,9 @@ package osmcb.program.bundlecreators.SQLite;
 import osmb.mapsources.IfMapSource;
 import osmb.mapsources.mapspace.MercatorPower2MapSpace;
 import osmcb.program.bundle.IfBundle;
-import osmcb.program.bundlecreators.BundleCreatorName;
+import osmcb.program.bundlecreators.IfBundleCreatorName;
 
-@BundleCreatorName(value = "OsmAnd SQLite DB", type = "OSMAND_SQlite")
+@IfBundleCreatorName(value = "OsmAnd SQLite DB", type = "OSMAND_SQlite")
 public class BCOSMAND_SQlite extends BCRMapsSQLite
 {
 	public BCOSMAND_SQlite(IfBundle bundle)

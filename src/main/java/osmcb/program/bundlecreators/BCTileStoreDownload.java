@@ -19,7 +19,7 @@ package osmcb.program.bundlecreators;
 import osmb.mapsources.IfMapSource;
 import osmcb.program.bundle.IfBundle;
 
-@BundleCreatorName(value = "Tile store download only", type = "TILESTORE")
+@IfBundleCreatorName(value = "Tile store download only", type = "TILESTORE")
 public class BCTileStoreDownload extends ACBundleCreator
 {
 	public BCTileStoreDownload(IfBundle bundle)

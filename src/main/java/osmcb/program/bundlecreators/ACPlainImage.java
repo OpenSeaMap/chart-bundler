@@ -206,5 +206,4 @@ public abstract class ACPlainImage extends ACBundleCreator
 	}
 
 	protected abstract void writeTileImage(BufferedImage tileImage) throws MapCreationException;
-
 }

@@ -24,9 +24,15 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
+import osmb.program.map.BoundingRect;
 import osmb.program.map.IfMapSpace;
-import osmcb.program.bundlecreators.tileprovider.IfTileProvider;
+import osmb.program.tiles.IfTileProvider;
 
+/**
+ * 
+ * @author humbach
+ *
+ */
 public class OsmcbTile
 {
 	private static final Logger log = Logger.getLogger(OsmcbTile.class);
@@ -53,8 +59,7 @@ public class OsmcbTile
 		double west = mapSpace.cXToLon(x, zoom);
 		double east = mapSpace.cXToLon(x + tileSize - 1, zoom);
 
-		// north and south have to be negated - this really strange!
-		boundingRect = new BoundingRect(-north, -south, west, east);
+		boundingRect = new BoundingRect(north, south, west, east);
 	}
 
 	/**

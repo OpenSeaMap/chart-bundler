@@ -35,6 +35,7 @@ import osmb.program.map.IfMap;
 import osmb.program.map.IfMapSpace;
 import osmb.program.map.IfMapSpace.ProjectionCategory;
 import osmb.program.tiles.IfTileLoaderListener;
+import osmb.program.tiles.IfTileProvider;
 import osmb.program.tiles.MemoryTileCache;
 import osmb.program.tiles.Tile;
 import osmb.program.tiles.TileImageParameters;
@@ -49,7 +50,6 @@ import osmcb.program.bundle.BundleOutputFormat;
 import osmcb.program.bundle.BundleTestException;
 import osmcb.program.bundle.IfBundle;
 import osmcb.program.bundle.MapCreationException;
-import osmcb.program.bundlecreators.tileprovider.IfTileProvider;
 import osmcb.ui.BundleProgress;
 import osmcb.utilities.OSMCBUtilities;
 
@@ -63,7 +63,7 @@ import osmcb.utilities.OSMCBUtilities;
  * The glue, common to all implementations, is implemented in this ACBundleCreator class and should not be overridden by implementations.
  * 
  */
-public class ACBundleCreator implements Runnable, IfBundleCreator, IfTileLoaderListener
+public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener
 {
 	public static final Charset TEXT_FILE_CHARSET = Charsets.ISO_8859_1;
 
@@ -124,6 +124,7 @@ public class ACBundleCreator implements Runnable, IfBundleCreator, IfTileLoaderL
 
 	/**
 	 * The thread pools will be created for each generation in the init method.
+	 * This init() is used when initializing a bundle creation
 	 * 
 	 * @param bundle
 	 */
@@ -135,12 +136,20 @@ public class ACBundleCreator implements Runnable, IfBundleCreator, IfTileLoaderL
 		log.trace("bundle '" + mBundle.getName() + "' pool for layers=" + mExec.getMaximumPoolSize() + ", " + mExec.toString());
 	};
 
+	/**
+	 * This init() is used when initializing a layer creation
+	 * 
+	 * @param bundle
+	 * @param layer
+	 * @param layerOutputDir
+	 */
 	public void init(IfBundle bundle, IfLayer layer, File layerOutputDir)
 	{
 		mBundle = bundle;
 		mLayer = layer;
 		mOutputDir = layerOutputDir;
 		// limit the number of threads, maybe we will get the limit value from settings in the future
+		// we will need some kind of dynamic max thread limit, depending on the number of remaining maps and layers
 		int nThreads = 10;
 		if (mLayer.getMapCount() < nThreads)
 			nThreads = mLayer.getMapCount();
@@ -148,6 +157,14 @@ public class ACBundleCreator implements Runnable, IfBundleCreator, IfTileLoaderL
 		log.trace("layer '" + mLayer.getName() + "' pool for maps=" + mExec.getMaximumPoolSize() + ", " + mExec.toString());
 	};
 
+	/**
+	 * This init() is used when initializing a map creation
+	 * 
+	 * @param bundle
+	 * @param layer
+	 * @param map
+	 * @param mapOutputDir
+	 */
 	public void init(IfBundle bundle, IfLayer layer, IfMap map, File mapOutputDir)
 	{
 		mBundle = bundle;
@@ -155,7 +172,7 @@ public class ACBundleCreator implements Runnable, IfBundleCreator, IfTileLoaderL
 		mMap = map;
 		mOutputDir = mapOutputDir;
 		// limit the number of threads, maybe we will get the limit value from settings in the future
-		// explicit limiting because getTileCount is a long
+		// we will need some kind of dynamic max thread limit, depending on the number of remaining maps and layers
 		int nThreads = 10;
 		if (mMap.getTileCount() < nThreads)
 			nThreads = (int) mMap.getTileCount();
@@ -238,7 +255,7 @@ public class ACBundleCreator implements Runnable, IfBundleCreator, IfTileLoaderL
 			log.debug("after shutdown(), completed tasks=" + mExec.getCompletedTaskCount() + ", total jobs=" + mExec.getTaskCount());
 			finishBundle();
 			jobFinishedSuccessfully(0);
-			log.trace("after BC.initializeBundle(), pool=" + mExec.toString());
+			log.debug("bundle '" + mBundle.getName() + "' finished");
 		}
 		catch (BundleTestException e)
 		{
@@ -284,6 +301,7 @@ public class ACBundleCreator implements Runnable, IfBundleCreator, IfTileLoaderL
 			finishLayer();
 			log.trace("after finishLayer()");
 			jobFinishedSuccessfully(0);
+			log.debug("layer '" + mLayer.getName() + "' finished");
 		}
 		catch (IOException | InterruptedException e)
 		{
@@ -293,12 +311,17 @@ public class ACBundleCreator implements Runnable, IfBundleCreator, IfTileLoaderL
 	}
 
 	/**
-	 * Is called for each map. No tests are performed since the bundle is already declared as ok.
+	 * Is called for each map. No tests are performed because the bundle is already declared for ok.
 	 * It actually creates the layer in a three step process.
 	 * - initializeMap(); creates the necessary directories etc...
 	 * - downloadMapTiles(); downloads all tiles which are not yet in the tile store available.
 	 * - createMap(); actually build a map (usually one file, but some formats handle that different) from the tiles.
 	 * - finishMap();
+	 * 
+	 * This is the 'synchronized' version of runMap. It waits for completion of all downloads before starting to actually create the map.
+	 * For performance issues, it seems reasonable to have a 'unsynchronized' version, which does only use the current tiles in the tile store.
+	 * Then there has to be a 'partnered' action, which schedules tiles for download, downloads them and updates the entries in the tile store independent of the
+	 * current bundle creation. We even might implement a completely separate process for updating the tile stores entries.
 	 */
 	protected void runMap()
 	{
@@ -307,9 +330,9 @@ public class ACBundleCreator implements Runnable, IfBundleCreator, IfTileLoaderL
 		{
 			mTS.prepareTileStore(mMap.getMapSource());
 			initializeMap();
-			// download all necessary tiles. They should go directly into the tile store...
-			downloadMapTiles();
-			// wait here for the download of all tiles to finish
+			// load all necessary tiles. They should go directly into the tile store...
+			loadMapTiles();
+			// wait here for the loading of all tiles to finish
 			mExec.shutdown();
 			while (!mExec.isTerminated())
 			{
@@ -324,6 +347,7 @@ public class ACBundleCreator implements Runnable, IfBundleCreator, IfTileLoaderL
 				createMap();
 				// wait for the map creation to finish
 				finishMap();
+				log.debug("map '" + mMap.getName() + "' finished");
 			}
 		}
 		catch (IOException e)
@@ -624,12 +648,16 @@ public class ACBundleCreator implements Runnable, IfBundleCreator, IfTileLoaderL
 	}
 
 	/**
-	 * 
+	 * This loads the map tiles from the tile store. In any case it retrieves at first the tile from the store.
+	 * If there is no tile or the tile in the store is expired, it dispatches a new job to download the tile into the store.
+	 * This procedure achieves: 1. The bundle creation does not stall at 'missing' tiles. 2. The tiles wanted are downloaded with priority into the tile store
+	 * and will be used next time. 3. We can use a lot of threads to fetch tiles from the store, while not overburdening the download server(s) by limiting the
+	 * number of threads which actually access the server.
 	 */
 	@Override
-	public boolean downloadMapTiles() throws Exception
+	public boolean loadMapTiles() throws Exception
 	{
-		log.debug("start map=" + mMap.getName() + ", TileStore=" + mTS);
+		log.debug("start map='" + mMap.getName() + "', TileStore=" + mTS);
 
 		if (Thread.currentThread().isInterrupted())
 		{
@@ -641,22 +669,20 @@ public class ACBundleCreator implements Runnable, IfBundleCreator, IfTileLoaderL
 
 		try
 		{
-			log.debug("download tiles=" + tileCount);
+			log.debug("load " + tileCount + " tiles");
 			sBundleProgress.initMapDownload(mMap);
-			// tileArchive = null;
-			// IfTileProvider mapTileProvider = null;
 			// we download only from online map sources, not from file based map sources
 			if (!(mMap.getMapSource() instanceof IfFileBasedMapSource))
 			{
 				TileLoader tl = new TileLoader(this);
 
 				log.trace("TileLoader instanciated");
-				for (int tileX = mMap.getMinTileCoordinate().x / 256; tileX < mMap.getMaxTileCoordinate().x / 256; ++tileX)
+				for (int tileX = mMap.getMinTileCoordinate().x / IfMapSpace.TECH_TILESIZE; tileX < mMap.getMaxTileCoordinate().x / IfMapSpace.TECH_TILESIZE; ++tileX)
 				{
-					for (int tileY = mMap.getMinTileCoordinate().y / 256; tileY < mMap.getMaxTileCoordinate().y / 256; ++tileY)
+					for (int tileY = mMap.getMinTileCoordinate().y / IfMapSpace.TECH_TILESIZE; tileY < mMap.getMaxTileCoordinate().y / IfMapSpace.TECH_TILESIZE; ++tileY)
 					{
 						mExec.execute(tl.createTileLoaderJob(mMap.getMapSource(), tileX, tileY, mMap.getZoom()));
-						log.trace("Job started X=" + tileX + ", Y=" + tileY + ", jobs=" + mExec.getActiveCount());
+						log.trace("Job started X=" + tileX + ", Y=" + tileY + ", threads=" + mExec.getActiveCount());
 					}
 				}
 			}
@@ -668,6 +694,7 @@ public class ACBundleCreator implements Runnable, IfBundleCreator, IfTileLoaderL
 		}
 		finally
 		{
+			sBundleProgress.finishMapDownload(mMap);
 		}
 		return true;
 	}

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package osmcb.program.bundlecreators;
+package osmcb.program.bundlecreators.TrekBuddy;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -30,20 +30,20 @@ import java.util.Locale;
 
 import javax.imageio.ImageIO;
 
-import osmb.mapsources.IfMapSource;
-import osmb.mapsources.mapspace.MercatorPower2MapSpace;
+import osmb.mapsources.IfMapSource.LoadMethod;
 import osmb.program.ACApp;
-import osmb.program.map.IfLayer;
 import osmb.program.map.IfMapSpace;
-import osmb.program.map.IfMapSpace.ProjectionCategory;
+import osmb.program.tiles.TileException;
 import osmb.utilities.geo.GeoUtils;
 import osmcb.OSMCBSettings;
 import osmcb.program.bundle.BundleTestException;
-import osmcb.program.bundle.IfBundle;
 import osmcb.program.bundle.MapCreationException;
+import osmcb.program.bundlecreators.ACBundleCreator;
+import osmcb.program.bundlecreators.IfBundleCreatorName;
+import osmcb.program.bundlecreators.IfMapTileWriter;
 import osmcb.utilities.OSMCBUtilities;
 
-@BundleCreatorName(value = "TrekBuddy untared bundle", type = "UntaredAtlas")
+@IfBundleCreatorName(value = "TrekBuddy untared bundle", type = "UntaredAtlas")
 // @SupportedTIParameters(names = {Name.format, Name.height, Name.width})
 public class BCTrekBuddy extends ACBundleCreator
 {
@@ -57,11 +57,11 @@ public class BCTrekBuddy extends ACBundleCreator
 		super();
 	}
 
-	public BCTrekBuddy(IfBundle bundle, File bundleOutputDir)
-	{
-		super();
-		init(bundle, bundleOutputDir);
-	}
+	// public BCTrekBuddy(IfBundle bundle, File bundleOutputDir)
+	// {
+	// super();
+	// init(bundle, bundleOutputDir);
+	// }
 
 	// protected BCTrekBuddy(IfBundle bundle, IfLayer layer, File layerOutputDir)
 	// {
@@ -73,13 +73,6 @@ public class BCTrekBuddy extends ACBundleCreator
 	// super(bundle, layer, map, mapOutputDir);
 	// }
 	//
-	@Override
-	public boolean testMapSource(IfMapSource mapSource)
-	{
-		IfMapSpace mapSpace = mapSource.getMapSpace();
-		return (mapSpace instanceof MercatorPower2MapSpace && ProjectionCategory.SPHERE.equals(mapSpace.getProjectionCategory()));
-		// TODO supports Mercator ellipsoid?
-	}
 
 	@Override
 	public void initializeBundle() throws IOException, BundleTestException
@@ -101,15 +94,11 @@ public class BCTrekBuddy extends ACBundleCreator
 	public void finishBundle()
 	{
 		createAtlasTbaFile(mBundle.getName());
+		sBundleProgress.finishBundle();
 	}
 
 	// public void initializeMap(TileProvider mapTileProvider)
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see osmcb.program.bundlecreators.ACBundleCreator#initializeLayer()
-	 */
 	@Override
 	public void initializeLayer() throws IOException, InterruptedException
 	{
@@ -130,9 +119,40 @@ public class BCTrekBuddy extends ACBundleCreator
 		{
 			e.printStackTrace();
 		}
-		IfLayer layer = mMap.getLayer();
 		mOutputDir = new File(mOutputDir, mMap.getName());
 		OSMCBUtilities.mkDirs(mOutputDir);
+	}
+
+	@Override
+	public void createMap() throws MapCreationException, InterruptedException
+	{
+		try
+		{
+			log.debug("Creating map");
+			// OSMCBUtilities.mkDirs(mMapDir);
+
+			// write the .map file containing the calibration points
+			writeMapFile();
+
+			// This means there should not be any resizing of the tiles.
+			mapTileWriter = createMapTileWriter();
+
+			createTiles();
+
+			mapTileWriter.finalizeMap();
+		}
+		catch (MapCreationException e)
+		{
+			throw e;
+		}
+		catch (InterruptedException e)
+		{
+			throw e;
+		}
+		catch (Exception e)
+		{
+			throw new MapCreationException(mMap, e);
+		}
 	}
 
 	protected void writeMapFile() throws IOException
@@ -174,37 +194,6 @@ public class BCTrekBuddy extends ACBundleCreator
 		mapWriter.flush();
 	}
 
-	@Override
-	public void createMap() throws MapCreationException, InterruptedException
-	{
-		try
-		{
-			// OSMCBUtilities.mkDirs(mMapDir);
-
-			// write the .map file containing the calibration points
-			writeMapFile();
-
-			// This means there should not be any resizing of the tiles.
-			mapTileWriter = createMapTileWriter();
-
-			createTiles();
-
-			mapTileWriter.finalizeMap();
-		}
-		catch (MapCreationException e)
-		{
-			throw e;
-		}
-		catch (InterruptedException e)
-		{
-			throw e;
-		}
-		catch (Exception e)
-		{
-			throw new MapCreationException(mMap, e);
-		}
-	}
-
 	protected IfMapTileWriter createMapTileWriter() throws IOException
 	{
 		return new FileTileWriter();
@@ -214,8 +203,6 @@ public class BCTrekBuddy extends ACBundleCreator
 	{
 		int tilex = 0;
 		int tiley = 0;
-
-		// bundleProgress.initMapCreation((xMax - xMin + 1) * (yMax - yMin + 1));
 
 		ImageIO.setUseCache(false);
 		byte[] emptyTileData = OSMCBUtilities.createEmptyTileData(mMap.getMapSource());
@@ -229,7 +216,8 @@ public class BCTrekBuddy extends ACBundleCreator
 				// bundleProgress.incMapCreationProgress();
 				try
 				{
-					byte[] sourceTileData = mapDlTileProvider.getTileData(x, y);
+					// byte[] sourceTileData = mapDlTileProvider.getTileData(x, y);
+					byte[] sourceTileData = mMap.getMapSource().getTileData(mMap.getZoom(), x, y, LoadMethod.CACHE);
 					if (sourceTileData != null)
 					{
 						mapTileWriter.writeTile(tilex, tiley, tileType, sourceTileData);
@@ -240,7 +228,7 @@ public class BCTrekBuddy extends ACBundleCreator
 						mapTileWriter.writeTile(tilex, tiley, tileType, emptyTileData);
 					}
 				}
-				catch (IOException e)
+				catch (IOException | TileException e)
 				{
 					throw new MapCreationException("Error writing tile image: " + e.getMessage(), mMap, e);
 				}
@@ -255,8 +243,8 @@ public class BCTrekBuddy extends ACBundleCreator
 		File setFolder;
 		Writer setFileWriter;
 
-		int tileHeight = 256;
-		int tileWidth = 256;
+		int tileHeight = IfMapSpace.TECH_TILESIZE;
+		int tileWidth = IfMapSpace.TECH_TILESIZE;
 
 		public FileTileWriter() throws IOException
 		{

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package osmcb.program.bundlecreators;
+package osmcb.program.bundlecreators.TrekBuddy;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -27,12 +27,13 @@ import java.util.List;
 import osmb.program.ACApp;
 import osmcb.OSMCBSettings;
 import osmcb.program.bundle.BundleTestException;
-import osmcb.program.bundle.IfBundle;
+import osmcb.program.bundlecreators.IfBundleCreatorName;
+import osmcb.program.bundlecreators.IfMapTileWriter;
 import osmcb.utilities.OSMCBUtilities;
 import osmcb.utilities.tar.TarArchive;
 import osmcb.utilities.tar.TarTmiArchive;
 
-@BundleCreatorName(value = "TrekBuddy tared bundle", type = "TaredAtlas")
+@IfBundleCreatorName(value = "TrekBuddy tared bundle", type = "TaredAtlas")
 public class BCTrekBuddyTared extends BCTrekBuddy
 {
 	public BCTrekBuddyTared()
@@ -40,10 +41,10 @@ public class BCTrekBuddyTared extends BCTrekBuddy
 		super();
 	}
 
-	public BCTrekBuddyTared(IfBundle bundle, File bundleOutputDir)
-	{
-		super(bundle, bundleOutputDir);
-	}
+	// public BCTrekBuddyTared(IfBundle bundle, File bundleOutputDir)
+	// {
+	// super(bundle, bundleOutputDir);
+	// }
 
 	// protected BCTrekBuddyTared(IfBundle bundle, IfLayer layer, File layerOutputDir)
 	// {

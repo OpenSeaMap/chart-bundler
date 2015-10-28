@@ -18,6 +18,7 @@ package osmcb.program.bundlecreators.tileprovider;
 
 import osmb.mapsources.IfMapSource;
 import osmb.mapsources.IfMapSource.LoadMethod;
+import osmb.program.tiles.IfTileProvider;
 
 /**
  * A {@link IfTileProvider} implementation that retrieves all tiles from the tile store (if the <code>mapSource</code> supports that).

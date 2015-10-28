@@ -23,6 +23,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import osmb.program.tiledatawriter.IfTileImageDataWriter;
+import osmb.program.tiles.IfTileProvider;
 import osmb.program.tiles.TileImageFormat;
 
 /**

@@ -39,7 +39,7 @@ import osmcb.program.bundle.BundleTestException;
 import osmcb.program.bundle.IfBundle;
 import osmcb.program.bundle.MapCreationException;
 import osmcb.program.bundlecreators.ACBundleCreator;
-import osmcb.program.bundlecreators.BundleCreatorName;
+import osmcb.program.bundlecreators.IfBundleCreatorName;
 import osmcb.program.bundlecreators.IfRequiresSQLite;
 import osmcb.program.bundlecreators.tileprovider.ConvertedRawTileProvider;
 import osmcb.utilities.OSMCBUtilities;
@@ -56,7 +56,7 @@ import osmcb.utilities.OSMCBUtilities;
  * Changes made by <a href="mailto:robertk506@gmail.com">Robert</a>, author of RMaps.
  * <p>
  */
-@BundleCreatorName(value = "RMaps SQLite DB", type = "RMaps")
+@IfBundleCreatorName(value = "RMaps SQLite DB", type = "RMaps")
 // @SupportedTIParameters(names = {Name.format})
 public class BCRMapsSQLite extends ACBundleCreator implements IfRequiresSQLite
 {

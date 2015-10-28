@@ -22,6 +22,7 @@ import java.io.IOException;
 
 import osmb.program.tiledatawriter.IfTileImageDataWriter;
 import osmb.program.tiledatawriter.TileImagePngDataWriter;
+import osmb.program.tiles.IfTileProvider;
 import osmb.program.tiles.TileImageType;
 import osmcb.utilities.OSMCBUtilities;
 
@@ -42,12 +43,9 @@ public class PngTileProvider extends FilterTileProvider
 	@Override
 	public byte[] getTileData(int x, int y) throws IOException
 	{
-		if (!tileProvider.preferTileImageUsage())
-		{
-			byte[] data = super.getTileData(x, y);
-			if (OSMCBUtilities.getImageType(data) == TileImageType.PNG)
-				return data;
-		}
+		byte[] data = super.getTileData(x, y);
+		if (OSMCBUtilities.getImageType(data) == TileImageType.PNG)
+			return data;
 		ByteArrayOutputStream buffer = new ByteArrayOutputStream(32000);
 		BufferedImage image = getTileImage(x, y);
 		if (image == null)
@@ -56,9 +54,4 @@ public class PngTileProvider extends FilterTileProvider
 		return buffer.toByteArray();
 	}
 
-	@Override
-	public boolean preferTileImageUsage()
-	{
-		return true;
-	}
 }
