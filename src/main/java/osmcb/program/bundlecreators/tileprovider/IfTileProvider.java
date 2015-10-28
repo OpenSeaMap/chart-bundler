@@ -14,24 +14,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package osmcb.program.bundlecreators.SQLite;
+package osmcb.program.bundlecreators.tileprovider;
+
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 import osmb.mapsources.IfMapSource;
-import osmb.mapsources.mapspace.MercatorPower2MapSpace;
-import osmcb.program.bundle.IfBundle;
-import osmcb.program.bundlecreators.IfBundleCreatorName;
 
-@IfBundleCreatorName(value = "OsmAnd SQLite DB", type = "OSMAND_SQlite")
-public class BCOSMAND_SQlite extends BCRMapsSQLite
+/**
+ * A TileProvider provides image tiles, i.e. 256x256 pixel squares, from a specified map source.
+ * The map source is usually an online source and the already downloaded tiles are hold in a local tile store.
+ * 
+ * @author humbach
+ *
+ */
+public interface IfTileProvider
 {
-	public BCOSMAND_SQlite(IfBundle bundle)
-	{
-		super(bundle);
-	}
+	public byte[] getTileData(int x, int y) throws IOException;
 
-	@Override
-	public boolean testMapSource(IfMapSource mapSource)
-	{
-		return MercatorPower2MapSpace.INSTANCE_256.equals(mapSource.getMapSpace());
-	}
+	public BufferedImage getTileImage(int x, int y) throws IOException;
+
+	public IfMapSource getMapSource();
+
+	/**
+	 * Indicates if subsequent filter in the filter-chain should prefer the {@link #getTileImage(int, int)} or {@link #getTileData(int, int)} method.
+	 * 
+	 * @return
+	 */
+	public boolean preferTileImageUsage();
 }

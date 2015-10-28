@@ -59,11 +59,6 @@ public class BCOpenCPN extends ACBundleCreator
 {
 	protected static final String FILENAME_PATTERN = "t_%d_%d.%s";
 
-	public BCOpenCPN()
-	{
-		super();
-	}
-
 	public BCOpenCPN(IfBundle bundle, File bundleOutputDir)
 	{
 		super();
@@ -80,7 +75,6 @@ public class BCOpenCPN extends ACBundleCreator
 	// super(bundle, layer, map, mapOutputDir);
 	// }
 	//
-
 	/**
 	 * Creates a format specific directory for all OpenCPN-KAP bundles
 	 * Creates a format specific directory name
@@ -108,22 +102,28 @@ public class BCOpenCPN extends ACBundleCreator
 	}
 
 	@Override
+	public void createInfoFile()
+	{
+		createInfoFile("OpenSeaMap Charts KAP Bundle 0.1\r\n");
+	}
+
+	@Override
 	public void initializeMap() throws IOException
 	{
 		// each map goes in its own folder BUT all maps are in the same folder 'ChartBundleRoot'
 		// NOAA has its own numbering scheme for the charts with more digits for smaller charts, but not a clear description to make subdivisions
 		// 'L00-M0000' will be the map folder name. Each chart includes one map L00-M0000.kap
+		super.initializeMap();
 		try
 		{
-			super.initializeMap();
 			mMap.setName(mMap.getName().replace(" ", "M"));
 		}
 		catch (InvalidNameException e)
 		{
-			e.printStackTrace();
+			log.error("", e);
 		}
-		mOutputDir = new File(mOutputDir, mMap.getName());
-		OSMCBUtilities.mkDirs(mOutputDir);
+		// mMapDir = new File(bundleDir, mMap.getName());
+		// OSMCBUtilities.mkDirs(mMapDir);
 	}
 
 	/**
@@ -796,16 +796,5 @@ public class BCOpenCPN extends ACBundleCreator
 			}
 			OSMCBUtilities.closeWriter(setFileWriter);
 		}
-	}
-
-	@Override
-	protected void testBundle() throws BundleTestException
-	{
-	}
-
-	@Override
-	public void createInfoFile()
-	{
-		createInfoFile("OpenSeaMap Charts KAP Bundle 0.1\r\n");
 	}
 }

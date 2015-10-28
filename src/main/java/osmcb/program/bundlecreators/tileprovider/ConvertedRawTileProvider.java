@@ -23,7 +23,6 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import osmb.program.tiledatawriter.IfTileImageDataWriter;
-import osmb.program.tiles.IfTileProvider;
 import osmb.program.tiles.TileImageFormat;
 
 /**
@@ -34,13 +33,15 @@ public class ConvertedRawTileProvider extends FilterTileProvider
 {
 	private IfTileImageDataWriter writer;
 
-	public ConvertedRawTileProvider(IfTileProvider tileProvider, TileImageFormat tileImageFormat) {
+	public ConvertedRawTileProvider(IfTileProvider tileProvider, TileImageFormat tileImageFormat)
+	{
 		super(tileProvider);
 		writer = tileImageFormat.getDataWriter();
 		writer.initialize();
 		ImageIO.setUseCache(false);
 	}
 
+	@Override
 	public byte[] getTileData(int x, int y) throws IOException
 	{
 		BufferedImage image = getTileImage(x, y);
@@ -51,9 +52,9 @@ public class ConvertedRawTileProvider extends FilterTileProvider
 		return buffer.toByteArray();
 	}
 
+	@Override
 	public boolean preferTileImageUsage()
 	{
 		return true;
 	}
-
 }

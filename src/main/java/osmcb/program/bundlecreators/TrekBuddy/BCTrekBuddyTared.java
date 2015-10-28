@@ -27,6 +27,7 @@ import java.util.List;
 import osmb.program.ACApp;
 import osmcb.OSMCBSettings;
 import osmcb.program.bundle.BundleTestException;
+import osmcb.program.bundle.IfBundle;
 import osmcb.program.bundlecreators.IfBundleCreatorName;
 import osmcb.program.bundlecreators.IfMapTileWriter;
 import osmcb.utilities.OSMCBUtilities;
@@ -41,10 +42,10 @@ public class BCTrekBuddyTared extends BCTrekBuddy
 		super();
 	}
 
-	// public BCTrekBuddyTared(IfBundle bundle, File bundleOutputDir)
-	// {
-	// super(bundle, bundleOutputDir);
-	// }
+	public BCTrekBuddyTared(IfBundle bundle, File bundleOutputDir)
+	{
+		super(bundle, bundleOutputDir);
+	}
 
 	// protected BCTrekBuddyTared(IfBundle bundle, IfLayer layer, File layerOutputDir)
 	// {

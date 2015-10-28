@@ -35,7 +35,6 @@ import osmb.program.map.IfMap;
 import osmb.program.map.IfMapSpace;
 import osmb.program.map.IfMapSpace.ProjectionCategory;
 import osmb.program.tiles.IfTileLoaderListener;
-import osmb.program.tiles.IfTileProvider;
 import osmb.program.tiles.MemoryTileCache;
 import osmb.program.tiles.Tile;
 import osmb.program.tiles.TileImageParameters;
@@ -50,6 +49,7 @@ import osmcb.program.bundle.BundleOutputFormat;
 import osmcb.program.bundle.BundleTestException;
 import osmcb.program.bundle.IfBundle;
 import osmcb.program.bundle.MapCreationException;
+import osmcb.program.bundlecreators.tileprovider.IfTileProvider;
 import osmcb.ui.BundleProgress;
 import osmcb.utilities.OSMCBUtilities;
 
@@ -317,11 +317,6 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener
 	 * - downloadMapTiles(); downloads all tiles which are not yet in the tile store available.
 	 * - createMap(); actually build a map (usually one file, but some formats handle that different) from the tiles.
 	 * - finishMap();
-	 * 
-	 * This is the 'synchronized' version of runMap. It waits for completion of all downloads before starting to actually create the map.
-	 * For performance issues, it seems reasonable to have a 'unsynchronized' version, which does only use the current tiles in the tile store.
-	 * Then there has to be a 'partnered' action, which schedules tiles for download, downloads them and updates the entries in the tile store independent of the
-	 * current bundle creation. We even might implement a completely separate process for updating the tile stores entries.
 	 */
 	protected void runMap()
 	{
@@ -657,7 +652,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener
 	@Override
 	public boolean loadMapTiles() throws Exception
 	{
-		log.debug("start map='" + mMap.getName() + "', TileStore=" + mTS);
+		log.debug("start map=" + mMap.getName() + ", TileStore=" + mTS);
 
 		if (Thread.currentThread().isInterrupted())
 		{
@@ -669,20 +664,22 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener
 
 		try
 		{
-			log.debug("load " + tileCount + " tiles");
+			log.debug("download tiles=" + tileCount);
 			sBundleProgress.initMapDownload(mMap);
+			// tileArchive = null;
+			// IfTileProvider mapTileProvider = null;
 			// we download only from online map sources, not from file based map sources
 			if (!(mMap.getMapSource() instanceof IfFileBasedMapSource))
 			{
 				TileLoader tl = new TileLoader(this);
 
 				log.trace("TileLoader instanciated");
-				for (int tileX = mMap.getMinTileCoordinate().x / IfMapSpace.TECH_TILESIZE; tileX < mMap.getMaxTileCoordinate().x / IfMapSpace.TECH_TILESIZE; ++tileX)
+				for (int tileX = mMap.getMinTileCoordinate().x / 256; tileX < mMap.getMaxTileCoordinate().x / 256; ++tileX)
 				{
-					for (int tileY = mMap.getMinTileCoordinate().y / IfMapSpace.TECH_TILESIZE; tileY < mMap.getMaxTileCoordinate().y / IfMapSpace.TECH_TILESIZE; ++tileY)
+					for (int tileY = mMap.getMinTileCoordinate().y / 256; tileY < mMap.getMaxTileCoordinate().y / 256; ++tileY)
 					{
 						mExec.execute(tl.createTileLoaderJob(mMap.getMapSource(), tileX, tileY, mMap.getZoom()));
-						log.trace("Job started X=" + tileX + ", Y=" + tileY + ", threads=" + mExec.getActiveCount());
+						log.trace("Job started X=" + tileX + ", Y=" + tileY + ", jobs=" + mExec.getActiveCount());
 					}
 				}
 			}

@@ -26,7 +26,6 @@ import org.apache.log4j.Logger;
 
 import osmb.mapsources.IfMapSource;
 import osmb.program.map.IfMap;
-import osmb.program.tiles.IfTileProvider;
 import osmb.program.tiles.TileImageType;
 import osmcb.utilities.tar.TarIndex;
 
@@ -59,6 +58,12 @@ public class DownloadedTileProvider implements IfTileProvider
 		if (unconvertedTileData == null)
 			return null;
 		return ImageIO.read(new ByteArrayInputStream(unconvertedTileData));
+	}
+
+	@Override
+	public boolean preferTileImageUsage()
+	{
+		return false;
 	}
 
 	@Override
