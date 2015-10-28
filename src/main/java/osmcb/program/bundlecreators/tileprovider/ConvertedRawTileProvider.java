@@ -26,14 +26,14 @@ import osmb.program.tiledatawriter.IfTileImageDataWriter;
 import osmb.program.tiles.TileImageFormat;
 
 /**
- * Loads a tile from the underlying {@link TileProvider}, loads the tile to memory, converts it to the desired {@link TileImageFormat} and returns the binary
+ * Loads a tile from the underlying {@link IfTileProvider}, loads the tile to memory, converts it to the desired {@link TileImageFormat} and returns the binary
  * representation of the image in the specified format.
  */
 public class ConvertedRawTileProvider extends FilterTileProvider
 {
 	private IfTileImageDataWriter writer;
 
-	public ConvertedRawTileProvider(TileProvider tileProvider, TileImageFormat tileImageFormat) {
+	public ConvertedRawTileProvider(IfTileProvider tileProvider, TileImageFormat tileImageFormat) {
 		super(tileProvider);
 		writer = tileImageFormat.getDataWriter();
 		writer.initialize();

@@ -29,7 +29,7 @@ import osmb.program.map.IfMap;
 import osmb.program.tiles.TileImageType;
 import osmcb.utilities.tar.TarIndex;
 
-public class DownloadedTileProvider implements TileProvider
+public class DownloadedTileProvider implements IfTileProvider
 {
 	private static final Logger log = Logger.getLogger(DownloadedTileProvider.class);
 	public static final String TILE_FILENAME_PATTERN = "x%dy%d";

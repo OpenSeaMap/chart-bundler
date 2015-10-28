@@ -14,21 +14,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package osmcb.program.bundlecreators;
+package osmcb.program.bundlecreators.tileprovider;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+
+import osmb.mapsources.IfMapSource;
 
 /**
- * Annotation for {@link ACBundleCreator} implementations. The {@link #names()} field holds the parameter names supported by the specific bundle format. The full
- * list of available parameters is defined in {@link Name}.
+ * A TileProvider provides image tiles, i.e. 256x256 pixel squares, from a specified map source.
+ * The map source is usually an online source and the already downloaded tiles are hold in a local tile store.
+ * 
+ * @author humbach
+ *
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface BundleCreatorName {
-	String value();
+public interface IfTileProvider
+{
+	public byte[] getTileData(int x, int y) throws IOException;
 
-	String type() default "";
+	public BufferedImage getTileImage(int x, int y) throws IOException;
+
+	public IfMapSource getMapSource();
+
+	/**
+	 * Indicates if subsequent filter in the filter-chain should prefer the {@link #getTileImage(int, int)} or {@link #getTileData(int, int)} method.
+	 * 
+	 * @return
+	 */
+	public boolean preferTileImageUsage();
 }

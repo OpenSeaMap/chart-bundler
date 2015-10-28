@@ -26,6 +26,7 @@ import osmb.program.map.IfLayer;
 import osmb.program.map.IfMap;
 import osmb.utilities.OSMBStrs;
 import osmcb.OSMCBStrs;
+import osmcb.program.bundlecreators.ACBundleCreator;
 
 /**
  * A window showing the progress while {@link AtlasThread} downloads and processes the map tiles.
@@ -77,7 +78,8 @@ public class ACBundleProgress implements IfMapSourceListener
 	protected boolean aborted = false;
 	protected boolean finished = false;
 	protected IfBCControler downloadControlListener = null;
-	protected IfBundleThread bundleThread = null;
+	// protected IfBundleThread bundleThread = null;
+	protected ACBundleCreator mBC = null;
 	protected ArrayList<MapInfo> mapInfos = null;
 	public String timeLeftTotal;
 	public String bps;
@@ -86,9 +88,16 @@ public class ACBundleProgress implements IfMapSourceListener
 	// private static String TEXT_PERCENT = OSMCBStrs.RStr("dlg_download_done_percent");
 	// private static String TEXT_TENTHPERCENT = OSMCBStrs.RStr("dlg_download_done_tenthpercent");
 
-	public ACBundleProgress(IfBundleThread bundleThread)
+	// public ACBundleProgress(IfBundleThread bundleThread)
+	// {
+	// this.mBC = bundleThread;
+	// initialTotalTime = System.currentTimeMillis();
+	// initialMapDownloadTime = System.currentTimeMillis();
+	// }
+
+	public ACBundleProgress(ACBundleCreator bc)
 	{
-		this.bundleThread = bundleThread;
+		this.mBC = bc;
 		initialTotalTime = System.currentTimeMillis();
 		initialMapDownloadTime = System.currentTimeMillis();
 	}
@@ -161,11 +170,11 @@ public class ACBundleProgress implements IfMapSourceListener
 		data.mapCreationProgress = 0;
 		data.mapCreationMax = l;
 		initialMapDownloadTime = -1;
-		log.trace(OSMCBStrs.RStr("BundleProgress.InitMapCreation"));
+		log.trace(OSMCBStrs.RStr("BundleProgress.InitMap"));
 	}
 
 	/**
-	 * called by BundleThread
+	 * called by {@link ACBundleCreator}
 	 * 
 	 * @param map
 	 */
@@ -186,10 +195,27 @@ public class ACBundleProgress implements IfMapSourceListener
 		printData();
 	}
 
+	public void finishMapDownload(IfMap map)
+	{
+		// int index = mapInfos.indexOf(new MapInfo(map, 0, 0));
+		// data.mapInfo = mapInfos.get(index);
+		// data.bundleProgress = data.mapInfo.tileCountOnStart;
+		// data.map = map;
+		// data.tilesDLMap = (int) map.calculateTilesToDownload();
+		// initialMapDownloadTime = System.currentTimeMillis();
+		// data.prevMapsPermanentErrors += data.mapPermanentErrors;
+		// data.prevMapsRetryErrors += data.mapRetryErrors;
+		// data.mapCreationProgress = 0;
+		// data.mapDownloadProgress = 0;
+		// data.mapCurrent = index + 1;
+		// log.trace(OSMCBStrs.RStr("BundleProgress.NextMap"));
+		// printData();
+	}
+
 	public void finishMap(IfMap mMap)
 	{
 		data.mapCreationProgress = 100;
-		log.trace(OSMCBStrs.RStr("BundleProgress.FinishMapCreation"));
+		log.trace(OSMCBStrs.RStr("BundleProgress.MapFinished"));
 	}
 
 	public void setErrorCounter(int retryErrors, int permanentErrors)

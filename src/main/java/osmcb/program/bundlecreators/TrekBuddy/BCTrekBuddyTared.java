@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package osmcb.program.bundlecreators;
+package osmcb.program.bundlecreators.TrekBuddy;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -25,16 +25,16 @@ import java.util.LinkedList;
 import java.util.List;
 
 import osmb.program.ACApp;
-import osmb.program.map.IfLayer;
-import osmb.program.map.IfMap;
 import osmcb.OSMCBSettings;
 import osmcb.program.bundle.BundleTestException;
 import osmcb.program.bundle.IfBundle;
+import osmcb.program.bundlecreators.IfBundleCreatorName;
+import osmcb.program.bundlecreators.IfMapTileWriter;
 import osmcb.utilities.OSMCBUtilities;
 import osmcb.utilities.tar.TarArchive;
 import osmcb.utilities.tar.TarTmiArchive;
 
-@BundleCreatorName(value = "TrekBuddy tared bundle", type = "TaredAtlas")
+@IfBundleCreatorName(value = "TrekBuddy tared bundle", type = "TaredAtlas")
 public class BCTrekBuddyTared extends BCTrekBuddy
 {
 	public BCTrekBuddyTared()
@@ -47,16 +47,16 @@ public class BCTrekBuddyTared extends BCTrekBuddy
 		super(bundle, bundleOutputDir);
 	}
 
-	protected BCTrekBuddyTared(IfBundle bundle, IfLayer layer, File layerOutputDir)
-	{
-		super(bundle, layer, layerOutputDir);
-	}
-
-	protected BCTrekBuddyTared(IfBundle bundle, IfLayer layer, IfMap map, File mapOutputDir)
-	{
-		super(bundle, layer, map, mapOutputDir);
-	}
-
+	// protected BCTrekBuddyTared(IfBundle bundle, IfLayer layer, File layerOutputDir)
+	// {
+	// super(bundle, layer, layerOutputDir);
+	// }
+	//
+	// protected BCTrekBuddyTared(IfBundle bundle, IfLayer layer, IfMap map, File mapOutputDir)
+	// {
+	// super(bundle, layer, map, mapOutputDir);
+	// }
+	//
 	@Override
 	public void initializeBundle() throws IOException, BundleTestException
 	{
@@ -77,18 +77,18 @@ public class BCTrekBuddyTared extends BCTrekBuddy
 
 	private void createAtlasTarArchive(String name)
 	{
-		log.trace("Creating " + name + ".tar for bundle in dir \"" + mBundleDir.getPath() + "\"");
+		log.trace("Creating " + name + ".tar for bundle in dir \"" + mOutputDir.getPath() + "\"");
 
-		File[] atlasLayerDirs = OSMCBUtilities.listSubDirectories(mBundleDir);
+		File[] atlasLayerDirs = OSMCBUtilities.listSubDirectories(mOutputDir);
 		List<File> atlasMapDirs = new LinkedList<File>();
 		for (File dir : atlasLayerDirs)
 			OSMCBUtilities.addSubDirectories(atlasMapDirs, dir, 0);
 
 		TarArchive ta = null;
-		File crFile = new File(mBundleDir, name + ".tar");
+		File crFile = new File(mOutputDir, name + ".tar");
 		try
 		{
-			ta = new TarArchive(crFile, mBundleDir);
+			ta = new TarArchive(crFile, mOutputDir);
 
 			ta.writeFileFromData(name + ".tba", "Bundle 1.0\r\n".getBytes());
 
@@ -139,7 +139,7 @@ public class BCTrekBuddyTared extends BCTrekBuddy
 				tileHeight = parameters.getHeight();
 				tileWidth = parameters.getWidth();
 			}
-			File mapTarFile = new File(mMapDir, mMap.getName() + ".tar");
+			File mapTarFile = new File(mOutputDir, mMap.getName() + ".tar");
 			log.debug("Writing tiles to tared map: " + mapTarFile);
 			try
 			{

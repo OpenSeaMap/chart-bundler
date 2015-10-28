@@ -29,7 +29,7 @@ import osmb.mapsources.IfMapSource;
 /**
  * A tile cache with speculative loading on a separate thread. Usually this decreases iMap generation time on multi-core systems.
  */
-public class CacheTileProvider implements TileProvider
+public class CacheTileProvider implements IfTileProvider
 {
 	private Logger log = Logger.getLogger(CacheTileProvider.class);
 
@@ -39,9 +39,9 @@ public class CacheTileProvider implements TileProvider
 	private static int PRELOADER_THREAD_NUM = 1;
 	private Hashtable<CacheKey, SRCachedTile> cache;
 	private PreLoadThread preLoader = new PreLoadThread();
-	protected final TileProvider tileProvider;
+	protected final IfTileProvider tileProvider;
 
-	public CacheTileProvider(TileProvider tileProvider)
+	public CacheTileProvider(IfTileProvider tileProvider)
 	{
 		this.tileProvider = tileProvider;
 		cache = new Hashtable<CacheKey, SRCachedTile>(500);

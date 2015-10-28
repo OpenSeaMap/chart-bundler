@@ -32,4 +32,8 @@ public interface IfBundle extends IfCatalog
 	BundleOutputFormat getOutputFormat();
 
 	ACBundleCreator createBundleCreatorInstance() throws InstantiationException, IllegalAccessException;
+
+	ACBundleCreator createLayerCreatorInstance() throws InstantiationException, IllegalAccessException;
+
+	ACBundleCreator createMapCreatorInstance() throws InstantiationException, IllegalAccessException;
 }

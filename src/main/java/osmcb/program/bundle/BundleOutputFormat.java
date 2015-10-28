@@ -26,12 +26,12 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import osmcb.program.bundlecreators.ACBundleCreator;
 import osmcb.program.bundlecreators.BCTileStoreDownload;
-import osmcb.program.bundlecreators.BCTrekBuddy;
-import osmcb.program.bundlecreators.BCTrekBuddyTared;
-import osmcb.program.bundlecreators.BundleCreatorName;
+import osmcb.program.bundlecreators.IfBundleCreatorName;
 import osmcb.program.bundlecreators.KAPImages.BCOpenCPN;
 import osmcb.program.bundlecreators.KAPImages.BCOpenCPN2;
 import osmcb.program.bundlecreators.SQLite.BCOSMAND_SQlite;
+import osmcb.program.bundlecreators.TrekBuddy.BCTrekBuddy;
+import osmcb.program.bundlecreators.TrekBuddy.BCTrekBuddyTared;
 
 @XmlRootElement
 @XmlJavaTypeAdapter(BundleOutputFormatAdapter.class)
@@ -117,7 +117,7 @@ public class BundleOutputFormat implements Comparable<BundleOutputFormat>
 
 	private static BundleOutputFormat createByClass(Class<? extends ACBundleCreator> bundleCreatorClass)
 	{
-		BundleCreatorName acName = bundleCreatorClass.getAnnotation(BundleCreatorName.class);
+		IfBundleCreatorName acName = bundleCreatorClass.getAnnotation(IfBundleCreatorName.class);
 		if (acName == null)
 			throw new RuntimeException("ACBundleCreator " + bundleCreatorClass.getName() + " has no name");
 		String typeName = acName.type();

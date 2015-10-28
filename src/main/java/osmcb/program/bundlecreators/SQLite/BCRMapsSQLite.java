@@ -39,7 +39,7 @@ import osmcb.program.bundle.BundleTestException;
 import osmcb.program.bundle.IfBundle;
 import osmcb.program.bundle.MapCreationException;
 import osmcb.program.bundlecreators.ACBundleCreator;
-import osmcb.program.bundlecreators.BundleCreatorName;
+import osmcb.program.bundlecreators.IfBundleCreatorName;
 import osmcb.program.bundlecreators.IfRequiresSQLite;
 import osmcb.program.bundlecreators.tileprovider.ConvertedRawTileProvider;
 import osmcb.utilities.OSMCBUtilities;
@@ -56,7 +56,7 @@ import osmcb.utilities.OSMCBUtilities;
  * Changes made by <a href="mailto:robertk506@gmail.com">Robert</a>, author of RMaps.
  * <p>
  */
-@BundleCreatorName(value = "RMaps SQLite DB", type = "RMaps")
+@IfBundleCreatorName(value = "RMaps SQLite DB", type = "RMaps")
 // @SupportedTIParameters(names = {Name.format})
 public class BCRMapsSQLite extends ACBundleCreator implements IfRequiresSQLite
 {
@@ -75,7 +75,8 @@ public class BCRMapsSQLite extends ACBundleCreator implements IfRequiresSQLite
 
 	public BCRMapsSQLite(IfBundle bundle)
 	{
-		super(bundle, ((OSMCBSettings) ACApp.getApp().getSettings()).getChartBundleOutputDirectory());
+		super();
+		init(bundle, ((OSMCBSettings) ACApp.getApp().getSettings()).getChartBundleOutputDirectory());
 		SQLiteLoader.loadSQLiteOrShowError();
 	}
 
@@ -105,7 +106,7 @@ public class BCRMapsSQLite extends ACBundleCreator implements IfRequiresSQLite
 		String bundleDirName = "OSM-OsmAnd-sqlitedb-" + mBundle.getName() + "-" + sdf.format(new Date());
 		bundleOutputDir = new File(bundleOutputDir, bundleDirName);
 		super.initializeBundle(bundleOutputDir);
-		databaseFile = new File(mBundleDir, getDatabaseFileName());
+		databaseFile = new File(mOutputDir, getDatabaseFileName());
 		log.debug("SQLite Database file: " + databaseFile);
 	}
 
@@ -114,7 +115,7 @@ public class BCRMapsSQLite extends ACBundleCreator implements IfRequiresSQLite
 	{
 		try
 		{
-			OSMCBUtilities.mkDir(mBundleDir);
+			OSMCBUtilities.mkDir(mOutputDir);
 		}
 		catch (IOException e)
 		{
@@ -149,13 +150,13 @@ public class BCRMapsSQLite extends ACBundleCreator implements IfRequiresSQLite
 		}
 	}
 
-	@Override
-	protected void abort()
-	{
-		SQLiteLoader.closeConnection(conn);
-		conn = null;
-	}
-
+	// @Override
+	// protected void abort()
+	// {
+	// SQLiteLoader.closeConnection(conn);
+	// conn = null;
+	// }
+	//
 	@Override
 	public void finishBundle()
 	{

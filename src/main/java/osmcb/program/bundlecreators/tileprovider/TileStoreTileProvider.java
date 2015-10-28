@@ -20,7 +20,7 @@ import osmb.mapsources.IfMapSource;
 import osmb.mapsources.IfMapSource.LoadMethod;
 
 /**
- * A {@link TileProvider} implementation that retrieves all tiles from the tile store (if the <code>mapSource</code> supports that).
+ * A {@link IfTileProvider} implementation that retrieves all tiles from the tile store (if the <code>mapSource</code> supports that).
  */
 public class TileStoreTileProvider extends MapSourceProvider
 {

@@ -24,15 +24,15 @@ import org.apache.log4j.Logger;
 import osmb.mapsources.IfMapSource;
 
 /**
- * Base implementation of an {@link TileProvider} that changes somehow the images, e.g. combines two layers to one or paints something onto a tile image.
+ * Base implementation of an {@link IfTileProvider} that changes somehow the images, e.g. combines two layers to one or paints something onto a tile image.
  */
-public abstract class FilterTileProvider implements TileProvider
+public abstract class FilterTileProvider implements IfTileProvider
 {
 	protected final Logger log;
 
-	protected final TileProvider tileProvider;
+	protected final IfTileProvider tileProvider;
 
-	public FilterTileProvider(TileProvider tileProvider)
+	public FilterTileProvider(IfTileProvider tileProvider)
 	{
 		log = Logger.getLogger(this.getClass());
 		this.tileProvider = tileProvider;

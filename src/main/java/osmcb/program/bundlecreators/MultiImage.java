@@ -23,10 +23,11 @@ import java.awt.image.BufferedImage;
 import org.apache.log4j.Logger;
 
 import osmb.mapsources.IfMapSource;
+import osmb.program.map.BoundingRect;
 import osmb.program.map.IfMap;
 import osmb.program.map.IfMapSpace;
 import osmcb.program.bundle.MapCreationException;
-import osmcb.program.bundlecreators.tileprovider.TileProvider;
+import osmcb.program.bundlecreators.tileprovider.IfTileProvider;
 import osmcb.utilities.collections.SoftHashMap;
 
 /**
@@ -40,10 +41,10 @@ public class MultiImage
 	private final IfMap map;
 	private final IfMapSource mapSource;
 	private final int zoom;
-	private final TileProvider tileProvider;
+	private final IfTileProvider tileProvider;
 	private SoftHashMap<TileKey, OsmcbTile> cache;
 
-	public MultiImage(IfMapSource mapSource, TileProvider tileProvider, IfMap map)
+	public MultiImage(IfMapSource mapSource, IfTileProvider tileProvider, IfMap map)
 	{
 		this.mapSource = mapSource;
 		this.tileProvider = tileProvider;
