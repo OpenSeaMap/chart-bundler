@@ -34,6 +34,7 @@ import osmb.program.map.IfLayer;
 import osmb.program.map.IfMap;
 import osmb.program.map.IfMapSpace;
 import osmb.program.map.IfMapSpace.ProjectionCategory;
+import osmb.program.tiles.IfMemoryTileCacheHolder;
 import osmb.program.tiles.IfTileLoaderListener;
 import osmb.program.tiles.MemoryTileCache;
 import osmb.program.tiles.Tile;
@@ -63,7 +64,7 @@ import osmcb.utilities.OSMCBUtilities;
  * The glue, common to all implementations, is implemented in this ACBundleCreator class and should not be overridden by implementations.
  * 
  */
-public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener
+public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, IfMemoryTileCacheHolder
 {
 	public static final Charset TEXT_FILE_CHARSET = Charsets.ISO_8859_1;
 
@@ -82,6 +83,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener
 	protected IfMap mMap = null;
 
 	protected ACSiTileStore mTS = ACSiTileStore.getInstance();
+	protected MemoryTileCache mTC = new MemoryTileCache();
 
 	protected int tileSize = 256;
 	protected long mTileCount = 0;
@@ -697,21 +699,6 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener
 	}
 
 	@Override
-	public void tileLoadingFinished(Tile tile, boolean success)
-	{
-		TileDbEntry tTSE = new TileDbEntry(tile.getXtile(), tile.getYtile(), tile.getZoom(), tile.getImage());
-		mTS.putTile(tTSE, tile.getSource());
-		log.trace("tile=" + tile + " loaded=" + success);
-	}
-
-	@Override
-	public MemoryTileCache getTileImageCache()
-	{
-		log.trace("MemoryTileCache requested");
-		return null;
-	}
-
-	@Override
 	public void createMap() throws MapCreationException, InterruptedException
 	{
 		// wait for all threads to finish
@@ -725,20 +712,36 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener
 		log.trace("map='" + mMap.getName() + "' finished");
 	}
 
-	public AtomicInteger getActiveDownloads()
-	{
-		return mActiveJobs;
-	}
+	// public AtomicInteger getActiveDownloads()
+	// {
+	// return mActiveJobs;
+	// }
 
 	public IfBundle getBundle()
 	{
 		return mBundle;
 	}
 
-	public boolean waitCreation()
-	{
-		boolean bOk = false;
+	// public boolean waitCreation()
+	// {
+	// boolean bOk = false;
+	//
+	// return bOk;
+	// }
 
-		return bOk;
+	@Override
+	public void tileLoadingFinished(Tile tile, boolean success)
+	{
+		TileDbEntry tTSE = new TileDbEntry(tile.getXtile(), tile.getYtile(), tile.getZoom(), tile.getImage());
+		mTS.putTile(tTSE, tile.getSource());
+		mTC.addTile(tile);
+		log.trace("tile=" + tile + " loaded=" + success);
+	}
+
+	@Override
+	public MemoryTileCache getTileImageCache()
+	{
+		log.trace("MemoryTileCache requested");
+		return mTC;
 	}
 }
