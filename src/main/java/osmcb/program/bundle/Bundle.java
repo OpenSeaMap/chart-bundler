@@ -8,14 +8,25 @@ public class Bundle extends Catalog implements IfBundle
 {
 	protected BundleOutputFormat mBOF;
 
-	public Bundle(String catalogName)
+	/**
+	 * Should never be used
+	 * 
+	 * @param catalogName
+	 */
+	private Bundle(String catalogName)
 	{
 		super(catalogName);
 	}
 
-	public Bundle(IfCatalog ifCatalog, BundleOutputFormat bundleOutputFormat)
+	/**
+	 * This is the 'normal' constructor for a usable Bundle. It will need a Catalog and a BundleOutputFormat to produce any output.
+	 * 
+	 * @param catalog
+	 * @param bundleOutputFormat
+	 */
+	public Bundle(IfCatalog catalog, BundleOutputFormat bundleOutputFormat)
 	{
-		super(ifCatalog);
+		super(catalog);
 		mBOF = bundleOutputFormat;
 	}
 
@@ -38,25 +49,33 @@ public class Bundle extends Catalog implements IfBundle
 		return mBOF;
 	}
 
+	/**
+	 * The class to be instantiated is specified by the {@link BundleOutputFormat}
+	 */
 	@Override
 	public ACBundleCreator createBundleCreatorInstance() throws InstantiationException, IllegalAccessException
 	{
-		ACBundleCreator bc = this.mBOF.getBundleCreatorClass().newInstance();
-		// bc.init(this);
+		ACBundleCreator bc = this.mBOF.createBundleCreatorInstance();
 		return bc;
 	}
 
+	/**
+	 * The class to be instantiated is specified by the {@link BundleOutputFormat}
+	 */
 	@Override
 	public ACBundleCreator createLayerCreatorInstance() throws InstantiationException, IllegalAccessException
 	{
-		ACBundleCreator bc = this.mBOF.getBundleCreatorClass().newInstance();
+		ACBundleCreator bc = this.mBOF.createBundleCreatorInstance();
 		return bc;
 	}
 
+	/**
+	 * The class to be instantiated is specified by the {@link BundleOutputFormat}
+	 */
 	@Override
 	public ACBundleCreator createMapCreatorInstance() throws InstantiationException, IllegalAccessException
 	{
-		ACBundleCreator bc = this.mBOF.getBundleCreatorClass().newInstance();
+		ACBundleCreator bc = this.mBOF.createBundleCreatorInstance();
 		return bc;
 	}
 }

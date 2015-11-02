@@ -474,7 +474,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener
 	public String createGeneralDisclaimer()
 	{
 		String strDisclaimer = "";
-		strDisclaimer += "This Charts are useable for testing ONLY, it is in no way fit for navigational purposes.\r\n";
+		strDisclaimer += "This Charts bundle is useable for testing ONLY, it is in no way fit for navigational purposes.\r\n";
 		strDisclaimer += "\r\n";
 		strDisclaimer += "OpenSeaMap does not give any warranty, that the data shown in this map are real.\r\n";
 		strDisclaimer += "Even if you use it for testing, any damage resulting from this test will be solely your responsibility.\r\n";

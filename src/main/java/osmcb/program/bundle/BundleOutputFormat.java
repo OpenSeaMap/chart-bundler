@@ -33,6 +33,9 @@ import osmcb.program.bundlecreators.SQLite.BCOSMAND_SQlite;
 import osmcb.program.bundlecreators.TrekBuddy.BCTrekBuddy;
 import osmcb.program.bundlecreators.TrekBuddy.BCTrekBuddyTared;
 
+/**
+ * The BundleOutputFormat allows the selection of the actual class to be used by its name.
+ */
 @XmlRootElement
 @XmlJavaTypeAdapter(BundleOutputFormatAdapter.class)
 public class BundleOutputFormat implements Comparable<BundleOutputFormat>
@@ -96,11 +99,19 @@ public class BundleOutputFormat implements Comparable<BundleOutputFormat>
 		FORMATS.add(TILESTORE);
 	}
 
+	/**
+	 * This is never used.
+	 * 
+	 * @return
+	 */
 	public static Vector<BundleOutputFormat> getFormatsAsVector()
 	{
 		return new Vector<BundleOutputFormat>(FORMATS);
 	}
 
+	/**
+	 * This actually returns the BundleOutputFormat object specified by its name.
+	 */
 	public static BundleOutputFormat getFormatByName(String Name)
 	{
 		for (BundleOutputFormat af : FORMATS)
@@ -140,6 +151,11 @@ public class BundleOutputFormat implements Comparable<BundleOutputFormat>
 		return name;
 	}
 
+	/**
+	 * Seems never used.
+	 * 
+	 * @return
+	 */
 	public Class<? extends ACBundleCreator> getMapCreatorClass()
 	{
 		return getBundleCreatorClass();
@@ -150,6 +166,11 @@ public class BundleOutputFormat implements Comparable<BundleOutputFormat>
 		return typeName;
 	}
 
+	/**
+	 * This actually creates the bundle creator instance, which can in turn do the bundle creation.
+	 * 
+	 * @return An instance of a subclass of ACBundleCreator.
+	 */
 	public ACBundleCreator createBundleCreatorInstance()
 	{
 		if (getBundleCreatorClass() == null)
