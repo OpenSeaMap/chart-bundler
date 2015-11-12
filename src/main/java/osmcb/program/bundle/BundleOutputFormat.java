@@ -29,6 +29,7 @@ import osmcb.program.bundlecreators.BCTileStoreDownload;
 import osmcb.program.bundlecreators.IfBundleCreatorName;
 import osmcb.program.bundlecreators.KAPImages.BCOpenCPN;
 import osmcb.program.bundlecreators.KAPImages.BCOpenCPN2;
+import osmcb.program.bundlecreators.KAPImages.BCOpenCPNZip;
 import osmcb.program.bundlecreators.SQLite.BCOSMAND_SQlite;
 import osmcb.program.bundlecreators.TrekBuddy.BCTrekBuddy;
 import osmcb.program.bundlecreators.TrekBuddy.BCTrekBuddyTared;
@@ -50,6 +51,7 @@ public class BundleOutputFormat implements Comparable<BundleOutputFormat>
 		FORMATS.add(createByClass(BCTrekBuddyTared.class));
 		FORMATS.add(createByClass(BCOpenCPN.class));
 		FORMATS.add(createByClass(BCOpenCPN2.class));
+		FORMATS.add(createByClass(BCOpenCPNZip.class));
 		FORMATS.add(createByClass(BCOSMAND_SQlite.class));
 		// FORMATS.add(createByClass(BCAFTrack.class));
 		// FORMATS.add(createByClass(BCAlpineQuestMap.class));

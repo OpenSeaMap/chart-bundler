@@ -27,6 +27,7 @@ import osmcb.OSMCBSettings;
 import osmcb.program.bundle.BundleTestException;
 import osmcb.program.bundle.IfBundle;
 import osmcb.program.bundle.MapCreationException;
+import osmcb.program.bundlecreators.ACBundleCreator;
 import osmcb.program.bundlecreators.IfBundleCreatorName;
 import osmcb.utilities.OSMCBUtilities;
 
@@ -42,11 +43,15 @@ import osmcb.utilities.OSMCBUtilities;
 // @SupportedTIParameters(names = {Name.format, Name.height, Name.width})
 public class BCOpenCPN2 extends BCOpenCPN
 {
-	protected static final String FILENAME_PATTERN = "t_%d_%d.%s";
-	protected File layerDir = null;
-	protected File mapDir = null;
+	// protected File layerDir = null;
+	// protected File mapDir = null;
 
 	// protected MapTileWriter mapTileWriter;
+
+	public BCOpenCPN2()
+	{
+		super();
+	}
 
 	public BCOpenCPN2(IfBundle bundle, File bundleOutputDir)
 	{
@@ -70,6 +75,7 @@ public class BCOpenCPN2 extends BCOpenCPN
 	@Override
 	public void initializeBundle() throws IOException, BundleTestException
 	{
+		log.trace("START");
 		File bundleOutputDir = ((OSMCBSettings) ACApp.getApp().getSettings()).getChartBundleOutputDirectory();
 		bundleOutputDir = new File(bundleOutputDir, "OpenCPN-KAP2");
 		OSMCBUtilities.mkDirs(bundleOutputDir);
@@ -94,13 +100,25 @@ public class BCOpenCPN2 extends BCOpenCPN
 	@Override
 	public void createLayer() throws IOException, InterruptedException
 	{
+		log.trace("START");
 		File mapOutputDir = mOutputDir;
 		for (IfMap tMap : mLayer)
 		{
 			if ((tMap.getZoom() & 0x1) == 0x0)
 			{
-				// IfBundleCreator mapCreator = new ACBundleCreator(mBundle, mLayer, tMap, mapOutputDir);
-				// mExec.execute(mapCreator);
+				ACBundleCreator mapCreator;
+				try
+				{
+					mapCreator = mBundle.createMapCreatorInstance();
+					mapCreator.init(mBundle, mLayer, tMap, mapOutputDir);
+					mExec.execute(mapCreator);
+					jobStarted();
+				}
+				catch (InstantiationException | IllegalAccessException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 		log.trace("layer='" + mLayer.getName() + "' created");
@@ -118,6 +136,7 @@ public class BCOpenCPN2 extends BCOpenCPN
 	@Override
 	public void createMap() throws MapCreationException, InterruptedException
 	{
+		log.trace("START");
 		// only do maps in even zoom layers
 		if ((mMap.getZoom() & 0x1) == 0x0)
 		{

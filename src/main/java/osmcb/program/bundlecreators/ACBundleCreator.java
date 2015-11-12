@@ -36,6 +36,7 @@ import osmb.program.map.IfMapSpace;
 import osmb.program.map.IfMapSpace.ProjectionCategory;
 import osmb.program.tiles.IfMemoryTileCacheHolder;
 import osmb.program.tiles.IfTileLoaderListener;
+import osmb.program.tiles.IfTileProvider;
 import osmb.program.tiles.MemoryTileCache;
 import osmb.program.tiles.Tile;
 import osmb.program.tiles.TileImageParameters;
@@ -50,7 +51,6 @@ import osmcb.program.bundle.BundleOutputFormat;
 import osmcb.program.bundle.BundleTestException;
 import osmcb.program.bundle.IfBundle;
 import osmcb.program.bundle.MapCreationException;
-import osmcb.program.bundlecreators.tileprovider.IfTileProvider;
 import osmcb.ui.BundleProgress;
 import osmcb.utilities.OSMCBUtilities;
 
@@ -109,7 +109,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	/**
 	 * way out
 	 */
-	private boolean aborted = false;
+	// private boolean aborted = false;
 	// private DownloadJobProducerThread djp;
 	// private JobDispatcher downloadJobDispatcher;
 
@@ -125,13 +125,14 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	};
 
 	/**
-	 * The thread pools will be created for each generation in the init method.
+	 * The thread pools will be created for each creation path in the init method.
 	 * This init() is used when initializing a bundle creation
 	 * 
 	 * @param bundle
 	 */
 	public void init(IfBundle bundle, File bundleOutputDir)
 	{
+		log.trace("START");
 		mBundle = bundle;
 		mOutputDir = bundleOutputDir;
 		mExec = new JobDispatcher(mBundle.getLayerCount());
@@ -147,6 +148,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	 */
 	public void init(IfBundle bundle, IfLayer layer, File layerOutputDir)
 	{
+		log.trace("START");
 		mBundle = bundle;
 		mLayer = layer;
 		mOutputDir = layerOutputDir;
@@ -169,6 +171,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	 */
 	public void init(IfBundle bundle, IfLayer layer, IfMap map, File mapOutputDir)
 	{
+		log.trace("START");
 		mBundle = bundle;
 		mLayer = layer;
 		mMap = map;
@@ -189,6 +192,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	@Override
 	public void run()
 	{
+		log.trace("START");
 		log.trace(OSMCBStrs.RStr("BundleThread.CB.RunCalled"));
 		if (sBundleProgress == null)
 			sBundleProgress = new BundleProgress(this);
@@ -226,6 +230,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	 */
 	protected void runBundle()
 	{
+		log.trace("START");
 		log.trace(OSMCBStrs.RStr("BundleThread.CB.RunBundleCalled") + " [" + Thread.currentThread().getName() + "], pool=" + mExec.toString());
 		// log.trace("creation of bundle='" + mBundle.getName() + "' started with some tests");
 		// log.debug(OSMCBStrs.RStr("BundleThread.CB.ModeUnknown", mBundle.getName()));
@@ -285,6 +290,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	 */
 	protected void runLayer()
 	{
+		log.trace("START");
 		log.trace(OSMCBStrs.RStr("BundleThread.CB.RunLayerCalled") + " [" + Thread.currentThread().getName() + "], pool=" + mExec.toString());
 		try
 		{
@@ -322,6 +328,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	 */
 	protected void runMap()
 	{
+		log.trace("START");
 		log.trace(OSMCBStrs.RStr("BundleThread.CB.RunMapCalled") + " [" + Thread.currentThread().getName() + "], pool=" + mExec.toString());
 		try
 		{
@@ -382,12 +389,14 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 
 	public void jobFinishedSuccessfully(int bytesDownloaded)
 	{
+		log.trace("START");
 		mActiveJobs.decrementAndGet();
 		mJobsCompleted.incrementAndGet();
 	}
 
 	public void jobFinishedWithError(boolean retry)
 	{
+		log.trace("START");
 		mActiveJobs.decrementAndGet();
 		if (retry)
 			mJobsRetryError.incrementAndGet();
@@ -410,6 +419,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	 */
 	final public void abortBundleCreation()
 	{
+		log.trace("START");
 		try
 		{
 			shutdown();
@@ -418,7 +428,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 		{
 			log.error("Exception thrown in stopDownload()" + e.getMessage());
 		}
-		this.aborted = true;
+		// this.aborted = true;
 		log.trace("bundle='" + mBundle.getName() + "' aborted");
 	}
 
@@ -430,6 +440,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	 */
 	protected void testBundle() throws BundleTestException
 	{
+		log.trace("START");
 		try
 		{
 			for (IfLayer layer : mBundle)
@@ -475,6 +486,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	 */
 	public String createGeneralDisclaimer()
 	{
+		log.trace("START");
 		String strDisclaimer = "";
 		strDisclaimer += "This Charts bundle is useable for testing ONLY, it is in no way fit for navigational purposes.\r\n";
 		strDisclaimer += "\r\n";
@@ -503,6 +515,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	 */
 	public void createInfoFile(String strBundleDescription)
 	{
+		log.trace("START");
 		File crtba = new File(mOutputDir.getAbsolutePath(), "UserAgreement-OpenSeaMap.txt");
 		try
 		{
@@ -538,6 +551,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	// public void initializeBundle(String bundleDirName) throws IOException, BundleTestException
 	public void initializeBundle(File bundleOutputDir) throws IOException, BundleTestException
 	{
+		log.trace("START");
 		if (bundleOutputDir == null)
 		{
 			bundleOutputDir = OSMCBSettings.getInstance().getChartBundleOutputDirectory();
@@ -556,6 +570,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	@Override
 	public void createBundle() throws IOException, InterruptedException
 	{
+		log.trace("START");
 		File layerOutputDir = mOutputDir;
 		for (IfLayer tLayer : mBundle.getLayers())
 		{
@@ -585,6 +600,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	@Override
 	public void finishBundle()
 	{
+		log.trace("START");
 		createInfoFile();
 		sBundleProgress.finishBundle();
 		log.trace("bundle='" + mBundle.getName() + "' finished");
@@ -593,6 +609,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	@Override
 	public void initializeLayer() throws IOException, InterruptedException
 	{
+		log.trace("START");
 		sBundleProgress.initLayer(mLayer);
 		log.trace("layer='" + mLayer.getName() + "' initialized");
 	}
@@ -600,6 +617,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	@Override
 	public void createLayer() throws IOException, InterruptedException
 	{
+		log.trace("START");
 		File mapOutputDir = mOutputDir;
 		for (IfMap tMap : mLayer)
 		{
@@ -630,13 +648,13 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	@Override
 	public void initializeMap() throws IOException
 	{
-		int tileSize = mMap.getMapSource().getMapSpace().getTileSize();
+		// int tileSize = mMap.getMapSource().getMapSpace().getTileSize();
 		// xMin = mMap.getMinTileCoordinate().x / tileSize;
 		// xMax = mMap.getMaxTileCoordinate().x / tileSize;
 		// yMin = mMap.getMinTileCoordinate().y / tileSize;
 		// yMax = mMap.getMaxTileCoordinate().y / tileSize;
 
-		Thread t = Thread.currentThread();
+		// Thread t = Thread.currentThread();
 		// if (!(t instanceof BundleThread))
 		// throw new RuntimeException("Calling thread must be BundleThread!");
 		// BundleThread at = (BundleThread) t;
@@ -645,15 +663,18 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	}
 
 	/**
-	 * This loads the map tiles from the tile store. In any case it retrieves at first the tile from the store.
+	 * This loads the map tiles from the tile store. In any case it first retrieves the tile from the store.
 	 * If there is no tile or the tile in the store is expired, it dispatches a new job to download the tile into the store.
-	 * This procedure achieves: 1. The bundle creation does not stall at 'missing' tiles. 2. The tiles wanted are downloaded with priority into the tile store
-	 * and will be used next time. 3. We can use a lot of threads to fetch tiles from the store, while not overburdening the download server(s) by limiting the
+	 * This procedure achieves:
+	 * 1. The bundle creation does not stall at 'missing' tiles.
+	 * 2. The tiles wanted are downloaded with priority into the tile store and will be used next time.
+	 * 3. We can use a lot of threads to fetch tiles from the store, while not overburdening the download server(s) by limiting the
 	 * number of threads which actually access the server.
 	 */
 	@Override
 	public boolean loadMapTiles() throws Exception
 	{
+		log.trace("START");
 		log.debug("start map=" + mMap.getName() + ", TileStore=" + mTS);
 
 		if (Thread.currentThread().isInterrupted())
@@ -680,8 +701,8 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 				{
 					for (int tileY = mMap.getMinTileCoordinate().y / 256; tileY < mMap.getMaxTileCoordinate().y / 256; ++tileY)
 					{
+						log.debug("start job (" + mMap.getZoom() + "|" + tileX + "|" + tileY + ") jobs=" + mExec.getActiveCount());
 						mExec.execute(tl.createTileLoaderJob(mMap.getMapSource(), tileX, tileY, mMap.getZoom()));
-						log.trace("Job started X=" + tileX + ", Y=" + tileY + ", jobs=" + mExec.getActiveCount());
 					}
 				}
 			}
@@ -708,6 +729,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	@Override
 	public void finishMap()
 	{
+		log.trace("START");
 		sBundleProgress.finishMap(mMap);
 		log.trace("map='" + mMap.getName() + "' finished");
 	}
@@ -732,6 +754,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	@Override
 	public void tileLoadingFinished(Tile tile, boolean success)
 	{
+		log.trace("START");
 		TileDbEntry tTSE = new TileDbEntry(tile.getXtile(), tile.getYtile(), tile.getZoom(), tile.getImage());
 		mTS.putTile(tTSE, tile.getSource());
 		mTC.addTile(tile);

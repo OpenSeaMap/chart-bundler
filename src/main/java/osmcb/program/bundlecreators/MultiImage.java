@@ -26,8 +26,8 @@ import osmb.mapsources.IfMapSource;
 import osmb.program.map.BoundingRect;
 import osmb.program.map.IfMap;
 import osmb.program.map.IfMapSpace;
+import osmb.program.tiles.IfTileProvider;
 import osmcb.program.bundle.MapCreationException;
-import osmcb.program.bundlecreators.tileprovider.IfTileProvider;
 import osmcb.utilities.collections.SoftHashMap;
 
 /**

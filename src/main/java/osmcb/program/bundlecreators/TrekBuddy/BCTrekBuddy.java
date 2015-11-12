@@ -53,8 +53,6 @@ import osmcb.utilities.OSMCBUtilities;
 public class BCTrekBuddy extends ACBundleCreator
 {
 	protected static final String FILENAME_PATTERN = "t_%d_%d.%s";
-	// protected File layerDir = null;
-	// protected File mapDir = null;
 	protected IfMapTileWriter mapTileWriter;
 
 	public BCTrekBuddy()

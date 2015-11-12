@@ -25,6 +25,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.apache.log4j.Logger;
 
 import osmb.mapsources.IfMapSource;
+import osmb.program.tiles.IfTileProvider;
 
 /**
  * A tile cache with speculative loading on a separate thread. Usually this decreases iMap generation time on multi-core systems.
@@ -48,11 +49,11 @@ public class CacheTileProvider implements IfTileProvider
 		preLoader.start();
 	}
 
-	@Override
-	public boolean preferTileImageUsage()
-	{
-		return true;
-	}
+	// @Override
+	// public boolean preferTileImageUsage()
+	// {
+	// return true;
+	// }
 
 	@Override
 	public BufferedImage getTileImage(int x, int y) throws IOException

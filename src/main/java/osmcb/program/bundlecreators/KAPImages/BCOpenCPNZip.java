@@ -28,6 +28,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.net.URI;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
@@ -55,18 +58,18 @@ import osmcb.utilities.image.IFOSMPalette;
 import osmcb.utilities.image.OSMAdaptivePalette;
 import osmcb.utilities.image.OSMColor;
 
-@IfBundleCreatorName(value = "OpenCPN KAP bundle", type = "OpenCPN")
+@IfBundleCreatorName(value = "OpenCPN zipped KAP bundle", type = "OpenCPNZip")
 // @SupportedTIParameters(names = {Name.format, Name.height, Name.width})
-public class BCOpenCPN extends ACBundleCreator
+public class BCOpenCPNZip extends ACBundleCreator
 {
 	protected static final String FILENAME_PATTERN = "t_%d_%d.%s";
 
-	public BCOpenCPN()
+	public BCOpenCPNZip()
 	{
 		super();
 	}
 
-	public BCOpenCPN(IfBundle bundle, File bundleOutputDir)
+	public BCOpenCPNZip(IfBundle bundle, File bundleOutputDir)
 	{
 		super();
 		init(bundle, bundleOutputDir);
@@ -91,12 +94,16 @@ public class BCOpenCPN extends ACBundleCreator
 	{
 		log.trace("START");
 		File bundleOutputDir = ((OSMCBSettings) ACApp.getApp().getSettings()).getChartBundleOutputDirectory();
+		URI zipURI = URI.create("jar:file:/OpenCPN-KAP/Test.zip");
 		bundleOutputDir = new File(bundleOutputDir, "OpenCPN-KAP");
 		OSMCBUtilities.mkDirs(bundleOutputDir);
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-hhmmss");
 		String bundleDirName = "OSM-OpenCPN-KAP-" + mBundle.getName() + "-" + sdf.format(new Date());
 		bundleOutputDir = new File(bundleOutputDir, bundleDirName);
 		super.initializeBundle(bundleOutputDir);
+
+		FileSystem zipfs = FileSystems.newFileSystem(zipURI, null);
+		Path bundleOutputPath = zipfs.getPath(bundleDirName);
 	}
 
 	/**
@@ -317,7 +324,7 @@ public class BCOpenCPN extends ACBundleCreator
 			bsbWriter.write("MFR/OpenSeaMap\r\n");
 			// bsbWriter.write("CGD/unknown\r\n");
 			// bsbWriter.write("RGN/unknown\r\n");
-			bsbWriter.write("K01/NA=" + mMap.getName() + ",NU=" + mMap.getNumber() + ",TY=BASE,FN=" + mMap.getName() + "_1.kap\r\n");
+			bsbWriter.write("K01/NU=" + mMap.getNumber() + ",TY=BASE,FN=" + mMap.getName() + "_1.kap\r\n");
 			// bsbWriter.write("DTM/0,0\r\n");
 			// bsbWriter.write("CPH/0\r\n");
 			// bsbWriter.write("IFM/7\r\n");
@@ -462,24 +469,24 @@ public class BCOpenCPN extends ACBundleCreator
 		// PRG/
 		// TIFF Image Data *
 
-		// BSB (or NOS for older GEO/NOS or GEO/NO1 files) - General parameters
+		// BSB (or NOS for older GEO/NOS or GEO/NO1 files) � General parameters
 		// NA - Pane name
 		// NU - Pane number. If chart is 123 and contains a plan A, the plan should be numbered 123_A
 		// RA - width, height - width and height of raster image data in pixels
 		// DU - Drawing Units in pixels/inch (same as DPI resolution) e.g. 50, 150, 175, 254, 300
 
-		// KNP Detailed chart parameters
+		// KNP � Detailed chart parameters
 		// SC - Scale e.g. 25000 means 1:25000
-		// GD - Geodetic Datum i.e. WGS84 for us
+		// GD - Geodetic Datum e.g. WGS84 for us
 		// PR - Projection e.g. MERCATOR for us. Other known values are TRANSVERSE MERCATOR or LAMBERT CONFORMAL CONIC or POLYCONIC. This must be one of those
 		// listed, as the value determines how PP etc. are interpreted. Only MERCATOR and TRANSVERSE MERCATOR are supported by OpenCPN.
-		// PP - Projection parameter. For Mercator charts this is where the scale is valid, i.e. +lat_ts - use average latitude of the chart. For transverse
+		// PP � Projection parameter. For Mercator charts this is where the scale is valid, i.e. +lat_ts � use average latitude of the chart. For transverse
 		// Mercator it is the +lon_0 value.
-		// PI - Projection interval ? e.g. 0.0, 0.033333, 0.083333, 2.0, UNKNOWN
-		// SP - ? UNKNOWN is valid
+		// PI � Projection interval ? e.g. 0.0, 0.033333, 0.083333, 2.0
+		// SP -? � Unknown is valid
 		// SK - Skew angle e.g. 0.0 for us. Angle of rotation of the chart
 		// TA - text angle e.g. 90 for us
-		// UN - Depth units (for depths and heights) e.g. METRES, FATHOMS, FEET
+		// UN � Depth units (for depths and heights) e.g. METRES, FATHOMS, FEET
 		// SD - Sounding Datum e.g. MEAN LOWER LOW WATER, HHWLT or normally LAT
 		// DU - Drawing Units in pixels/inch (same as DPI resolution) e.g. 50, 150, 175, 254, 300
 
@@ -506,7 +513,6 @@ public class BCOpenCPN extends ACBundleCreator
 		osw.write("PLY/4," + laMin + "," + loMin + "\r\n");
 		osw.write("DTM/0,0\r\n");
 		osw.write("CPH/0\r\n");
-		osw.write("OST/1\r\n");
 		osw.write("IFM/7\r\n");
 		// two variants are possible
 		// - we use a fixed colortable and match the pixels against the predefined color (quick and the same look in all charts)

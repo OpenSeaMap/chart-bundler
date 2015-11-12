@@ -23,6 +23,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import osmb.program.tiledatawriter.IfTileImageDataWriter;
+import osmb.program.tiles.IfTileProvider;
 import osmb.program.tiles.TileImageFormat;
 
 /**
@@ -52,9 +53,9 @@ public class ConvertedRawTileProvider extends FilterTileProvider
 		return buffer.toByteArray();
 	}
 
-	@Override
-	public boolean preferTileImageUsage()
-	{
-		return true;
-	}
+	// @Override
+	// public boolean preferTileImageUsage()
+	// {
+	// return true;
+	// }
 }

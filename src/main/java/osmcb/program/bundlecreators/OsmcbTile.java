@@ -26,7 +26,7 @@ import org.apache.log4j.Logger;
 
 import osmb.program.map.BoundingRect;
 import osmb.program.map.IfMapSpace;
-import osmcb.program.bundlecreators.tileprovider.IfTileProvider;
+import osmb.program.tiles.IfTileProvider;
 
 public class OsmcbTile
 {
