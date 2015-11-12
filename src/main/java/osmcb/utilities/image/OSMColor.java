@@ -231,6 +231,12 @@ public class OSMColor extends Color
 		return str;
 	}
 
+	String toStringKmpl()
+	{
+		String str = "color=RGB(" + toStringRGB() + "), HSL(" + toStringHSL() + ")";
+		return str;
+	}
+
 	public boolean equals(int nRGB)
 	{
 		return ((getRed() == ((nRGB & 0xFF0000) >> 16)) && (getGreen() == ((nRGB & 0xFF00) >> 8)) && (getBlue() == ((nRGB & 0xFF))));

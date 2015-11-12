@@ -216,39 +216,39 @@ public class BCOpenCPN extends ACBundleCreator
 		// The text header is terminated with a <Control-Z><NUL> sequence (ASCII characters 26 and 0).
 		// ! - Comment line
 		// VER - Version number of BSB format � we will use 3.0
-		// CRR � Copyright message. Free text
-		// CHT � General parameters
+		// CRR - Copyright message. Free text
+		// CHT - General parameters
 		// NA - Chart name given to the BSB chart (can represent more than one .KAP)
 		// NU - Chart number.
 		// CHF Chart format (e.g. Overview, General, Coastal, Approach, River, Harbour or Berthing) -- L7,8,9 Overview, L10,11 General, L12, 13 Coastal, L14
 		// Approach, L15,16 River, Harbour, Berthing
-		// CED � Chart edition parameters - optional
+		// CED - Chart edition parameters - optional
 		// SE - Source edition / number of paper chart
 		// RE - Raster edition / number
 		// ED - Chart edition date/number
-		// NTM � Notices to mariners - optional
+		// NTM - Notices to mariners - optional
 		// NE - NTM edition number
 		// ND - NTM date
 		// BF - Base flag on or off (I guess this allows a base edition of the chart to be specified?) It allows the chart to be updated with new ntms at a later
 		// date
 		// BD - Base date
-		// CHK � number of KAPs, KAP-number [, KAP-number]
+		// CHK - number of KAPs, KAP-number [, KAP-number]
 		// CGD - ? coast guard district � optional or can be unknown
 		// RGN - ? - optional
-		// ORG � Producing agency identifier -- OSeaM
-		// MFR � Manufacturer of the RNC chart -- OSeaM
+		// ORG - Producing agency identifier -- OSeaM
+		// MFR - Manufacturer of the RNC chart -- OSeaM
 		// Knn -- we have exactly one file in the map (LXX-MYYYY_1.KAP)
 		// NA - Chart name given to the pane
 		// NU - Pane number e.g. 123_A
 		// TY - Type. Base for the base chart, Inset for a plan contained within the base chart, or extension for a plan outside of the base area -- we only use
 		// BASE maps
-		// FN � KAP file name e.g. 123_1.kap
+		// FN - KAP file name e.g. 123_1.kap
 		// Naa � List of text boxes and hot spot links on the chart
-		// RT � N for text box, L for hot spot link
+		// RT - N for text box, L for hot spot link
 		// KN - ?
-		// CA � Category e.g. Chart, Caution, General etc
-		// DE � Type e.g. Tide box, note etc
-		// LK � Links this hot spot to the specified text box
+		// CA - Category e.g. Chart, Caution, General etc
+		// DE - Type e.g. Tide box, note etc
+		// LK - Links this hot spot to the specified text box
 		// P1, P2, P3, P4 � Hot spot location (just P1) or text box boundaries as 4 point polygon in x, y pixels
 		//
 		// ! An example BSB text header
@@ -473,15 +473,18 @@ public class BCOpenCPN extends ACBundleCreator
 		// GD - Geodetic Datum i.e. WGS84 for us
 		// PR - Projection e.g. MERCATOR for us. Other known values are TRANSVERSE MERCATOR or LAMBERT CONFORMAL CONIC or POLYCONIC. This must be one of those
 		// listed, as the value determines how PP etc. are interpreted. Only MERCATOR and TRANSVERSE MERCATOR are supported by OpenCPN.
-		// PP - Projection parameter. For Mercator charts this is where the scale is valid, i.e. +lat_ts - use average latitude of the chart. For transverse
-		// Mercator it is the +lon_0 value.
+		// PP - Projection parameter. For Mercator charts this is where the scale is valid - we use the average latitude of the chart.
+		// For transverse Mercator it is the average longitude value.
 		// PI - Projection interval ? e.g. 0.0, 0.033333, 0.083333, 2.0, UNKNOWN
 		// SP - ? UNKNOWN is valid
-		// SK - Skew angle e.g. 0.0 for us. Angle of rotation of the chart
-		// TA - text angle e.g. 90 for us
+		// SK - Skew angle i.e. 0.0 for us. Angle of rotation of the chart
+		// TA - text angle i.e. 90 for us
 		// UN - Depth units (for depths and heights) e.g. METRES, FATHOMS, FEET
 		// SD - Sounding Datum e.g. MEAN LOWER LOW WATER, HHWLT or normally LAT
 		// DU - Drawing Units in pixels/inch (same as DPI resolution) e.g. 50, 150, 175, 254, 300
+		// DX,DY - Distance covered by one pixel [UN] i.e. meters
+
+		// REF - start SW corner, proceed clockwise
 
 		int width = (mMap.getXMax() - mMap.getXMin() + 1) * tileSize;
 		int height = (mMap.getYMax() - mMap.getYMin() + 1) * tileSize;
