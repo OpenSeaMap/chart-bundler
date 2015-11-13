@@ -85,19 +85,9 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	protected ACSiTileStore mTS = ACSiTileStore.getInstance();
 	protected MemoryTileCache mTC = new MemoryTileCache();
 
-	protected int tileSize = 256;
-	protected long mTileCount = 0;
-	// protected PauseResumeHandler pauseResumeHandler = null;
+	protected int mTileSize = IfMapSpace.TECH_TILESIZE;
 
-	/**
-	 * fields specific to the current map
-	 */
-	// protected int xMin;
-	// protected int xMax;
-	// protected int yMin;
-	// protected int yMax;
-	// protected int zoom;
-	// protected IfMapSource mapSource;
+	// protected PauseResumeHandler pauseResumeHandler = null;
 
 	/**
 	 * Custom tile processing parameters. <code>null</code> if disabled in GUI
@@ -116,8 +106,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	/**
 	 * necessary for instantiation via newInstance()
 	 * Top-level constructor - this is the starting point for the whole bundle. It recursively executes threads for each layer. The number of layers is the
-	 * 'natural'
-	 * limit for the the number of threads here.
+	 * 'natural' limit for the the number of threads here.
 	 */
 	public ACBundleCreator()
 	{
@@ -136,6 +125,8 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 		mBundle = bundle;
 		mOutputDir = bundleOutputDir;
 		mExec = new JobDispatcher(mBundle.getLayerCount());
+		// mTileCount = bundle.calculateTilesToLoad();
+		// mMapCount = bundle.calcMapsToCompose();
 		log.trace("bundle '" + mBundle.getName() + "' pool for layers=" + mExec.getMaximumPoolSize() + ", " + mExec.toString());
 	};
 
@@ -351,7 +342,6 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 				createMap();
 				// wait for the map creation to finish
 				finishMap();
-				log.debug("map '" + mMap.getName() + "' finished");
 			}
 		}
 		catch (IOException e)
@@ -382,11 +372,11 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 		sBundleProgress = bP;
 	}
 
-	public void jobStarted()
-	{
-		sBundleProgress.setJobs(mActiveJobs.incrementAndGet());
-	}
-
+	// public void jobStarted()
+	// {
+	// sBundleProgress.setJobs(mActiveJobs.incrementAndGet());
+	// }
+	//
 	public void jobFinishedSuccessfully(int bytesDownloaded)
 	{
 		log.trace("START");
@@ -627,7 +617,6 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 				mapCreator = mBundle.createMapCreatorInstance();
 				mapCreator.init(mBundle, mLayer, tMap, mapOutputDir);
 				mExec.execute(mapCreator);
-				jobStarted();
 			}
 			catch (InstantiationException | IllegalAccessException e)
 			{
@@ -683,7 +672,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 			throw new InterruptedException();
 		}
 
-		final int tileCount = (int) mMap.calculateTilesToDownload();
+		final int tileCount = (int) mMap.calculateTilesToLoad();
 
 		try
 		{
@@ -701,7 +690,9 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 				{
 					for (int tileY = mMap.getMinTileCoordinate().y / 256; tileY < mMap.getMaxTileCoordinate().y / 256; ++tileY)
 					{
-						log.debug("start job (" + mMap.getZoom() + "|" + tileX + "|" + tileY + ") jobs=" + mExec.getActiveCount());
+						Tile tile = new Tile(mMap.getMapSource(), tileX, tileY, mMap.getZoom());
+						log.debug("start job " + tile + ", jobs=" + mExec.getActiveCount());
+						sBundleProgress.initTileDownload(tile);
 						mExec.execute(tl.createTileLoaderJob(mMap.getMapSource(), tileX, tileY, mMap.getZoom()));
 					}
 				}
@@ -731,7 +722,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	{
 		log.trace("START");
 		sBundleProgress.finishMap(mMap);
-		log.trace("map='" + mMap.getName() + "' finished");
+		log.debug("map '" + mMap.getName() + "' finished");
 	}
 
 	// public AtomicInteger getActiveDownloads()
@@ -758,6 +749,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 		TileDbEntry tTSE = new TileDbEntry(tile.getXtile(), tile.getYtile(), tile.getZoom(), tile.getImage());
 		mTS.putTile(tTSE, tile.getSource());
 		mTC.addTile(tile);
+		sBundleProgress.finishTileDownload(tile);
 		log.trace("tile=" + tile + " loaded=" + success);
 	}
 

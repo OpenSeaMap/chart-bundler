@@ -137,8 +137,8 @@ public abstract class ACPlainImage extends ACBundleCreator
 		// 1));
 		ImageIO.setUseCache(false);
 
-		int mapWidth = (mMap.getXMax() - mMap.getXMin() + 1) * tileSize;
-		int mapHeight = (mMap.getYMax() - mMap.getYMin() + 1) * tileSize;
+		int mapWidth = (mMap.getXMax() - mMap.getXMin() + 1) * mTileSize;
+		int mapHeight = (mMap.getYMax() - mMap.getYMin() + 1) * mTileSize;
 
 		int maxImageSize = getMaxImageSize();
 		int imageWidth = Math.min(maxImageSize, mapWidth);
@@ -186,16 +186,16 @@ public abstract class ACPlainImage extends ACBundleCreator
 						if (sourceTileData != null)
 						{
 							BufferedImage tile = ImageIO.read(new ByteArrayInputStream(sourceTileData));
-							graphics.drawImage(tile, lineX, lineY, tileSize, tileSize, Color.WHITE, null);
+							graphics.drawImage(tile, lineX, lineY, mTileSize, mTileSize, Color.WHITE, null);
 						}
 					}
 					catch (IOException e)
 					{
 						log.error("", e);
 					}
-					lineX += tileSize;
+					lineX += mTileSize;
 				}
-				lineY += tileSize;
+				lineY += mTileSize;
 			}
 		}
 		finally

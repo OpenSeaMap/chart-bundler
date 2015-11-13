@@ -106,7 +106,7 @@ public class BundleProgress extends ACBundleProgress
 	{
 		// data.totalProgress = data.mapInfo.tileCountOnStart;
 		data.map = map;
-		data.tilesDLMap = (int) map.calculateTilesToDownload();
+		data.tilesDLMap = (int) map.calculateTilesToLoad();
 		initialMapDownloadTime = System.currentTimeMillis();
 		data.prevMapsPermanentErrors += data.mapPermanentErrors;
 		data.prevMapsRetryErrors += data.mapRetryErrors;

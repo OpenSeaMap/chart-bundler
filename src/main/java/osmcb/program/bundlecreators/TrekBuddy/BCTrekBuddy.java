@@ -165,13 +165,13 @@ public class BCTrekBuddy extends ACBundleCreator
 
 		IfMapSpace mapSpace = mMap.getMapSource().getMapSpace();
 
-		double longitudeMin = mapSpace.cXToLon(mMap.getXMin() * tileSize, mMap.getZoom());
-		double longitudeMax = mapSpace.cXToLon((mMap.getXMax() + 1) * tileSize - 1, mMap.getZoom());
-		double latitudeMin = mapSpace.cYToLat((mMap.getYMax() + 1) * tileSize - 1, mMap.getZoom());
-		double latitudeMax = mapSpace.cYToLat(mMap.getYMin() * tileSize, mMap.getZoom());
+		double longitudeMin = mapSpace.cXToLon(mMap.getXMin() * mTileSize, mMap.getZoom());
+		double longitudeMax = mapSpace.cXToLon((mMap.getXMax() + 1) * mTileSize - 1, mMap.getZoom());
+		double latitudeMin = mapSpace.cYToLat((mMap.getYMax() + 1) * mTileSize - 1, mMap.getZoom());
+		double latitudeMax = mapSpace.cYToLat(mMap.getYMin() * mTileSize, mMap.getZoom());
 
-		int width = (mMap.getXMax() - mMap.getXMin() + 1) * tileSize;
-		int height = (mMap.getYMax() - mMap.getYMin() + 1) * tileSize;
+		int width = (mMap.getXMax() - mMap.getXMin() + 1) * mTileSize;
+		int height = (mMap.getYMax() - mMap.getYMin() + 1) * mTileSize;
 
 		mapWriter.write(prepareMapString(imageFileName, longitudeMin, longitudeMax, latitudeMin, latitudeMax, width, height));
 		mapWriter.flush();

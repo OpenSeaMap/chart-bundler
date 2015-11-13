@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 import osmb.mapsources.IfMapSourceListener;
 import osmb.program.map.IfLayer;
 import osmb.program.map.IfMap;
+import osmb.program.tiles.Tile;
 import osmb.utilities.OSMBStrs;
 import osmcb.OSMCBStrs;
 import osmcb.program.bundlecreators.ACBundleCreator;
@@ -36,6 +37,7 @@ public class ACBundleProgress implements IfMapSourceListener
 {
 	protected static Logger log = Logger.getLogger(ACBundleProgress.class);
 	private static final long serialVersionUID = -1L;
+
 	protected static final Timer TIMER = new Timer(true);
 	// private JProgressBar atlasProgressBar;
 	// private JProgressBar mapDownloadProgressBar;
@@ -95,6 +97,12 @@ public class ACBundleProgress implements IfMapSourceListener
 	// initialMapDownloadTime = System.currentTimeMillis();
 	// }
 
+	// progress calculation
+	protected long mTileCount = 0;
+	protected long mTilesFinished = 0;
+	protected long mMapCount = 0;
+	protected long mMapsFinished = 0;
+
 	public ACBundleProgress(ACBundleCreator bc)
 	{
 		this.mBC = bc;
@@ -114,9 +122,9 @@ public class ACBundleProgress implements IfMapSourceListener
 	{
 		data.bundle = bundle;
 		if (bundle.getOutputFormat().equals(BundleOutputFormat.TILESTORE))
-			data.tilesTotal = (int) bundle.calculateTilesToDownload();
+			data.tilesTotal = (int) bundle.calculateTilesToLoad();
 		else
-			data.tilesTotal = (int) bundle.calculateTilesToDownload() * 2;
+			data.tilesTotal = (int) bundle.calculateTilesToLoad() * 2;
 		int mapCount = 0;
 		int tileCount = 0;
 		data.layersTotal = bundle.getLayerCount();
@@ -128,7 +136,7 @@ public class ACBundleProgress implements IfMapSourceListener
 			for (IfMap map : layer)
 			{
 				int before = tileCount;
-				int mapTiles = (int) map.calculateTilesToDownload();
+				int mapTiles = (int) map.calculateTilesToLoad();
 				tileCount += mapTiles + mapTiles;
 				mapInfos.add(new MapInfo(map, before, tileCount));
 			}
@@ -140,22 +148,26 @@ public class ACBundleProgress implements IfMapSourceListener
 		initialMapDownloadTime = -1;
 		log.trace(OSMBStrs.RStr("BundleProgress.Init"));
 		printData();
+		log.trace(OSMBStrs.RStr("BundleProgress.Init"));
 	}
 
 	public void finishBundle()
 	{
 		finished = true;
 		downloadControlListener = null;
+		printData();
 	}
 
 	public void initLayer(IfLayer layer)
 	{
 		data.layerCurrent++;
 		data.layer = layer;
+		printData();
 	}
 
 	public void finishLayer(IfLayer layer)
 	{
+		printData();
 		log.trace(OSMCBStrs.RStr("BundleProgress.LayerFinished"));
 	}
 
@@ -170,6 +182,7 @@ public class ACBundleProgress implements IfMapSourceListener
 		data.mapCreationProgress = 0;
 		data.mapCreationMax = l;
 		initialMapDownloadTime = -1;
+		printData();
 		log.trace(OSMCBStrs.RStr("BundleProgress.InitMap"));
 	}
 
@@ -184,38 +197,40 @@ public class ACBundleProgress implements IfMapSourceListener
 		data.mapInfo = mapInfos.get(index);
 		data.bundleProgress = data.mapInfo.tileCountOnStart;
 		data.map = map;
-		data.tilesDLMap = (int) map.calculateTilesToDownload();
+		data.tilesDLMap = (int) map.calculateTilesToLoad();
 		initialMapDownloadTime = System.currentTimeMillis();
 		data.prevMapsPermanentErrors += data.mapPermanentErrors;
 		data.prevMapsRetryErrors += data.mapRetryErrors;
-		data.mapCreationProgress = 0;
 		data.mapDownloadProgress = 0;
 		data.mapCurrent = index + 1;
-		log.trace(OSMCBStrs.RStr("BundleProgress.NextMap"));
 		printData();
+		log.trace(OSMCBStrs.RStr("BundleProgress.NextMap"));
 	}
 
 	public void finishMapDownload(IfMap map)
 	{
-		// int index = mapInfos.indexOf(new MapInfo(map, 0, 0));
-		// data.mapInfo = mapInfos.get(index);
-		// data.bundleProgress = data.mapInfo.tileCountOnStart;
-		// data.map = map;
-		// data.tilesDLMap = (int) map.calculateTilesToDownload();
-		// initialMapDownloadTime = System.currentTimeMillis();
-		// data.prevMapsPermanentErrors += data.mapPermanentErrors;
-		// data.prevMapsRetryErrors += data.mapRetryErrors;
-		// data.mapCreationProgress = 0;
-		// data.mapDownloadProgress = 0;
-		// data.mapCurrent = index + 1;
-		// log.trace(OSMCBStrs.RStr("BundleProgress.NextMap"));
-		// printData();
+		data.mapDownloadProgress = 100;
+		printData();
 	}
 
 	public void finishMap(IfMap mMap)
 	{
+		mMapsFinished++;
 		data.mapCreationProgress = 100;
+		printData();
 		log.trace(OSMCBStrs.RStr("BundleProgress.MapFinished"));
+	}
+
+	public void initTileDownload(Tile tile)
+	{
+		printData();
+		log.debug(OSMCBStrs.RStr("start tile load " + tile));
+	}
+
+	public void finishTileDownload(Tile tile)
+	{
+		data.mapDownloadProgress = 100;
+		printData();
 	}
 
 	public void setErrorCounter(int retryErrors, int permanentErrors)
@@ -338,7 +353,7 @@ public class ACBundleProgress implements IfMapSourceListener
 			this.map = map;
 			this.tileCountOnStart = tileCountOnStart;
 			this.tileCountOnEnd = tileCountOnEnd;
-			this.mapTiles = (int) map.calculateTilesToDownload();
+			this.mapTiles = (int) map.calculateTilesToLoad();
 		}
 
 		@Override
@@ -365,8 +380,4 @@ public class ACBundleProgress implements IfMapSourceListener
 		public boolean isPaused();
 	}
 
-	public void setJobs(int nJobs)
-	{
-		log.debug("BP: concurrent jobs=" + nJobs);
-	}
 }
