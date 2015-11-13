@@ -649,10 +649,10 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	public void initializeMap() throws IOException
 	{
 		// int tileSize = mMap.getMapSource().getMapSpace().getTileSize();
-		// xMin = mMap.getMinTileCoordinate().x / tileSize;
-		// xMax = mMap.getMaxTileCoordinate().x / tileSize;
-		// yMin = mMap.getMinTileCoordinate().y / tileSize;
-		// yMax = mMap.getMaxTileCoordinate().y / tileSize;
+		// xMin = mMap.getMinPixelCoordinate().x / tileSize;
+		// xMax = mMap.getMaxPixelCoordinate().x / tileSize;
+		// yMin = mMap.getMinPixelCoordinate().y / tileSize;
+		// yMax = mMap.getMaxPixelCoordinate().y / tileSize;
 
 		// Thread t = Thread.currentThread();
 		// if (!(t instanceof BundleThread))
@@ -697,9 +697,9 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 				TileLoader tl = new TileLoader(this);
 
 				log.trace("TileLoader instanciated");
-				for (int tileX = mMap.getMinTileCoordinate().x / 256; tileX < mMap.getMaxTileCoordinate().x / 256; ++tileX)
+				for (int tileX = mMap.getMinPixelCoordinate().x / 256; tileX < mMap.getMaxPixelCoordinate().x / 256; ++tileX)
 				{
-					for (int tileY = mMap.getMinTileCoordinate().y / 256; tileY < mMap.getMaxTileCoordinate().y / 256; ++tileY)
+					for (int tileY = mMap.getMinPixelCoordinate().y / 256; tileY < mMap.getMaxPixelCoordinate().y / 256; ++tileY)
 					{
 						log.debug("start job (" + mMap.getZoom() + "|" + tileX + "|" + tileY + ") jobs=" + mExec.getActiveCount());
 						mExec.execute(tl.createTileLoaderJob(mMap.getMapSource(), tileX, tileY, mMap.getZoom()));

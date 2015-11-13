@@ -88,8 +88,8 @@ public abstract class ACPlainImage extends ACBundleCreator
 		{
 			for (IfMap map : layer)
 			{
-				int w = map.getMaxTileCoordinate().x - map.getMinTileCoordinate().x;
-				int h = map.getMaxTileCoordinate().y - map.getMinTileCoordinate().y;
+				int w = map.getMaxPixelCoordinate().x - map.getMinPixelCoordinate().x;
+				int h = map.getMaxPixelCoordinate().y - map.getMinPixelCoordinate().y;
 				if (w > maxMapSize || h > maxMapSize)
 					throw new BundleTestException("Map size too large for memory (is: " + Math.max(w, h) + " max:  " + maxMapSize + ")", map);
 			}
