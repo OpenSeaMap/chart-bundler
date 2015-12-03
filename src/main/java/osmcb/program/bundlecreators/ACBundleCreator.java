@@ -482,6 +482,10 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 		strDisclaimer += "\r\n";
 		strDisclaimer += "OpenSeaMap does not give any warranty, that the data shown in this map are real.\r\n";
 		strDisclaimer += "Even if you use it for testing, any damage resulting from this test will be solely your responsibility.\r\n";
+
+		strDisclaimer += "By using this chart you acknowledge that you have read, understood\r\n";
+		strDisclaimer += "and accepted the terms and conditions stated in the User Agreement:\r\n";
+		strDisclaimer += "http://www.openseamap.org/legal/disclaimer.html\r\n";
 		return strDisclaimer;
 	}
 

@@ -80,10 +80,10 @@ public class ColorInfo
 	 */
 	public int setMColor(OSMColor tMColor)
 	{
-		int oldCount = mCount;
+		int prevCount = mCount;
 		mCount = 0;
 		mMColor = tMColor;
-		return oldCount;
+		return prevCount;
 	}
 
 	public int getCount()
@@ -99,10 +99,10 @@ public class ColorInfo
 	 */
 	public int setCount(int nCount)
 	{
-		int oldCount = mCount;
+		int prevCount = mCount;
 		mCount = nCount;
 		mMColor = null;
-		return oldCount;
+		return prevCount;
 	}
 
 	/**
@@ -114,10 +114,10 @@ public class ColorInfo
 	 */
 	public int incCount(int nCount)
 	{
-		int oldCount = mCount;
+		int prevCount = mCount;
 		mCount += nCount;
 		mMColor = null;
-		return oldCount;
+		return prevCount;
 	}
 
 	/**
@@ -127,9 +127,9 @@ public class ColorInfo
 	 */
 	public int incCount()
 	{
-		int oldCount = mCount;
+		int prevCount = mCount;
 		mCount++;
 		mMColor = null;
-		return oldCount;
+		return prevCount;
 	}
 }

@@ -214,6 +214,7 @@ public class BCOpenCPN extends ACBundleCreator
 		// N000005580041/RT=L,KN=12221_1,LK=N000005580027,DE=TIDE BOX,
 		// P1=8527, 707
 		// The text header is terminated with a <Control-Z><NUL> sequence (ASCII characters 26 and 0).
+		//
 		// ! - Comment line
 		// VER - Version number of BSB format � we will use 3.0
 		// CRR - Copyright message. Free text
@@ -268,6 +269,7 @@ public class BCOpenCPN extends ACBundleCreator
 		// TY=Base
 		// FN=Lxx-Myyyy.KAP
 		// The text header is terminated with a <Control-Z><NUL> sequence (ASCII characters 26 and 0).
+		//
 		FileOutputStream bsbFileStream = null;
 
 		try
@@ -490,6 +492,7 @@ public class BCOpenCPN extends ACBundleCreator
 		int height = (mMap.getYMax() - mMap.getYMin() + 1) * tileSize;
 		osw.write("! - KAP File\r\n");
 		osw.write("VER/3.0\r\n");
+		// Indentation !!!! osw.write("CRR/2015, OpenSeamMap. All rights reserved.\r\n " + createGeneralDisclaimer());
 		osw.write("CRR/2015, OpenSeamMap. All rights reserved.\r\n");
 		osw.write("CHT/NA=" + mMap.getName() + ",NU=" + mMap.getNumber() + "\r\n");
 		osw.write("CHF/" + strCHF + "\r\n");
@@ -507,8 +510,8 @@ public class BCOpenCPN extends ACBundleCreator
 		osw.write("PLY/2," + laMax + "," + loMax + "\r\n");
 		osw.write("PLY/3," + laMin + "," + loMax + "\r\n");
 		osw.write("PLY/4," + laMin + "," + loMin + "\r\n");
-		osw.write("DTM/0,0\r\n");
-		osw.write("CPH/0\r\n");
+		osw.write("DTM/0.0,0.0\r\n");
+		osw.write("CPH/0.0\r\n");
 		osw.write("OST/1\r\n");
 		osw.write("IFM/7\r\n");
 		// two variants are possible
@@ -526,7 +529,7 @@ public class BCOpenCPN extends ACBundleCreator
 		log.trace("START");
 		OSMAdaptivePalette tPal = new OSMAdaptivePalette(img);
 		// OSMFixedHSLPalette tPal = new OSMFixedHSLPalette(img);
-		log.debug("final Palette:" + tPal.toString());
+		// log.debug("final Palette:" + tPal.toString());
 		return tPal;
 	}
 
@@ -575,8 +578,13 @@ public class BCOpenCPN extends ACBundleCreator
 						nX++;
 					}
 
-					if ((nPalIdx > 127) || (nPalIdx == 0))
+					if (nPalIdx > 127)
 						log.error("palette index wrong=" + nPalIdx + ", used=" + (nPalIdx & 0x7F));
+					if (nPalIdx == 0)
+					{
+						log.error("palette index wrong=" + nPalIdx + ", used=" + (1));
+						nPalIdx = 1;
+					}
 					// for our 7bit palette the whole first Byte is used by the color index, so the count will follow -> set bit 7
 					ios.write((nPalIdx & 0x7F) | 0x80);
 					// calculate the run count

@@ -28,7 +28,8 @@ public class OSMCBColorMap extends HashMap<OSMColor, ColorInfo>
 	protected final Logger log;
 
 	/**
-	 * This comparator sorts the colors according to their usage count with the most used colors listed first
+	 * This comparator sorts the colors according to their usage count with the most used colors listed first.
+	 * Colors with the same usage count are ordered by their rgb color value.
 	 */
 	static final Comparator<Entry<OSMColor, ColorInfo>> BYCOUNTDESC = new Comparator<Entry<OSMColor, ColorInfo>>()
 	{
@@ -52,7 +53,8 @@ public class OSMCBColorMap extends HashMap<OSMColor, ColorInfo>
 	};
 
 	/**
-	 * This comparator sorts the colors according to the optical distance to their best match
+	 * This comparator sorts the colors according to the optical distance to their best match.
+	 * Colors with the same optical distance are ordered by their rgb color value.
 	 */
 	static final Comparator<Entry<OSMColor, ColorInfo>> BYDIST = new Comparator<Entry<OSMColor, ColorInfo>>()
 	{

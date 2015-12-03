@@ -112,7 +112,6 @@ public class BCOpenCPN2 extends BCOpenCPN
 					mapCreator = mBundle.createMapCreatorInstance();
 					mapCreator.init(mBundle, mLayer, tMap, mapOutputDir);
 					mExec.execute(mapCreator);
-					jobStarted();
 				}
 				catch (InstantiationException | IllegalAccessException e)
 				{
