@@ -92,9 +92,9 @@ public class OSMAdaptivePalette implements IFOSMPalette
 			if (mColorsHM.size() > mPaletteCnt)
 			{
 				reduce();
-				log.trace("Palette[" + mColorsHM.size() + "," + mColorsHM.getMColorCnt() + "] after reduce()");
-				log.trace("Colors:" + toString());
-				log.trace("BSB:" + asBSBStr());
+				// log.trace("Palette[" + mColorsHM.size() + "," + mColorsHM.getMColorCnt() + "] after reduce()");
+				// log.trace("Colors:" + toString());
+				// log.trace("BSB:" + asBSBStr());
 			}
 			else
 				log.trace("Palette[" + mColorsHM.size() + "," + mColorsHM.getMColorCnt() + "] no reduction neccessary");
@@ -340,29 +340,39 @@ public class OSMAdaptivePalette implements IFOSMPalette
 	{
 		String strPal = "\r\n";
 
-		int nColor = mStartColorIdx;
-		// for (Map.Entry<OSMColor, ColorInfo> tPE : mColorsHM.entrySet())
-		Iterator<Map.Entry<OSMColor, ColorInfo>> iColor;
-		for (iColor = mColorsHM.getUsageIt(); iColor.hasNext();)
+		// int nColor = mStartColorIdx;
+		Iterator<Map.Entry<OSMColor, ColorInfo>> iColor = null;
+		try
 		{
-			Map.Entry<OSMColor, ColorInfo> tPE = iColor.next();
-			strPal += "Palette: " + tPE.getKey().toStringKmpl() + ", cnt=" + tPE.getValue().getCount();
-			if (tPE.getValue().getMColor() != null)
-				strPal += ", mapped to=RGB(" + tPE.getValue().getMColor().toStringRGB() + ")";
-			else
-				strPal += ", unmapped";
+			for (iColor = mColorsHM.getUsageIt(); iColor.hasNext();)
+			{
+				Map.Entry<OSMColor, ColorInfo> tPE = iColor.next();
+				strPal += "Palette: " + tPE.getKey().toStringKmpl() + ", cnt=" + tPE.getValue().getCount();
+				if (tPE.getValue().getMColor() != null)
+					strPal += ", mapped to=RGB(" + tPE.getValue().getMColor().toStringRGB() + ")";
+				else
+					strPal += ", unmapped";
 
-			if (tPE.getValue().getBestMatch() != null)
-				strPal += ", best match=RGB(" + tPE.getValue().getBestMatch().toStringRGB() + ")";
-			else
-				strPal += ", unmatched";
+				if (tPE.getValue().getBestMatch() != null)
+					strPal += ", best match=RGB(" + tPE.getValue().getBestMatch().toStringRGB() + ")";
+				else
+					strPal += ", unmatched";
 
-			strPal += ", PIdx=" + tPE.getValue().getPIdx();
+				strPal += ", PIdx=" + tPE.getValue().getPIdx();
 
-			strPal += "\r\n";
-			nColor++;
+				strPal += "\r\n";
+				// nColor++;
+			}
 		}
-		iColor = null;
+		catch (Throwable t)
+		{
+			log.error("---- Error in toString() ----");
+			t.printStackTrace();
+		}
+		finally
+		{
+			iColor = null;
+		}
 		return strPal;
 	}
 

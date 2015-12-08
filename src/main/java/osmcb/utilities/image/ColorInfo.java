@@ -46,21 +46,35 @@ public class ColorInfo
 		mBMColor = tColor;
 	}
 
+	/**
+	 * @return The 'optical distance' to the best matching color
+	 */
 	public double getDist()
 	{
 		return mDist;
 	}
 
+	/**
+	 * @param dDist
+	 *          The 'optical distance' to the best matching color
+	 */
 	public void setDist(double dDist)
 	{
 		mDist = dDist;
 	}
 
+	/**
+	 * @return The index of this color in the final palette
+	 */
 	public int getPIdx()
 	{
 		return mPIdx;
 	}
 
+	/**
+	 * @param nIdx
+	 *          The index of this color in the final palette
+	 */
 	public void setPIdx(int nIdx)
 	{
 		mPIdx = nIdx;

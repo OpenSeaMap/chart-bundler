@@ -124,7 +124,10 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 		log.trace("START");
 		mBundle = bundle;
 		mOutputDir = bundleOutputDir;
-		mExec = new JobDispatcher(mBundle.getLayerCount());
+		int nThreads = 3;
+		if (mBundle.getLayerCount() < nThreads)
+			nThreads = mBundle.getLayerCount();
+		mExec = new JobDispatcher(nThreads);
 		// mTileCount = bundle.calculateTilesToLoad();
 		// mMapCount = bundle.calcMapsToCompose();
 		log.trace("bundle '" + mBundle.getName() + "' pool for layers=" + mExec.getMaximumPoolSize() + ", " + mExec.toString());
@@ -145,7 +148,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 		mOutputDir = layerOutputDir;
 		// limit the number of threads, maybe we will get the limit value from settings in the future
 		// we will need some kind of dynamic max thread limit, depending on the number of remaining maps and layers
-		int nThreads = 10;
+		int nThreads = 5;
 		if (mLayer.getMapCount() < nThreads)
 			nThreads = mLayer.getMapCount();
 		mExec = new JobDispatcher(nThreads);
@@ -169,7 +172,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 		mOutputDir = mapOutputDir;
 		// limit the number of threads, maybe we will get the limit value from settings in the future
 		// we will need some kind of dynamic max thread limit, depending on the number of remaining maps and layers
-		int nThreads = 10;
+		int nThreads = 5;
 		if (mMap.getTileCount() < nThreads)
 			nThreads = (int) mMap.getTileCount();
 		mExec = new JobDispatcher(nThreads);
@@ -729,22 +732,10 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 		log.debug("map '" + mMap.getName() + "' finished");
 	}
 
-	// public AtomicInteger getActiveDownloads()
-	// {
-	// return mActiveJobs;
-	// }
-
 	public IfBundle getBundle()
 	{
 		return mBundle;
 	}
-
-	// public boolean waitCreation()
-	// {
-	// boolean bOk = false;
-	//
-	// return bOk;
-	// }
 
 	@Override
 	public void tileLoadingFinished(Tile tile, boolean success)

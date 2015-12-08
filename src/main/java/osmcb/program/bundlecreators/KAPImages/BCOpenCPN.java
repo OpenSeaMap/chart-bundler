@@ -72,16 +72,6 @@ public class BCOpenCPN extends ACBundleCreator
 		init(bundle, bundleOutputDir);
 	}
 
-	// protected BCOpenCPN(IfBundle bundle, IfLayer layer, File layerOutputDir)
-	// {
-	// super(bundle, layer, layerOutputDir);
-	// }
-	//
-	// protected BCOpenCPN(IfBundle bundle, IfLayer layer, IfMap map, File mapOutputDir)
-	// {
-	// super(bundle, layer, map, mapOutputDir);
-	// }
-	//
 	/**
 	 * Creates a format specific directory for all OpenCPN-KAP bundles
 	 * Creates a format specific directory name
@@ -99,9 +89,6 @@ public class BCOpenCPN extends ACBundleCreator
 		super.initializeBundle(bundleOutputDir);
 	}
 
-	/**
-	 * name can be configured
-	 */
 	@Override
 	public void finishBundle()
 	{
@@ -131,8 +118,6 @@ public class BCOpenCPN extends ACBundleCreator
 		{
 			log.error("", e);
 		}
-		// mMapDir = new File(bundleDir, mMap.getName());
-		// OSMCBUtilities.mkDirs(mMapDir);
 	}
 
 	/**
@@ -152,6 +137,7 @@ public class BCOpenCPN extends ACBundleCreator
 
 			writeMapFile(img);
 			writeBsbFile();
+			img = null;
 		}
 		catch (MapCreationException e)
 		{
@@ -274,44 +260,17 @@ public class BCOpenCPN extends ACBundleCreator
 
 		try
 		{
-			bsbFileStream = new FileOutputStream(bsbFile);
-			String strCHF = null;
-			switch (mMap.getLayer().getZoomLvl())
-			{
-				case 7:
-				case 8:
-				case 9:
-					strCHF = "Overview";
-					break;
-				case 12:
-				case 13:
-					strCHF = "Coastal";
-					break;
-				case 14:
-					strCHF = "Approach";
-					break;
-				case 15:
-				case 16:
-				case 17:
-				case 18:
-					strCHF = "Berthing";
-					break;
-				default:
-					strCHF = "General";
-					break;
-			}
-			Date editionDate = new Date();
-			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-			String strDate = sdf.format(editionDate);
-
 			log.trace("Writing bsb file");
+			bsbFileStream = new FileOutputStream(bsbFile);
+			String strDate = new SimpleDateFormat("dd/MM/yyyy").format(new Date());
+
 			OutputStreamWriter bsbWriter = new OutputStreamWriter(bsbFileStream, TEXT_FILE_CHARSET);
 
 			bsbWriter.write("! - BSB File\r\n");
 			bsbWriter.write("VER/3.0\r\n");
 			bsbWriter.write("CRR/2015, OpenSeamMap. All rights reserved.\r\n");
 			bsbWriter.write("CHT/NA=" + mMap.getName() + ",NU=" + mMap.getNumber() + "\r\n");
-			bsbWriter.write("CHF/" + strCHF + "\r\n");
+			bsbWriter.write("CHF/" + getCHF() + "\r\n");
 			bsbWriter.write("CED/SE=1,RE=1,ED=" + strDate + "\r\n");
 			bsbWriter.write("NTM/NE=70.00,ND=" + strDate + ",BF=on,BD=" + strDate + "\r\n");
 			bsbWriter.write("CHK/1," + mMap.getName() + "\r\n");
@@ -348,8 +307,8 @@ public class BCOpenCPN extends ACBundleCreator
 
 		Path mapFile = Files.createFile(mOutputDir.toPath().resolve(mMap.getName() + "_1.kap"));
 
-		// The .kap file as used by OpenCPN is a text/binary combined file
-		// it consists of a BSB-header part and an image part (see misc/BSB-KAP Format.txt)
+		// The .kap file as used by OpenCPN is a text/binary combined file.
+		// It consists of a BSB-header part and an image part (see misc/BSB-KAP Format.txt)
 		try
 		{
 			IFOSMPalette sPal = makePalette(img);
@@ -363,6 +322,7 @@ public class BCOpenCPN extends ACBundleCreator
 			long pos = Files.size(mapFile);
 
 			writeMapImage(img, ios, sPal, pos);
+			sPal = null;
 		}
 		finally
 		{
@@ -401,35 +361,7 @@ public class BCOpenCPN extends ACBundleCreator
 
 		log.info("start writing image file for='" + mMap.getName() + "'");
 
-		Date editionDate = new Date();
-		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-		String strDate = sdf.format(editionDate);
-
-		String strCHF = null;
-		switch (mMap.getLayer().getZoomLvl())
-		{
-			case 7:
-			case 8:
-			case 9:
-				strCHF = "Overview";
-				break;
-			case 12:
-			case 13:
-				strCHF = "Coastal";
-				break;
-			case 14:
-			case 15:
-				strCHF = "Approach";
-				break;
-			case 16:
-			case 17:
-			case 18:
-				strCHF = "Berthing";
-				break;
-			default:
-				strCHF = "General";
-				break;
-		}
+		String strDate = new SimpleDateFormat("dd/MM/yyyy").format(new Date());
 
 		// BSB-header
 		// VER/2.0
@@ -495,7 +427,7 @@ public class BCOpenCPN extends ACBundleCreator
 		// Indentation !!!! osw.write("CRR/2015, OpenSeamMap. All rights reserved.\r\n " + createGeneralDisclaimer());
 		osw.write("CRR/2015, OpenSeamMap. All rights reserved.\r\n");
 		osw.write("CHT/NA=" + mMap.getName() + ",NU=" + mMap.getNumber() + "\r\n");
-		osw.write("CHF/" + strCHF + "\r\n");
+		osw.write("CHF/" + getCHF() + "\r\n");
 		osw.write("CED/SE=1,RE=1,ED=" + strDate + "\r\n");
 		osw.write("BSB/NA=" + mMap.getName() + ",NU=" + mMap.getNumber() + ",RA=" + width + "," + height + ",DU=220\r\n");
 		osw.write("ORG/OpenSeaMap\r\n");
@@ -524,6 +456,36 @@ public class BCOpenCPN extends ACBundleCreator
 		os.write(0x00);
 	}
 
+	protected String getCHF()
+	{
+		String strCHF = null;
+		switch (mMap.getLayer().getZoomLvl())
+		{
+			case 7:
+			case 8:
+			case 9:
+				strCHF = "Overview";
+				break;
+			case 12:
+			case 13:
+				strCHF = "Coastal";
+				break;
+			case 14:
+			case 15:
+				strCHF = "Approach";
+				break;
+			case 16:
+			case 17:
+			case 18:
+				strCHF = "Berthing";
+				break;
+			default:
+				strCHF = "General";
+				break;
+		}
+		return strCHF;
+	}
+
 	protected IFOSMPalette makePalette(BufferedImage img)
 	{
 		log.trace("START");
@@ -544,6 +506,7 @@ public class BCOpenCPN extends ACBundleCreator
 	protected void writeMapImage(BufferedImage img, ImageOutputStream ios, IFOSMPalette tPal, long nPos)
 	{
 		log.trace("START");
+		int nFCnt = 0;
 		ArrayList<Long> tLIdx = new ArrayList<Long>(img.getHeight());
 		try
 		{
@@ -579,11 +542,17 @@ public class BCOpenCPN extends ACBundleCreator
 					}
 
 					if (nPalIdx > 127)
-						log.error("palette index wrong=" + nPalIdx + ", used=" + (nPalIdx & 0x7F));
+					{
+						log.error(mMap.getName() + " [" + nX + "|" + nY + "], (" + new OSMColor(img.getRGB(nX, nY - 1)).toStringRGB() + "), " + nCnt
+						    + ", palette index wrong=" + nPalIdx + ", used=" + (nPalIdx & 0x7F) + ", errors=" + nFCnt);
+						++nFCnt;
+					}
 					if (nPalIdx == 0)
 					{
-						log.error("palette index wrong=" + nPalIdx + ", used=" + (1));
+						log.error(mMap.getName() + " [" + nX + "|" + nY + "], (" + new OSMColor(img.getRGB(nX, nY - 1)).toStringRGB() + "), " + nCnt
+						    + ", palette index wrong=" + nPalIdx + ", used=" + (1) + ", errors=" + nFCnt);
 						nPalIdx = 1;
+						++nFCnt;
 					}
 					// for our 7bit palette the whole first Byte is used by the color index, so the count will follow -> set bit 7
 					ios.write((nPalIdx & 0x7F) | 0x80);

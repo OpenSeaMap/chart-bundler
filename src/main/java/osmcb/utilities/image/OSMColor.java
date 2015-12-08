@@ -219,19 +219,19 @@ public class OSMColor extends Color
 		return dLng;
 	}
 
-	String toStringRGB()
+	public String toStringRGB()
 	{
 		String str = getRed() + "," + getGreen() + "," + getBlue();
 		return str;
 	}
 
-	String toStringRGBA()
+	public String toStringRGBA()
 	{
 		String str = getRed() + "," + getGreen() + "," + getBlue() + "," + getAlpha();
 		return str;
 	}
 
-	String toStringKmpl()
+	public String toStringKmpl()
 	{
 		String str = "color=RGB(" + toStringRGB() + "), HSL(" + toStringHSL() + ")";
 		return str;
