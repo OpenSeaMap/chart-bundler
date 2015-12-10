@@ -520,7 +520,7 @@ public class BCOpenCPN extends ACBundleCreator
 				// write the line index, we get the offset of the first scan line in the file from the outside by file.size() after writeMapHeader()
 				// know no way to ask ios about that
 				tLIdx.add(ios.getStreamPosition() + nPos);
-				if (nY < 128)
+				if (nY < 0x80)
 					ios.write(nY);
 				else
 				{
@@ -533,7 +533,7 @@ public class BCOpenCPN extends ACBundleCreator
 					int nCnt = 1;
 					int nPalIdx = tPal.getPID(new OSMColor(img.getRGB(nX, nY - 1)));
 
-					// should compare the mapped colors
+					// should compare the mapped colors. The current pixel and the next one.
 					// while ((nX < img.getWidth() - 1) && (img.getRGB(nX + 1, nY - 1) == tCol.getRGB()))
 					while ((nX < img.getWidth() - 1) && (tPal.getPID(new OSMColor(img.getRGB(nX + 1, nY - 1))) == nPalIdx))
 					{
@@ -543,13 +543,13 @@ public class BCOpenCPN extends ACBundleCreator
 
 					if (nPalIdx > 127)
 					{
-						log.error(mMap.getName() + " [" + nX + "|" + nY + "], (" + new OSMColor(img.getRGB(nX, nY - 1)).toStringRGB() + "), " + nCnt
+						log.error(mMap.getName() + " [" + nX + "|" + (nY - 1) + "], (" + new OSMColor(img.getRGB(nX, nY - 1)).toStringRGB() + "), " + nCnt
 						    + ", palette index wrong=" + nPalIdx + ", used=" + (nPalIdx & 0x7F) + ", errors=" + nFCnt);
 						++nFCnt;
 					}
 					if (nPalIdx == 0)
 					{
-						log.error(mMap.getName() + " [" + nX + "|" + nY + "], (" + new OSMColor(img.getRGB(nX, nY - 1)).toStringRGB() + "), " + nCnt
+						log.error(mMap.getName() + " [" + nX + "|" + (nY - 1) + "], (" + new OSMColor(img.getRGB(nX, nY - 1)).toStringRGB() + "), " + nCnt
 						    + ", palette index wrong=" + nPalIdx + ", used=" + (1) + ", errors=" + nFCnt);
 						nPalIdx = 1;
 						++nFCnt;
