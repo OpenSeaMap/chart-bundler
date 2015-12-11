@@ -69,6 +69,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	public static final Charset TEXT_FILE_CHARSET = Charsets.ISO_8859_1;
 
 	protected static ACBundleProgress sBundleProgress = null; // all messages regarding the progress go there
+	protected static MemoryTileCache mTC = new MemoryTileCache();
 	private AtomicInteger mActiveJobs = new AtomicInteger(0);
 	private AtomicInteger mJobsCompleted = new AtomicInteger(0);
 	private AtomicInteger mJobsRetryError = new AtomicInteger(0);
@@ -83,7 +84,6 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	protected IfMap mMap = null;
 
 	protected ACSiTileStore mTS = ACSiTileStore.getInstance();
-	protected MemoryTileCache mTC = new MemoryTileCache();
 
 	protected int mTileSize = IfMapSpace.TECH_TILESIZE;
 

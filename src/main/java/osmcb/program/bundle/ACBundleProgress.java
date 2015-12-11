@@ -224,7 +224,7 @@ public class ACBundleProgress implements IfMapSourceListener
 	public void initTileDownload(Tile tile)
 	{
 		printData();
-		log.debug(OSMCBStrs.RStr("start tile load " + tile));
+		log.debug("start tile load " + tile);
 	}
 
 	public void finishTileDownload(Tile tile)
