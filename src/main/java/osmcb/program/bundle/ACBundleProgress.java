@@ -35,8 +35,10 @@ import osmcb.program.bundlecreators.ACBundleCreator;
  */
 public class ACBundleProgress implements IfMapSourceListener
 {
+//	@SuppressWarnings("unused") // W #unused -> no need for serialVersionUID
+//	private static final long serialVersionUID = -1L;
+	
 	protected static Logger log = Logger.getLogger(ACBundleProgress.class);
-	private static final long serialVersionUID = -1L;
 
 	protected static final Timer TIMER = new Timer(true);
 	// private JProgressBar atlasProgressBar;
@@ -300,11 +302,13 @@ public class ACBundleProgress implements IfMapSourceListener
 		printData();
 	}
 
+	@SuppressWarnings("unused") // W #unused
 	private void avgBytesPerTile(int size)
 	{
 		data.bytesAvgTile = 0;
 	}
 
+	@SuppressWarnings("unused") // W #unused
 	private String formatTime(long longSeconds)
 	{
 		String timeString = "";

@@ -12,6 +12,8 @@ import org.apache.log4j.Logger;
  */
 public class OSMColor extends Color
 {
+	private static final long serialVersionUID = 1L;
+	
 	/**
 	 * takes the hsl value in the range 0..1. If you have rgb values in 1..255 use HSL2RGB(int, int, int)
 	 */

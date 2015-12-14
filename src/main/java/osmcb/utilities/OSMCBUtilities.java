@@ -59,6 +59,7 @@ import javax.swing.JComponent;
 import org.apache.log4j.Logger;
 
 import osmb.mapsources.IfMapSource;
+import osmb.mapsources.MP2MapSpace;
 import osmb.program.Logging;
 import osmb.program.tiles.TileImageType;
 import osmb.utilities.Charsets;
@@ -105,7 +106,7 @@ public class OSMCBUtilities
 
 	public static BufferedImage createEmptyTileImage(IfMapSource mapSource)
 	{
-		int tileSize = mapSource.getMapSpace().getTileSize();
+		int tileSize = MP2MapSpace.getTileSize(); // #mapSpace  mapSource.getMapSpace().getTileSize();
 		Color color = mapSource.getBackgroundColor();
 
 		int imageType;

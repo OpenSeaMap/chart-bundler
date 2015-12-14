@@ -7,11 +7,12 @@ package osmcb.utilities.image;
  * @author humbach
  *
  */
-public class OSMPaletteEntry implements Comparable
+public class OSMPaletteEntry implements Comparable<Object>
 {
 	/**
 	 * 20140112 AH v1 initial version
 	 */
+	@SuppressWarnings("unused") // W #unused -> no need for serialVersionUID
 	private static final long serialVersionUID = 1L;
 
 	protected OSMColor mColor; // the color in the image

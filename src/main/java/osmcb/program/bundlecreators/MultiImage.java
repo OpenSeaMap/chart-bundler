@@ -23,9 +23,10 @@ import java.awt.image.BufferedImage;
 import org.apache.log4j.Logger;
 
 import osmb.mapsources.IfMapSource;
+import osmb.mapsources.MP2MapSpace;
 import osmb.program.map.BoundingRect;
 import osmb.program.map.IfMap;
-import osmb.program.map.IfMapSpace;
+// W #mapSpace import osmb.program.map.IfMapSpace;
 import osmb.program.tiles.IfTileProvider;
 import osmcb.program.bundle.MapCreationException;
 import osmcb.utilities.collections.SoftHashMap;
@@ -39,14 +40,14 @@ public class MultiImage
 	private static final Logger log = Logger.getLogger(MultiImage.class);
 
 	private final IfMap map;
-	private final IfMapSource mapSource;
+// W #mapSpace //	private final IfMapSource mapSource;
 	private final int zoom;
 	private final IfTileProvider tileProvider;
 	private SoftHashMap<TileKey, OsmcbTile> cache;
 
 	public MultiImage(IfMapSource mapSource, IfTileProvider tileProvider, IfMap map)
 	{
-		this.mapSource = mapSource;
+// W #mapSpace // this.mapSource = mapSource;
 		this.tileProvider = tileProvider;
 		this.zoom = map.getZoom();
 		this.map = map;
@@ -58,13 +59,13 @@ public class MultiImage
 		if (log.isTraceEnabled())
 			log.trace(String.format("getSubImage %d %d %s", width, height, area));
 
-		IfMapSpace mapSpace = mapSource.getMapSpace();
-		int tilesize = mapSpace.getTileSize();
+		// W #mapSpace IfMapSpace mapSpace = mapSource.getMapSpace();
+		int tilesize = MP2MapSpace.getTileSize(); // W #mapSpace mapSpace.getTileSize();
 
-		int xMax = mapSource.getMapSpace().cLonToX(area.getEast(), zoom) / tilesize;
-		int xMin = mapSource.getMapSpace().cLonToX(area.getWest(), zoom) / tilesize;
-		int yMax = mapSource.getMapSpace().cLatToY(-area.getSouth(), zoom) / tilesize;
-		int yMin = mapSource.getMapSpace().cLatToY(-area.getNorth(), zoom) / tilesize;
+		int xMax =  MP2MapSpace.cLonToX(area.getEast(), zoom) / tilesize; // W #mapSpace mapSource.getMapSpace().cLonToX(area.getEast(), zoom) / tilesize;
+		int xMin =  MP2MapSpace.cLonToX(area.getWest(), zoom) / tilesize; // W #mapSpace mapSource.getMapSpace().cLonToX(area.getWest(), zoom) / tilesize;
+		int yMax =  MP2MapSpace.cLatToY(-area.getSouth(), zoom) / tilesize; // W #mapSpace mapSource.getMapSpace().cLatToY(-area.getSouth(), zoom) / tilesize;
+		int yMin =  MP2MapSpace.cLatToY(-area.getNorth(), zoom) / tilesize; // W #mapSpace mapSource.getMapSpace().cLatToY(-area.getNorth(), zoom) / tilesize;
 
 		BufferedImage result = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
@@ -82,7 +83,7 @@ public class MultiImage
 					OsmcbTile image = cache.get(key);
 					if (image == null)
 					{
-						image = new OsmcbTile(tileProvider, mapSpace, x, y, zoom);
+						image = new OsmcbTile(tileProvider, x, y, zoom); // W #mapSpace (tileProvider, mapSpace, x, y, zoom);
 						cache.put(key, image);
 					}
 					image.drawSubImage(area, result);

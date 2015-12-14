@@ -21,6 +21,8 @@ import osmb.program.map.IfMap;
 
 public class BundleTestException extends Exception
 {
+	private static final long serialVersionUID = 1L;
+	
 	public BundleTestException(String message, IfMap map)
 	{
 		super(message + "\nError caused by iMap \"" + map.getName() + "\" on layer \"" + map.getLayer().getName() + "\"");

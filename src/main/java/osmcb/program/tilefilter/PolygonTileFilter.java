@@ -19,6 +19,7 @@ package osmcb.program.tilefilter;
 import java.awt.Polygon;
 
 import osmb.mapsources.IfMapSource;
+import osmb.mapsources.MP2MapSpace;
 import osmb.program.map.MapPolygon;
 import osmb.program.tiles.IfTileFilter;
 
@@ -38,7 +39,7 @@ public class PolygonTileFilter implements IfTileFilter
 		super();
 		this.polygon = polygon;
 		this.polygonZoom = polygonZoom;
-		this.tileSize = mapSource.getMapSpace().getTileSize();
+		this.tileSize = MP2MapSpace.getTileSize(); // #mapSpace  mapSource.getMapSpace().getTileSize();
 	}
 
 	/**

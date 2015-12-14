@@ -30,8 +30,8 @@ import java.util.Locale;
 
 import osmb.mapsources.IfMapSource;
 import osmb.program.ACApp;
-import osmb.program.map.IfMapSpace;
-import osmb.program.map.IfMapSpace.ProjectionCategory;
+// W #mapSpace import osmb.program.map.IfMapSpace;
+// W #mapSpace import osmb.program.map.IfMapSpace.ProjectionCategory;
 import osmb.program.tiles.SQLiteLoader;
 import osmb.program.tiles.TileImageParameters;
 import osmcb.OSMCBSettings;
@@ -89,11 +89,14 @@ public class BCRMapsSQLite extends ACBundleCreator implements IfRequiresSQLite
 	@Override
 	public boolean testMapSource(IfMapSource mapSource)
 	{
-		IfMapSpace mapSpace = mapSource.getMapSpace();
-		boolean correctTileSize = (256 == mapSpace.getTileSize());
-		ProjectionCategory pc = mapSpace.getProjectionCategory();
-		boolean correctProjection = (ProjectionCategory.SPHERE.equals(pc) || ProjectionCategory.ELLIPSOID.equals(pc));
-		return correctTileSize && correctProjection;
+	// W #mapSpace ???		
+		//TODO ??? 
+		return true;
+//		IfMapSpace mapSpace = mapSource.getMapSpace();
+//		boolean correctTileSize = (256 == mapSpace.getTileSize());
+//		ProjectionCategory pc = mapSpace.getProjectionCategory();
+//		boolean correctProjection = (ProjectionCategory.SPHERE.equals(pc) || ProjectionCategory.ELLIPSOID.equals(pc));
+//		return correctTileSize && correctProjection;
 	}
 
 	@Override
@@ -188,6 +191,7 @@ public class BCRMapsSQLite extends ACBundleCreator implements IfRequiresSQLite
 
 	protected void createTiles() throws InterruptedException, MapCreationException
 	{
+		@SuppressWarnings("unused") // W #unused
 		int maxMapProgress = 2 * (mMap.getXMax() - mMap.getXMin() + 1) * (mMap.getYMax() - mMap.getYMin() + 1);
 		// bundleProgress.initMapCreation(maxMapProgress);
 		TileImageParameters param = mMap.getParameters();

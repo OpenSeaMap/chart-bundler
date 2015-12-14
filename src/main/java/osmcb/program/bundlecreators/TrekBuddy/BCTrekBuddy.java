@@ -32,11 +32,12 @@ import javax.imageio.ImageIO;
 
 import osmb.mapsources.IfMapSource;
 import osmb.mapsources.IfMapSource.LoadMethod;
-import osmb.mapsources.mapspace.MercatorPower2MapSpace;
+import osmb.mapsources.MP2MapSpace;
+//W #mapSpace import osmb.mapsources.mapspace.MercatorPower2MapSpace;
 import osmb.program.ACApp;
 import osmb.program.map.IfLayer;
-import osmb.program.map.IfMapSpace;
-import osmb.program.map.IfMapSpace.ProjectionCategory;
+//W #mapSpace import osmb.program.map.IfMapSpace;
+//W #mapSpace import osmb.program.map.IfMapSpace.ProjectionCategory;
 import osmb.program.tiles.TileException;
 import osmb.utilities.geo.GeoUtils;
 import osmcb.OSMCBSettings;
@@ -79,9 +80,11 @@ public class BCTrekBuddy extends ACBundleCreator
 	@Override
 	public boolean testMapSource(IfMapSource mapSource)
 	{
-		IfMapSpace mapSpace = mapSource.getMapSpace();
-		return (mapSpace instanceof MercatorPower2MapSpace && ProjectionCategory.SPHERE.equals(mapSpace.getProjectionCategory()));
-		// TODO supports Mercator ellipsoid?
+	//W #mapSpace ??? MP2MapSpace
+//		IfMapSpace mapSpace = mapSource.getMapSpace();
+//		return (mapSpace instanceof MercatorPower2MapSpace && ProjectionCategory.SPHERE.equals(mapSpace.getProjectionCategory()));
+//		// TODO supports Mercator ellipsoid?
+		return true; // #mapSpace ???
 	}
 
 	@Override
@@ -133,6 +136,7 @@ public class BCTrekBuddy extends ACBundleCreator
 		{
 			e.printStackTrace();
 		}
+		@SuppressWarnings("unused") // W #unused
 		IfLayer layer = mMap.getLayer();
 		mOutputDir = new File(mOutputDir, mMap.getName());
 		OSMCBUtilities.mkDirs(mOutputDir);
@@ -163,12 +167,13 @@ public class BCTrekBuddy extends ACBundleCreator
 		log.trace("Writing map file");
 		OutputStreamWriter mapWriter = new OutputStreamWriter(stream, TEXT_FILE_CHARSET);
 
-		IfMapSpace mapSpace = mMap.getMapSource().getMapSpace();
+	//W #mapSpace MP2MapSpace
+//		IfMapSpace mapSpace = mMap.getMapSource().getMapSpace();
 
-		double longitudeMin = mapSpace.cXToLon(mMap.getXMin() * mTileSize, mMap.getZoom());
-		double longitudeMax = mapSpace.cXToLon((mMap.getXMax() + 1) * mTileSize - 1, mMap.getZoom());
-		double latitudeMin = mapSpace.cYToLat((mMap.getYMax() + 1) * mTileSize - 1, mMap.getZoom());
-		double latitudeMax = mapSpace.cYToLat(mMap.getYMin() * mTileSize, mMap.getZoom());
+		double longitudeMin = MP2MapSpace.cXToLon(mMap.getXMin() * mTileSize, mMap.getZoom());
+		double longitudeMax =  MP2MapSpace.cXToLon((mMap.getXMax() + 1) * mTileSize - 1, mMap.getZoom());
+		double latitudeMin =  MP2MapSpace.cYToLat((mMap.getYMax() + 1) * mTileSize - 1, mMap.getZoom());
+		double latitudeMax =  MP2MapSpace.cYToLat(mMap.getYMin() * mTileSize, mMap.getZoom());
 
 		int width = (mMap.getXMax() - mMap.getXMin() + 1) * mTileSize;
 		int height = (mMap.getYMax() - mMap.getYMin() + 1) * mTileSize;

@@ -31,6 +31,7 @@ public class OSMFixedHSLPalette implements IFOSMPalette
 	/**
 	 * 20150812 AH v1 initial version
 	 */
+	@SuppressWarnings("unused") // W #unused -> no need for serialVersionUID
 	private static final long serialVersionUID = 1L;
 	protected final Logger log;
 
@@ -85,6 +86,7 @@ public class OSMFixedHSLPalette implements IFOSMPalette
 	private ArrayList<OSMUsageCnt> mColorUseList = new ArrayList<OSMUsageCnt>(128);
 
 	private int mPaletteCnt = 128; // the BSB-KAP allows up to 128 colors, including the unused color 0
+	@SuppressWarnings("unused") // W #unused
 	private int mStdColors = 0;
 
 	class OSMColorPair
@@ -366,11 +368,12 @@ public class OSMFixedHSLPalette implements IFOSMPalette
 	 * 
 	 * @param nTCol
 	 */
+	@SuppressWarnings("unused") // W #unused
 	private void findBestMatch(int nTCol)
 	{
 		OSMPaletteEntry tTPE = mColorList.get(nTCol);
 		OSMPaletteEntry tMPE = tTPE;
-		;
+
 		OSMColor tTCol = tTPE.getColor();
 		double dDiff = 1e100;
 		int nSCol = 0, nMCol = 0;
@@ -466,6 +469,7 @@ public class OSMFixedHSLPalette implements IFOSMPalette
 	{
 		String strPal = "\r\n";
 
+		@SuppressWarnings("unused") // W #unused
 		OSMPaletteEntry tPE = null;
 		for (int nCol = 1; nCol < mColorList.size(); nCol++)
 		{

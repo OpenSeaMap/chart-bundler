@@ -25,8 +25,10 @@ import javax.swing.AbstractListModel;
 
 import osmb.mapsources.IfMapSource;
 
-public class MapSourcesListModel extends AbstractListModel
+public class MapSourcesListModel extends AbstractListModel<Object> // W ? <IfMapSource>
 {
+	private static final long serialVersionUID = 1L;
+	
 	ArrayList<IfMapSource> mapSources;
 
 	public MapSourcesListModel(Vector<IfMapSource> source)
@@ -35,7 +37,7 @@ public class MapSourcesListModel extends AbstractListModel
 	}
 
 	@Override
-	public Object getElementAt(int index)
+	public Object getElementAt(int index) // W ? <IfMapSource>
 	{
 		return mapSources.get(index);
 	}

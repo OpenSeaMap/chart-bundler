@@ -38,6 +38,7 @@ import osmcb.utilities.OSMCBUtilities;
  */
 public class EnvironmentSetup
 {
+	@SuppressWarnings("unused") // W #unused
 	private static boolean FIRST_START = false;
 
 	public static Logger log = Logger.getLogger(EnvironmentSetup.class);

@@ -30,6 +30,7 @@ import osmcb.program.bundlecreators.ACBundleCreator;
 public class CmdlCreateBundle implements IfCommandLine
 {
 	private final String catalogName;
+	@SuppressWarnings("unused") // W #unused
 	private final File outputDir;
 
 	public CmdlCreateBundle(String catalogName)

@@ -44,7 +44,7 @@ import osmb.exceptions.InvalidNameException;
 import osmb.mapsources.IfMapSource.LoadMethod;
 import osmb.program.ACApp;
 import osmb.program.map.IfMap;
-import osmb.program.map.IfMapSpace;
+// W #mapSpace import osmb.program.map.IfMapSpace;
 import osmb.program.tiles.TileException;
 import osmcb.OSMCBSettings;
 import osmcb.program.bundle.BundleTestException;
@@ -103,6 +103,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 		super.initializeBundle(bundleOutputDir);
 
 		FileSystem zipfs = FileSystems.newFileSystem(zipURI, null);
+		@SuppressWarnings("unused") // W #unused
 		Path bundleOutputPath = zipfs.getPath(bundleDirName);
 	}
 
@@ -389,8 +390,9 @@ public class BCOpenCPNZip extends ACBundleCreator
 	protected void writeMapHeader(OutputStream os, IFOSMPalette sPal) throws IOException
 	{
 		log.trace("START");
-		IfMapSpace mapSpace = mMap.getMapSource().getMapSpace();
+	//W #mapSpace IfMapSpace mapSpace = mMap.getMapSource().getMapSpace();
 		int tileSize = mMap.getTileSize().width;
+		@SuppressWarnings("unused") // W #unused
 		int zoom = mMap.getZoom();
 		OutputStreamWriter osw = new OutputStreamWriter(os, TEXT_FILE_CHARSET);
 
@@ -759,6 +761,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 		return img;
 	}
 
+	@SuppressWarnings("unused") // W #unused
 	private class FileTileWriter implements IfMapTileWriter
 	{
 		File setFolder;

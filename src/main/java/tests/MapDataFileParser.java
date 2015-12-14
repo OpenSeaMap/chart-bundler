@@ -26,8 +26,9 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import osmb.mapsources.mapspace.MercatorPower2MapSpace;
-import osmb.program.map.IfMapSpace;
+import osmb.mapsources.MP2MapSpace;
+//W #mapSpace import osmb.mapsources.mapspace.MercatorPower2MapSpace;
+//W #mapSpace import osmb.program.map.IfMapSpace;
 
 //import osmcd.gui.mapview.JMapViewer;
 
@@ -108,9 +109,9 @@ public class MapDataFileParser
 		System.out.println(String.format("Max point (lat/lon): %4f %4f", lat_max, lon_max));
 		System.out.println(String.format("Min point (lat/lon): %4f %4f", lat_min, lon_min));
 
-		IfMapSpace ms = MercatorPower2MapSpace.INSTANCE_256;
-		int x1 = ms.cLonToX(lon_max, 18);
-		int x2 = ms.cLonToX(lon_min, 18);
+// W #mapSpace 		IfMapSpace ms = MercatorPower2MapSpace.INSTANCE_256; // W #mapSpace =
+		int x1 = MP2MapSpace.cLonToX(lon_max, 18); // W #mapSpace ms.cLonToX(lon_max, 18);
+		int x2 = MP2MapSpace.cLonToX(lon_min, 18); // W #mapSpace ms.cLonToX(lon_min, 18);
 		int diff = Math.abs(x1 - x2);
 		for (int i = 1; i < 10; i++)
 		{

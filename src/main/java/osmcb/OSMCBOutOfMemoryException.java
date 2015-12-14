@@ -20,6 +20,7 @@ import osmcb.utilities.OSMCBUtilities;
 
 public class OSMCBOutOfMemoryException extends RuntimeException
 {
+	private static final long serialVersionUID = 1L;
 
 	long requiredMemory;
 	long heapAvailable;

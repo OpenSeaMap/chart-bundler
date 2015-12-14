@@ -36,6 +36,7 @@ import osmcb.utilities.OSMCBUtilities;
  */
 public class DirectoryManager extends osmb.program.DirectoryManager
 {
+	@SuppressWarnings("unused") // W #unused
 	private static Properties dirConfig = null;
 
 	static

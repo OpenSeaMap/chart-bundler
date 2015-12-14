@@ -28,12 +28,14 @@ import org.apache.log4j.Logger;
 
 import osmb.mapsources.IfFileBasedMapSource;
 import osmb.mapsources.IfMapSource;
-import osmb.mapsources.mapspace.MercatorPower2MapSpace;
+import osmb.mapsources.MP2MapSpace;
+//W #mapSpace import osmb.mapsources.MP2MapSpace;
+//W #mapSpace import osmb.mapsources.mapspace.MercatorPower2MapSpace;
 import osmb.program.JobDispatcher;
 import osmb.program.map.IfLayer;
 import osmb.program.map.IfMap;
-import osmb.program.map.IfMapSpace;
-import osmb.program.map.IfMapSpace.ProjectionCategory;
+//W #mapSpaceimport osmb.program.map.IfMapSpace;
+//W #mapSpace import osmb.program.map.IfMapSpace.ProjectionCategory;
 import osmb.program.tiles.IfMemoryTileCacheHolder;
 import osmb.program.tiles.IfTileLoaderListener;
 import osmb.program.tiles.IfTileProvider;
@@ -85,7 +87,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 
 	protected ACSiTileStore mTS = ACSiTileStore.getInstance();
 
-	protected int mTileSize = IfMapSpace.TECH_TILESIZE;
+	protected int mTileSize = MP2MapSpace.TECH_TILESIZE; // W #mapSpace MP2MapSpaceIfMapSpace.TECH_TILESIZE;
 
 	// protected PauseResumeHandler pauseResumeHandler = null;
 
@@ -468,8 +470,10 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	 */
 	protected boolean testMapSource(IfMapSource mapSource)
 	{
-		IfMapSpace mapSpace = mapSource.getMapSpace();
-		return (mapSpace instanceof MercatorPower2MapSpace && ProjectionCategory.SPHERE.equals(mapSpace.getProjectionCategory()));
+	// W #mapSpace ???
+		return true; //TODO ???
+//		IfMapSpace mapSpace = mapSource.getMapSpace();
+//		return (mapSpace instanceof MercatorPower2MapSpace && ProjectionCategory.SPHERE.equals(mapSpace.getProjectionCategory()));
 	}
 
 	/**
@@ -644,7 +648,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	@Override
 	public void initializeMap() throws IOException
 	{
-		// int tileSize = mMap.getMapSource().getMapSpace().getTileSize();
+		// int tileSize = MP2MapSpace.getTileSize(); // #mapSpace  mMap.getMapSource().getMapSpace().getTileSize();
 		// xMin = mMap.getMinPixelCoordinate().x / tileSize;
 		// xMax = mMap.getMaxPixelCoordinate().x / tileSize;
 		// yMin = mMap.getMinPixelCoordinate().y / tileSize;

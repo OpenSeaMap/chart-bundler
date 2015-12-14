@@ -10,9 +10,10 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 
+import osmb.mapsources.MP2MapSpace;
 import osmb.mapsources.MapSourceTools;
-import osmb.mapsources.mapspace.MercatorPower2MapSpace;
-import osmb.program.map.IfMapSpace;
+//W #mapSpaceimport osmb.mapsources.mapspace.MercatorPower2MapSpace;
+//W #mapSpaceimport osmb.program.map.IfMapSpace;
 
 public class Tools
 {
@@ -25,18 +26,21 @@ public class Tools
 	}
 
 	public static final SecureRandom RND = new SecureRandom();
-	public static final IfMapSpace OSM_MERCATOR = MercatorPower2MapSpace.INSTANCE_256;
+// W #mapSpace
+//	public static final IfMapSpace OSM_MERCATOR = MercatorPower2MapSpace.INSTANCE_256; // W #mapSpace =
 
 	@MethodDescription("Converts an horizontal tile number on a certain zoom level " + "into the corespondent longitude")
 	public static double xTileToLon(int x, int zoom)
 	{
-		return OSM_MERCATOR.cXToLon(x, zoom);
+// W #mapSpace		return OSM_MERCATOR.cXToLon(x, zoom);
+		return MP2MapSpace.cXToLon(x, zoom);
 	}
 
 	@MethodDescription("Converts an vertical tile number on a certain zoom level " + "into the corespondent latitude")
 	public static double yTileToLat(int y, int zoom)
 	{
-		return OSM_MERCATOR.cYToLat(y, zoom);
+// W #mapSpace		return OSM_MERCATOR.cYToLat(y, zoom);
+		return MP2MapSpace.cYToLat(y, zoom);
 	}
 
 	@MethodDescription("Returns a random value. Range [0..<b>max</b>]")

@@ -25,7 +25,9 @@ public class OSMAdaptivePalette implements IFOSMPalette
 	/**
 	 * 20140112 AH v1 initial version
 	 */
+	@SuppressWarnings("unused") // W #unused -> no need for serialVersionUID
 	private static final long serialVersionUID = 1L;
+	
 	protected final Logger log;
 
 	/**
@@ -39,6 +41,7 @@ public class OSMAdaptivePalette implements IFOSMPalette
 	 */
 	private int mStartColorIdx = 1;
 	private int mPaletteCnt = 128; // the BSB-KAP allows up to 128 colors, including the (supposedly unused) color 0
+	@SuppressWarnings("unused") // W #unused
 	private int mStdColors = 0;
 
 	class OSMColorPair

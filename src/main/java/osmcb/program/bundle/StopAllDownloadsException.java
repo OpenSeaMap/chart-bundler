@@ -20,6 +20,8 @@ import osmb.program.tiles.TileException;
 
 public class StopAllDownloadsException extends TileException
 {
+	private static final long serialVersionUID = 1L;
+	
 	public StopAllDownloadsException(String message, Throwable cause)
 	{
 		super(message, cause);

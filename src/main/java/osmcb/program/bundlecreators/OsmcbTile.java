@@ -24,8 +24,9 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
+import osmb.mapsources.MP2MapSpace;
 import osmb.program.map.BoundingRect;
-import osmb.program.map.IfMapSpace;
+//W #mapSpace import osmb.program.map.IfMapSpace;
 import osmb.program.tiles.IfTileProvider;
 
 public class OsmcbTile
@@ -39,20 +40,20 @@ public class OsmcbTile
 
 	private BoundingRect boundingRect;
 
-	public OsmcbTile(IfTileProvider tileProvider, IfMapSpace mapSpace, int tilex, int tiley, int zoom)
+	public OsmcbTile(IfTileProvider tileProvider, int tilex, int tiley, int zoom) // W #mapSpace (IfTileProvider tileProvider, IfMapSpace mapSpace, int tilex, int tiley, int zoom)
 	{
 		this.tileProvider = tileProvider;
 		this.tilex = tilex;
 		this.tiley = tiley;
 		image = null;
 
-		int tileSize = mapSpace.getTileSize();
+		int tileSize = MP2MapSpace.getTileSize(); // W #mapSpace mapSpace.getTileSize();
 		int x = tilex * tileSize;
 		int y = tiley * tileSize;
-		double north = mapSpace.cYToLat(y, zoom);
-		double south = mapSpace.cYToLat(y + tileSize - 1, zoom);
-		double west = mapSpace.cXToLon(x, zoom);
-		double east = mapSpace.cXToLon(x + tileSize - 1, zoom);
+		double north = MP2MapSpace.cYToLat(y, zoom); // W #mapSpace mapSpace.cYToLat(y, zoom);
+		double south = MP2MapSpace.cYToLat(y + tileSize - 1, zoom); // W #mapSpace mapSpace.cYToLat(y + tileSize - 1, zoom);
+		double west = MP2MapSpace.cXToLon(x, zoom); // W #mapSpace mapSpace.cXToLon(x, zoom);
+		double east = MP2MapSpace.cXToLon(x + tileSize - 1, zoom); // W #mapSpace mapSpace.cXToLon(x + tileSize - 1, zoom);
 
 		// north and south have to be negated - this really strange!
 		boundingRect = new BoundingRect(-north, -south, west, east);

@@ -32,8 +32,12 @@ import osmcb.program.bundlecreators.ACBundleCreator;
  */
 public class BundleProgress extends ACBundleProgress
 {
-	private static Logger log = Logger.getLogger(BundleProgress.class);
+	@SuppressWarnings("unused") // W #unused -> no need for serialVersionUID
 	private static final long serialVersionUID = -1L;
+	
+	private static Logger log = Logger.getLogger(BundleProgress.class);
+	
+	@SuppressWarnings("unused") // W #unused
 	private static final Timer TIMER = new Timer(true);
 
 	// private JProgressBar atlasProgressBar;
@@ -43,6 +47,7 @@ public class BundleProgress extends ACBundleProgress
 
 	private IfBCControler downloadControlListener = null;
 	// private BundleThread bundleThread = null;
+	@SuppressWarnings("unused") // W #unused
 	private ArrayList<MapInfo> mapInfos = null;
 	public String timeLeftTotal;
 	public String bps;
@@ -208,11 +213,13 @@ public class BundleProgress extends ACBundleProgress
 		printData();
 	}
 
+	@SuppressWarnings("unused") // W #unused
 	private void avgBytesPerTile(int size)
 	{
 		data.bytesAvgTile = 0;
 	}
 
+	@SuppressWarnings("unused") // W #unused
 	private String formatTime(long longSeconds)
 	{
 		String timeString = "";

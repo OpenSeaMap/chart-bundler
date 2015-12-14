@@ -13,14 +13,16 @@ import java.util.ArrayList;
  * @param <OSMPaletteEntry>
  *
  */
-public class OSMColorList<OSMPaletteEntry> extends ArrayList<OSMPaletteEntry>
+public class OSMColorList extends ArrayList<OSMPaletteEntry> // W ? public class OSMColorList<OSMPaletteEntry> extends ArrayList<OSMPaletteEntry>
 {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
+	@SuppressWarnings("unused") // W #unused
 	private int mPaletteCnt = 128; // the BSB-KAP allows up to 128 colors, including the unused color 0
+	@SuppressWarnings("unused") // W #unused
 	private int mStdColors = 0;
 
 	/*
