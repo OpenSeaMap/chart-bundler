@@ -41,6 +41,7 @@ import osmb.exceptions.InvalidNameException;
 import osmb.mapsources.IfMapSource.LoadMethod;
 import osmb.program.ACApp;
 import osmb.program.map.IfMap;
+import osmb.program.tiles.Tile;
 //W #mapSpace import osmb.program.map.IfMapSpace;
 import osmb.program.tiles.TileException;
 import osmcb.OSMCBSettings;
@@ -344,7 +345,7 @@ public class BCOpenCPN extends ACBundleCreator
 	protected void writeMapHeader(OutputStream os, IFOSMPalette sPal) throws IOException
 	{
 		log.trace("START");
-	// W #mapSpace IfMapSpace mapSpace = mMap.getMapSource().getMapSpace();
+		// W #mapSpace IfMapSpace mapSpace = mMap.getMapSource().getMapSpace();
 		int tileSize = mMap.getTileSize().width;
 		@SuppressWarnings("unused") // W #unused
 		int zoom = mMap.getZoom();
@@ -709,7 +710,12 @@ public class BCOpenCPN extends ACBundleCreator
 				// bundleProgress.incMapCreationProgress();
 				try
 				{
-					BufferedImage tile = mMap.getMapSource().getTileImage(mMap.getZoom(), x, y, LoadMethod.CACHE);
+					BufferedImage tile = null;
+					Tile tt = null;
+					if ((tt = mTC.getTile(mMap.getMapSource(), x, y, mMap.getZoom())) != null)
+						tile = tt.getImage();
+					else
+						tile = mMap.getMapSource().getTileImage(mMap.getZoom(), x, y, LoadMethod.STORE);
 					if (tile != null)
 					{
 						log.trace(String.format("Tile x=%d y=%d ", tilex, tiley));
@@ -720,7 +726,9 @@ public class BCOpenCPN extends ACBundleCreator
 					{
 						log.debug(String.format("Tile x=%d y=%d not found in tile archive - creating default", tilex, tiley));
 						// mapTileWriter.writeTile(tilex, tiley, tileType, emptyTileData);
-						gc.drawImage(tile, tilex * tileSize, tiley * tileSize, tileSize, tileSize, null);
+						Tile te = new Tile(mMap.getMapSource(), tilex, tiley, mMap.getZoom());
+						te.setErrorImage();
+						gc.drawImage(te.getImage(), tilex * tileSize, tiley * tileSize, tileSize, tileSize, null);
 					}
 				}
 				catch (IOException | TileException e)
