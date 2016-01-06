@@ -609,7 +609,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 		log.trace(OSMBStrs.RStr("START"));
 		createInfoFile();
 		sBundleProgress.finishBundle();
-		log.trace("bundle='" + mBundle.getName() + "' finished");
+		log.info("bundle='" + mBundle.getName() + "' finished");
 	}
 
 	@Override
@@ -648,7 +648,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	{
 		log.trace(OSMBStrs.RStr("START"));
 		sBundleProgress.finishLayer(mLayer);
-		log.trace("layer='" + mLayer.getName() + "' finished");
+		log.info("layer='" + mLayer.getName() + "' finished");
 	}
 
 	@Override
@@ -741,7 +741,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	{
 		log.trace(OSMBStrs.RStr("START"));
 		sBundleProgress.finishMap(mMap);
-		log.debug("map '" + mMap.getName() + "' finished");
+		log.info("map '" + mMap.getName() + "' finished");
 	}
 
 	public IfBundle getBundle()
