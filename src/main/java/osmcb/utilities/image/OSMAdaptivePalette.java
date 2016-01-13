@@ -7,7 +7,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 /**
- * the @class is used to assign the 127 colors available in the KAP-format to the most used colors in the image.
+ * This @class is used to assign the 127 colors available in the KAP-format to the most used colors in the image.
  * We need to
  * 1. look up the existing entries in the palette to check if the current color is already in the palette. This is done by a lookup in the hashmap for the
  * color value
@@ -27,7 +27,7 @@ public class OSMAdaptivePalette implements IFOSMPalette
 	 */
 	@SuppressWarnings("unused") // W #unused -> no need for serialVersionUID
 	private static final long serialVersionUID = 1L;
-	
+
 	protected final Logger log;
 
 	/**
