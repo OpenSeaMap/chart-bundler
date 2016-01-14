@@ -110,13 +110,13 @@ public class OSMAdaptivePalette implements IFOSMPalette
 	}
 
 	/**
-	 * reduces the palette to mPaletteCnt entries by mapping the least used entries to the mPaletteCnt most used ones.
-	 * this is done recursively from the start on.
+	 * Reduces the palette to mPaletteCnt entries by mapping the least used entries to the mPaletteCnt most used ones.
+	 * This is done recursively from the start on.
 	 */
 	protected void reduce()
 	{
 		// The palette is traversed in 'normal' order, which is descending in the usage count. This means, often used colors are mapped first, and hopefully
-		// prevents color drifting while chained mapping.
+		// prevents 'color drifting' while chained mapping.
 		// It stops when the usage count of the color has reached 0, so colors which have already been mapped earlier are skipped.
 		// The first round maps neatly matching colors, so the most often used colors move to the front of the palette.
 		log.trace("start");
@@ -149,6 +149,8 @@ public class OSMAdaptivePalette implements IFOSMPalette
 								log.trace("src " + tSPE.getKey().toStringKmpl() + ", cnt=" + tSPE.getValue().getCount());
 							mColorsHM.decMColorCnt();
 						}
+						else if (tSPE.getValue().getCount() == 0)
+							log.debug("src " + tSPE.getKey().toStringKmpl() + ", last color=" + nSrcColor);
 					}
 				}
 				log.trace("tgt after=[" + nSrcColor + "], " + tColor.toStringKmpl() + ", cnt=" + tPE.getValue().getCount());
