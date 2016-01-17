@@ -70,7 +70,7 @@ public class BCOpenCPN2 extends BCOpenCPN
 		File bundleOutputDir = ((OSMCBSettings) ACApp.getApp().getSettings()).getChartBundleOutputDirectory();
 		bundleOutputDir = new File(bundleOutputDir, "OpenCPN-KAP2");
 		OSMCBUtilities.mkDirs(bundleOutputDir);
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-hhmmss");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-HHmmss");
 		String bundleDirName = "OSM-OpenCPN-KAP2-" + mBundle.getName() + "-" + sdf.format(new Date());
 		bundleOutputDir = new File(bundleOutputDir, bundleDirName);
 		super.initializeBundle(bundleOutputDir);
