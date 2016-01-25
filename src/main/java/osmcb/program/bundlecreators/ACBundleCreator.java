@@ -71,6 +71,10 @@ import osmcb.utilities.OSMCBUtilities;
 public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, IfMemoryTileCacheHolder
 {
 	public static final Charset TEXT_FILE_CHARSET = Charsets.ISO_8859_1;
+	/**
+	 * This is a default date/time format for naming bundles etc.
+	 */
+	public static final String STR_BUFMT = "yyyyMMdd-HHmmss";
 
 	protected static ACBundleProgress sBundleProgress = null; // all messages regarding the progress go there
 	protected static MemoryTileCache mTC = new MemoryTileCache();
@@ -561,7 +565,8 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 		if (bundleOutputDir == null)
 		{
 			bundleOutputDir = OSMCBSettings.getInstance().getChartBundleOutputDirectory();
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-HHmmss");
+			// SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-HHmmss");
+			SimpleDateFormat sdf = new SimpleDateFormat(STR_BUFMT);
 			String bundleDirName = mBundle.getName() + "-" + sdf.format(new Date());
 			bundleOutputDir = new File(bundleOutputDir, bundleDirName);
 		}

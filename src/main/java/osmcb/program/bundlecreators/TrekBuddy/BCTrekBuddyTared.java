@@ -63,7 +63,7 @@ public class BCTrekBuddyTared extends BCTrekBuddy
 		File bundleOutputDir = ((OSMCBSettings) ACApp.getApp().getSettings()).getChartBundleOutputDirectory();
 		bundleOutputDir = new File(bundleOutputDir, "TrekBuddy-TAR");
 		OSMCBUtilities.mkDirs(bundleOutputDir);
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-hhmmss");
+		SimpleDateFormat sdf = new SimpleDateFormat(STR_BUFMT);
 		String bundleDirName = "OSM-TrekBuddyTar-" + mBundle.getName() + "-" + sdf.format(new Date());
 		bundleOutputDir = new File(bundleOutputDir, bundleDirName);
 		super.initializeBundle(bundleOutputDir);
@@ -72,7 +72,10 @@ public class BCTrekBuddyTared extends BCTrekBuddy
 	@Override
 	public void finishBundle()
 	{
+		createInfoFile();
 		createAtlasTarArchive(mBundle.getName());
+		sBundleProgress.finishBundle();
+		log.info("bundle='" + mBundle.getName() + "' finished");
 	}
 
 	private void createAtlasTarArchive(String name)

@@ -32,10 +32,8 @@ import javax.imageio.ImageIO;
 
 import osmb.mapsources.IfMapSource;
 import osmb.mapsources.IfMapSource.LoadMethod;
-import osmb.mapsources.MP2MapSpace;
 //W #mapSpace import osmb.mapsources.mapspace.MercatorPower2MapSpace;
 import osmb.program.ACApp;
-import osmb.program.map.IfLayer;
 //W #mapSpace import osmb.program.map.IfMapSpace;
 //W #mapSpace import osmb.program.map.IfMapSpace.ProjectionCategory;
 import osmb.program.tiles.TileException;
@@ -80,10 +78,10 @@ public class BCTrekBuddy extends ACBundleCreator
 	@Override
 	public boolean testMapSource(IfMapSource mapSource)
 	{
-	//W #mapSpace ??? MP2MapSpace
-//		IfMapSpace mapSpace = mapSource.getMapSpace();
-//		return (mapSpace instanceof MercatorPower2MapSpace && ProjectionCategory.SPHERE.equals(mapSpace.getProjectionCategory()));
-//		// TODO supports Mercator ellipsoid?
+		// W #mapSpace ??? MP2MapSpace
+		// IfMapSpace mapSpace = mapSource.getMapSpace();
+		// return (mapSpace instanceof MercatorPower2MapSpace && ProjectionCategory.SPHERE.equals(mapSpace.getProjectionCategory()));
+		// // TODO supports Mercator ellipsoid?
 		return true; // #mapSpace ???
 	}
 
@@ -93,7 +91,7 @@ public class BCTrekBuddy extends ACBundleCreator
 		File bundleOutputDir = ((OSMCBSettings) ACApp.getApp().getSettings()).getChartBundleOutputDirectory();
 		bundleOutputDir = new File(bundleOutputDir, "TrekBuddy-Atlas");
 		OSMCBUtilities.mkDirs(bundleOutputDir);
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-hhmmss");
+		SimpleDateFormat sdf = new SimpleDateFormat(STR_BUFMT);
 		String bundleDirName = "OSM-TrekBuddy-" + mBundle.getName() + "-" + sdf.format(new Date());
 		bundleOutputDir = new File(bundleOutputDir, bundleDirName);
 		super.initializeBundle(bundleOutputDir);
@@ -106,7 +104,10 @@ public class BCTrekBuddy extends ACBundleCreator
 	@Override
 	public void finishBundle()
 	{
+		createInfoFile();
 		createAtlasTbaFile(mBundle.getName());
+		sBundleProgress.finishBundle();
+		log.info("bundle='" + mBundle.getName() + "' finished");
 	}
 
 	// public void initializeMap(TileProvider mapTileProvider)
@@ -136,8 +137,7 @@ public class BCTrekBuddy extends ACBundleCreator
 		{
 			e.printStackTrace();
 		}
-		@SuppressWarnings("unused") // W #unused
-		IfLayer layer = mMap.getLayer();
+		// IfLayer layer = mMap.getLayer();
 		mOutputDir = new File(mOutputDir, mMap.getName());
 		OSMCBUtilities.mkDirs(mOutputDir);
 	}
@@ -167,13 +167,17 @@ public class BCTrekBuddy extends ACBundleCreator
 		log.trace("Writing map file");
 		OutputStreamWriter mapWriter = new OutputStreamWriter(stream, TEXT_FILE_CHARSET);
 
-	//W #mapSpace MP2MapSpace
-//		IfMapSpace mapSpace = mMap.getMapSource().getMapSpace();
+		// W #mapSpace MP2MapSpace
+		// IfMapSpace mapSpace = mMap.getMapSource().getMapSpace();
 
-		double longitudeMin = MP2MapSpace.cXToLon(mMap.getXMin() * mTileSize, mMap.getZoom());
-		double longitudeMax =  MP2MapSpace.cXToLon((mMap.getXMax() + 1) * mTileSize - 1, mMap.getZoom());
-		double latitudeMin =  MP2MapSpace.cYToLat((mMap.getYMax() + 1) * mTileSize - 1, mMap.getZoom());
-		double latitudeMax =  MP2MapSpace.cYToLat(mMap.getYMin() * mTileSize, mMap.getZoom());
+		// double longitudeMin = MP2MapSpace.cXToLon(mMap.getXMin() * mTileSize, mMap.getZoom());
+		// double longitudeMax = MP2MapSpace.cXToLon((mMap.getXMax() + 1) * mTileSize - 1, mMap.getZoom());
+		// double latitudeMin = MP2MapSpace.cYToLat((mMap.getYMax() + 1) * mTileSize - 1, mMap.getZoom());
+		// double latitudeMax = MP2MapSpace.cYToLat(mMap.getYMin() * mTileSize, mMap.getZoom());
+		double longitudeMin = mMap.getMinLon();
+		double longitudeMax = mMap.getMaxLon();
+		double latitudeMin = mMap.getMinLat();
+		double latitudeMax = mMap.getMaxLat();
 
 		int width = (mMap.getXMax() - mMap.getXMin() + 1) * mTileSize;
 		int height = (mMap.getYMax() - mMap.getYMin() + 1) * mTileSize;

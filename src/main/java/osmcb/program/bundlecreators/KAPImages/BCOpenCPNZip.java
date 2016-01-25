@@ -75,16 +75,6 @@ public class BCOpenCPNZip extends ACBundleCreator
 		init(bundle, bundleOutputDir);
 	}
 
-	// protected BCOpenCPN(IfBundle bundle, IfLayer layer, File layerOutputDir)
-	// {
-	// super(bundle, layer, layerOutputDir);
-	// }
-	//
-	// protected BCOpenCPN(IfBundle bundle, IfLayer layer, IfMap map, File mapOutputDir)
-	// {
-	// super(bundle, layer, map, mapOutputDir);
-	// }
-	//
 	/**
 	 * Creates a format specific directory for all OpenCPN-KAP bundles
 	 * Creates a format specific directory name
@@ -97,7 +87,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 		URI zipURI = URI.create("jar:file:/OpenCPN-KAP/Test.zip");
 		bundleOutputDir = new File(bundleOutputDir, "OpenCPN-KAP");
 		OSMCBUtilities.mkDirs(bundleOutputDir);
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-hhmmss");
+		SimpleDateFormat sdf = new SimpleDateFormat(STR_BUFMT);
 		String bundleDirName = "OSM-OpenCPN-KAP-" + mBundle.getName() + "-" + sdf.format(new Date());
 		bundleOutputDir = new File(bundleOutputDir, bundleDirName);
 		super.initializeBundle(bundleOutputDir);
@@ -390,7 +380,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 	protected void writeMapHeader(OutputStream os, IFOSMPalette sPal) throws IOException
 	{
 		log.trace("START");
-	//W #mapSpace IfMapSpace mapSpace = mMap.getMapSource().getMapSpace();
+		// W #mapSpace IfMapSpace mapSpace = mMap.getMapSource().getMapSpace();
 		int tileSize = mMap.getTileSize().width;
 		@SuppressWarnings("unused") // W #unused
 		int zoom = mMap.getZoom();
