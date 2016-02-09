@@ -87,6 +87,10 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 
 	protected final Logger log;
 
+	private static AtomicInteger sCompletedMaps = new AtomicInteger(0);
+	private static AtomicInteger sScheduledTiles = new AtomicInteger(0);
+	private static AtomicInteger sDownloadedTiles = new AtomicInteger(0);
+
 	// protected ExecutorService mExec = null;
 	protected JobDispatcher mExec = null;
 	protected IfBundle mBundle = null;
@@ -123,7 +127,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 
 	/**
 	 * The thread pools will be created for each creation path in the init method.
-	 * This init() is used when initializing a bundle creation
+	 * This init() is used when initializing a bundle creation.
 	 * 
 	 * @param bundle
 	 */
@@ -132,7 +136,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 		log.trace(OSMBStrs.RStr("START"));
 		mBundle = bundle;
 		mOutputDir = bundleOutputDir;
-		int nThreads = 3;
+		int nThreads = 5;
 		if (mBundle.getLayerCount() < nThreads)
 			nThreads = mBundle.getLayerCount();
 		mExec = new JobDispatcher(nThreads);
@@ -142,7 +146,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	};
 
 	/**
-	 * This init() is used when initializing a layer creation
+	 * This init() is used when initializing a layer creation.
 	 * 
 	 * @param bundle
 	 * @param layer
@@ -156,7 +160,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 		mOutputDir = layerOutputDir;
 		// limit the number of threads, maybe we will get the limit value from settings in the future
 		// we will need some kind of dynamic max thread limit, depending on the number of remaining maps and layers
-		int nThreads = 5;
+		int nThreads = 10;
 		if (mLayer.getMapCount() < nThreads)
 			nThreads = mLayer.getMapCount();
 		mExec = new JobDispatcher(nThreads);
@@ -164,7 +168,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	};
 
 	/**
-	 * This init() is used when initializing a map creation
+	 * This init() is used when initializing a map creation.
 	 * 
 	 * @param bundle
 	 * @param layer
@@ -180,7 +184,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 		mOutputDir = mapOutputDir;
 		// limit the number of threads, maybe we will get the limit value from settings in the future
 		// we will need some kind of dynamic max thread limit, depending on the number of remaining maps and layers
-		int nThreads = 5;
+		int nThreads = 4;
 		if (mMap.getTileCount() < nThreads)
 			nThreads = (int) mMap.getTileCount();
 		mExec = new JobDispatcher(nThreads);
@@ -311,7 +315,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 			finishLayer();
 			log.trace("after finishLayer()");
 			jobFinishedSuccessfully(0);
-			log.debug("layer '" + mLayer.getName() + "' finished");
+			log.info("layer '" + mLayer.getName() + "' of " + mBundle.getLayers() + " finished");
 		}
 		catch (IOException | InterruptedException e)
 		{
@@ -454,6 +458,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 						    "The selected bundle output format \"" + mBundle.getOutputFormat() + "\" does not support the map source \"" + map.getMapSource() + "\"");
 				}
 			}
+			log.info("bundle with " + mBundle.calcMapsToCompose() + " maps, " + mBundle.calculateTilesToLoad() + " tiles");
 			log.trace("bundle successfully tested");
 		}
 		catch (BundleTestException e)
@@ -654,6 +659,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 		log.trace(OSMBStrs.RStr("START"));
 		sBundleProgress.finishLayer(mLayer);
 		log.info("layer='" + mLayer.getName() + "' finished");
+		mLayer = null;
 	}
 
 	@Override
@@ -716,6 +722,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 						Tile tile = new Tile(mMap.getMapSource(), tileX, tileY, mMap.getZoom());
 						log.debug("schedule job " + tile + ", jobs=" + mExec.getActiveCount());
 						sBundleProgress.initTileDownload(tile);
+						log.debug("tiles=" + sScheduledTiles.incrementAndGet() + " of " + mBundle.calculateTilesToLoad());
 						mExec.execute(tl.createTileLoaderJob(mMap.getMapSource(), tileX, tileY, mMap.getZoom()));
 					}
 				}
@@ -746,7 +753,9 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	{
 		log.trace(OSMBStrs.RStr("START"));
 		sBundleProgress.finishMap(mMap);
-		log.info("map '" + mMap.getName() + "' finished");
+		log.info("map '" + mMap.getName() + "', " + sCompletedMaps.incrementAndGet() + " of " + mBundle.calcMapsToCompose() + " finished, tiles="
+		    + sDownloadedTiles.incrementAndGet() + " of " + mBundle.calculateTilesToLoad());
+		mMap = null;
 	}
 
 	public IfBundle getBundle()
@@ -761,6 +770,9 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 		TileDbEntry tTSE = new TileDbEntry(tile.getXtile(), tile.getYtile(), tile.getZoom(), tile.getImage());
 		mTS.putTile(tTSE, tile.getSource());
 		mTC.addTile(tile);
+		log.debug("tiles=" + sDownloadedTiles.incrementAndGet() + " of " + mBundle.calculateTilesToLoad());
+		if (sDownloadedTiles.get() % 500 == 0)
+			log.info("tiles=" + sDownloadedTiles.get() + " of " + mBundle.calculateTilesToLoad());
 		sBundleProgress.finishTileDownload(tile);
 		log.trace("tile=" + tile + " loaded=" + success);
 	}

@@ -37,9 +37,10 @@ public class OSMAdaptivePalette implements IFOSMPalette
 	private OSMCBColorMap mColorsHM = new OSMCBColorMap();
 
 	/**
-	 * Supposedly the color IDs start with 1 in bsb/kap format
+	 * Supposedly the color IDs start with 1 in bsb/kap format.
+	 * OpenCPN uses color 0 as well (2016-01).
 	 */
-	private int mStartColorIdx = 1;
+	private int mStartColorIdx = 0;
 	private int mPaletteCnt = 128; // the BSB-KAP allows up to 128 colors, including the (supposedly unused) color 0
 	@SuppressWarnings("unused") // W #unused
 	private int mStdColors = 0;
@@ -68,18 +69,18 @@ public class OSMAdaptivePalette implements IFOSMPalette
 		try
 		{
 			// Init some standard colors
-			mColorsHM.put(new OSMColor(0, 0, 0), new ColorInfo(21000000));
-			mColorsHM.put(new OSMColor(255, 0, 0), new ColorInfo(20000000));
-			mColorsHM.put(new OSMColor(0, 255, 0), new ColorInfo(19000000));
-			mColorsHM.put(new OSMColor(0, 0, 255), new ColorInfo(18000000));
-			mColorsHM.put(new OSMColor(255, 255, 0), new ColorInfo(17000000));
-			mColorsHM.put(new OSMColor(0, 255, 255), new ColorInfo(16000000));
-			mColorsHM.put(new OSMColor(255, 0, 255), new ColorInfo(15000000));
-			mColorsHM.put(new OSMColor(255, 255, 255), new ColorInfo(14000000));
-			mColorsHM.put(new OSMColor(181, 208, 208), new ColorInfo(13000000));
-			mColorsHM.put(new OSMColor(228, 198, 171), new ColorInfo(12000000));
-			mColorsHM.put(new OSMColor(177, 139, 190), new ColorInfo(11000000));
-			mColorsHM.put(new OSMColor(127, 127, 127), new ColorInfo(10000000));
+			mColorsHM.put(new OSMColor(0, 0, 0), new ColorInfo(21100000));
+			mColorsHM.put(new OSMColor(255, 0, 0), new ColorInfo(21000000));
+			mColorsHM.put(new OSMColor(0, 255, 0), new ColorInfo(20900000));
+			mColorsHM.put(new OSMColor(0, 0, 255), new ColorInfo(20800000));
+			mColorsHM.put(new OSMColor(255, 255, 0), new ColorInfo(20700000));
+			mColorsHM.put(new OSMColor(0, 255, 255), new ColorInfo(20600000));
+			mColorsHM.put(new OSMColor(255, 0, 255), new ColorInfo(20500000));
+			mColorsHM.put(new OSMColor(255, 255, 255), new ColorInfo(20400000));
+			mColorsHM.put(new OSMColor(181, 208, 208), new ColorInfo(20300000));
+			mColorsHM.put(new OSMColor(228, 198, 171), new ColorInfo(20200000));
+			mColorsHM.put(new OSMColor(177, 139, 190), new ColorInfo(20100000));
+			mColorsHM.put(new OSMColor(127, 127, 127), new ColorInfo(20000000));
 			for (int y = 0; y < img.getHeight(); ++y)
 			{
 				for (int x = 0; x < img.getWidth(); ++x)
@@ -87,20 +88,20 @@ public class OSMAdaptivePalette implements IFOSMPalette
 					put(new OSMColor(img.getRGB(x, y)));
 				}
 			}
-			log.trace("Palette[" + mColorsHM.size() + "," + mColorsHM.getMColorCnt() + "] after put()");
-			log.trace("Colors:" + toString());
+			log.debug("Palette[" + mColorsHM.size() + "," + mColorsHM.getMColorCnt() + "] after put()");
+			log.debug("Colors:" + toString());
 
 			mColorsHM.usageSet();
 
 			if (mColorsHM.size() > mPaletteCnt)
 			{
 				reduce();
-				// log.trace("Palette[" + mColorsHM.size() + "," + mColorsHM.getMColorCnt() + "] after reduce()");
+				log.debug("Palette[" + mColorsHM.size() + "," + mColorsHM.getMColorCnt() + "] after reduce()");
 				// log.trace("Colors:" + toString());
 				// log.trace("BSB:" + asBSBStr());
 			}
 			else
-				log.trace("Palette[" + mColorsHM.size() + "," + mColorsHM.getMColorCnt() + "] no reduction neccessary");
+				log.debug("Palette[" + mColorsHM.size() + "," + mColorsHM.getMColorCnt() + "] no reduction neccessary");
 		}
 		catch (Exception e)
 		{
@@ -150,7 +151,10 @@ public class OSMAdaptivePalette implements IFOSMPalette
 							mColorsHM.decMColorCnt();
 						}
 						else if (tSPE.getValue().getCount() == 0)
+						{
 							log.debug("src " + tSPE.getKey().toStringKmpl() + ", last color=" + nSrcColor);
+							// break;
+						}
 					}
 				}
 				log.trace("tgt after=[" + nSrcColor + "], " + tColor.toStringKmpl() + ", cnt=" + tPE.getValue().getCount());
@@ -160,7 +164,7 @@ public class OSMAdaptivePalette implements IFOSMPalette
 
 		log.trace("\r\n");
 		log.debug("Palette[" + mColorsHM.size() + "," + mColorsHM.getMColorCnt() + "] after first round()");
-		log.trace("Colors:" + toString());
+		log.debug("Colors:" + toString());
 
 		// Second round: now map the colors more different. Here one has to be careful. We use OSMColor.oDiff() instead of OSMColor.dDiff()
 		// For each color in the list the best matching color is found. Then the best color match, i.e. the one with the least difference is mapped.
@@ -275,33 +279,36 @@ public class OSMAdaptivePalette implements IFOSMPalette
 				iSrcColor = mColorsHM.getUsageIt();
 			else
 				iSrcColor = mColorsHM.getLessUsageIt(tPE);
-			while (iSrcColor.hasNext())
+			if (iSrcColor.hasNext())
 			{
-				Map.Entry<OSMColor, ColorInfo> tSPE = iSrcColor.next();
-				if ((tSPE != tPE) && (tSPE.getValue().mMColor == null))
+				while (iSrcColor.hasNext())
 				{
-					dNewDiff = tSrcColor.oDist(tSPE.getKey());
-					if (dNewDiff < dDist)
+					Map.Entry<OSMColor, ColorInfo> tSPE = iSrcColor.next();
+					if ((tSPE != tPE) && (tSPE.getValue().mMColor == null))
 					{
-						tMPE = tSPE;
-						dDist = dNewDiff;
+						dNewDiff = tSrcColor.oDist(tSPE.getKey());
+						if (dNewDiff < dDist)
+						{
+							tMPE = tSPE;
+							dDist = dNewDiff;
+						}
 					}
 				}
-			}
-			if (tMPE != null)
-			{
-				log.trace("best match: " + tPE.getKey().toStringKmpl() + ", cnt=" + tPE.getValue().getCount() + " to " + tMPE.getKey().toStringKmpl() + ", cnt="
-				    + tMPE.getValue().getCount() + ", diff=" + dDist);
+				if (tMPE != null)
+				{
+					log.trace("best match: " + tPE.getKey().toStringKmpl() + ", cnt=" + tPE.getValue().getCount() + " to " + tMPE.getKey().toStringKmpl() + ", cnt="
+					    + tMPE.getValue().getCount() + ", diff=" + dDist);
 
-				// Fill list with color distances.
-				tPE.getValue().setBestMatch(tMPE.getKey());
-				tPE.getValue().setDist(dDist);
-			}
-			else
-			{
-				log.debug("no match found");
-				// tPE.getValue().setBestMatch(tPE.getKey());
-				tPE.getValue().setDist(1e100);
+					// Fill list with color distances.
+					tPE.getValue().setBestMatch(tMPE.getKey());
+					tPE.getValue().setDist(dDist);
+				}
+				else
+				{
+					log.debug("no match found");
+					// tPE.getValue().setBestMatch(tPE.getKey());
+					tPE.getValue().setDist(1e100);
+				}
 			}
 		}
 		else
@@ -314,7 +321,7 @@ public class OSMAdaptivePalette implements IFOSMPalette
 
 	public void map(Map.Entry<OSMColor, ColorInfo> tTgtColor, Map.Entry<OSMColor, ColorInfo> tSrcColor)
 	{
-
+		log.error("map() called");
 	}
 
 	/**

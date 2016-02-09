@@ -35,9 +35,9 @@ import osmcb.program.bundlecreators.ACBundleCreator;
  */
 public class ACBundleProgress implements IfMapSourceListener
 {
-//	@SuppressWarnings("unused") // W #unused -> no need for serialVersionUID
-//	private static final long serialVersionUID = -1L;
-	
+	// @SuppressWarnings("unused") // W #unused -> no need for serialVersionUID
+	// private static final long serialVersionUID = -1L;
+
 	protected static Logger log = Logger.getLogger(ACBundleProgress.class);
 
 	protected static final Timer TIMER = new Timer(true);
@@ -191,15 +191,15 @@ public class ACBundleProgress implements IfMapSourceListener
 	/**
 	 * called by {@link ACBundleCreator}
 	 * 
-	 * @param map
+	 * @param mMap
 	 */
-	public void initMapDownload(IfMap map)
+	public void initMapDownload(IfMap mMap)
 	{
-		int index = mapInfos.indexOf(new MapInfo(map, 0, 0));
+		int index = mapInfos.indexOf(new MapInfo(mMap, 0, 0));
 		data.mapInfo = mapInfos.get(index);
 		data.bundleProgress = data.mapInfo.tileCountOnStart;
-		data.map = map;
-		data.tilesDLMap = (int) map.calculateTilesToLoad();
+		data.map = mMap;
+		data.tilesDLMap = (int) mMap.calculateTilesToLoad();
 		initialMapDownloadTime = System.currentTimeMillis();
 		data.prevMapsPermanentErrors += data.mapPermanentErrors;
 		data.prevMapsRetryErrors += data.mapRetryErrors;

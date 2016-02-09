@@ -61,6 +61,7 @@ import osmcb.utilities.image.OSMColor;
 public class BCOpenCPN extends ACBundleCreator
 {
 	protected static final String FILENAME_PATTERN = "t_%d_%d.%s";
+	protected static final String LINEEND = "\r\n";
 
 	public BCOpenCPN()
 	{
@@ -100,7 +101,7 @@ public class BCOpenCPN extends ACBundleCreator
 	@Override
 	public void createInfoFile()
 	{
-		createInfoFile("OpenSeaMap Charts KAP Bundle 0.2\r\n");
+		createInfoFile("OpenSeaMap Charts KAP Bundle 0.2" + LINEEND);
 	}
 
 	@Override
@@ -267,19 +268,19 @@ public class BCOpenCPN extends ACBundleCreator
 
 			OutputStreamWriter bsbWriter = new OutputStreamWriter(bsbFileStream, TEXT_FILE_CHARSET);
 
-			bsbWriter.write("! - BSB File\r\n");
-			bsbWriter.write("VER/3.0\r\n");
-			bsbWriter.write("CRR/2016, OpenSeamMap. All rights reserved.\r\n");
-			bsbWriter.write("CHT/NA=" + mMap.getName() + ",NU=" + mMap.getNumber() + "\r\n");
-			bsbWriter.write("CHF/" + getCHF() + "\r\n");
-			bsbWriter.write("CED/SE=1,RE=2,ED=" + strDate + "\r\n");
-			bsbWriter.write("NTM/NE=70.00,ND=" + strDate + ",BF=on,BD=" + strDate + "\r\n");
-			bsbWriter.write("CHK/1," + mMap.getName() + "\r\n");
-			bsbWriter.write("ORG/OpenSeaMap\r\n");
-			bsbWriter.write("MFR/OpenSeaMap\r\n");
-			bsbWriter.write("CGD/unknown\r\n");
-			bsbWriter.write("RGN/unknown\r\n");
-			bsbWriter.write("K01/NA=" + mMap.getName() + ",NU=" + mMap.getNumber() + ",TY=BASE,FN=" + mMap.getName() + "_1.kap\r\n");
+			bsbWriter.write("! - BSB File" + LINEEND);
+			bsbWriter.write("VER/3.0" + LINEEND);
+			bsbWriter.write("CRR/2016, OpenSeamMap. All rights reserved." + LINEEND);
+			bsbWriter.write("CHT/NA=" + mMap.getName() + ",NU=" + mMap.getNumber() + LINEEND);
+			bsbWriter.write("CHF/" + getCHF() + LINEEND);
+			bsbWriter.write("CED/SE=1,RE=2,ED=" + strDate + LINEEND);
+			bsbWriter.write("NTM/NE=70.00,ND=" + strDate + ",BF=on,BD=" + strDate + LINEEND);
+			bsbWriter.write("CHK/1," + mMap.getName() + LINEEND);
+			bsbWriter.write("ORG/OpenSeaMap" + LINEEND);
+			bsbWriter.write("MFR/OpenSeaMap" + LINEEND);
+			bsbWriter.write("CGD/unknown" + LINEEND);
+			bsbWriter.write("RGN/unknown" + LINEEND);
+			bsbWriter.write("K01/NA=" + mMap.getName() + ",NU=" + mMap.getNumber() + ",TY=BASE,FN=" + mMap.getName() + "_1.kap" + LINEEND);
 			// bsbWriter.write("DTM/0,0\r\n");
 			// bsbWriter.write("CPH/0\r\n");
 			// bsbWriter.write("IFM/7\r\n");
@@ -312,18 +313,18 @@ public class BCOpenCPN extends ACBundleCreator
 		// It consists of a BSB-header part and an image part (see misc/BSB-KAP Format.txt)
 		try
 		{
-			IFOSMPalette sPal = makePalette(img);
+			IFOSMPalette tPal = makePalette(img);
 			mFS = Files.newOutputStream(mapFile, CREATE);
 
 			log.debug("Writing map file (.kap)");
 
 			ImageOutputStream ios = ImageIO.createImageOutputStream(mFS);
-			writeMapHeader(mFS, sPal);
+			writeMapHeader(mFS, tPal);
 
 			long pos = Files.size(mapFile);
 
-			writeMapImage(img, ios, sPal, pos);
-			sPal = null;
+			writeMapImage(img, ios, tPal, pos);
+			tPal = null;
 		}
 		finally
 		{
@@ -356,7 +357,7 @@ public class BCOpenCPN extends ACBundleCreator
 		double laMin = mMap.getMinLat();
 		double laMax = mMap.getMaxLat();
 
-		log.info("start writing image file for='" + mMap.getName() + "'");
+		log.debug("start writing image file for='" + mMap.getName() + "'");
 
 		String strDate = new SimpleDateFormat("dd/MM/yyyy").format(new Date());
 
@@ -419,30 +420,30 @@ public class BCOpenCPN extends ACBundleCreator
 
 		int width = (mMap.getXMax() - mMap.getXMin() + 1) * tileSize;
 		int height = (mMap.getYMax() - mMap.getYMin() + 1) * tileSize;
-		osw.write("! - KAP File\r\n");
-		osw.write("VER/3.0\r\n");
+		osw.write("! - KAP File" + LINEEND);
+		osw.write("VER/3.0" + LINEEND);
 		// Indentation !!!! osw.write("CRR/2015, OpenSeamMap. All rights reserved.\r\n " + createGeneralDisclaimer());
-		osw.write("CRR/2016, OpenSeamMap. All rights reserved.\r\n");
-		osw.write("CHT/NA=" + mMap.getName() + ",NU=" + mMap.getNumber() + "\r\n");
-		osw.write("CHF/" + getCHF() + "\r\n");
-		osw.write("CED/SE=1,RE=2,ED=" + strDate + "\r\n");
-		osw.write("BSB/NA=" + mMap.getName() + ",NU=" + mMap.getNumber() + ",RA=" + width + "," + height + ",DU=220\r\n");
-		osw.write("ORG/OpenSeaMap\r\n");
-		osw.write("MFR/OpenSeaMap\r\n");
+		osw.write("CRR/2016, OpenSeamMap. All rights reserved." + LINEEND);
+		osw.write("CHT/NA=" + mMap.getName() + ",NU=" + mMap.getNumber() + LINEEND);
+		osw.write("CHF/" + getCHF() + LINEEND);
+		osw.write("CED/SE=1,RE=2,ED=" + strDate + LINEEND);
+		osw.write("BSB/NA=" + mMap.getName() + ",NU=" + mMap.getNumber() + ",RA=" + width + "," + height + ",DU=220" + LINEEND);
+		osw.write("ORG/OpenSeaMap" + LINEEND);
+		osw.write("MFR/OpenSeaMap" + LINEEND);
 		osw.write("KNP/PR=MERCATOR,GD=WGS84,SC=" + ((500000000) / Math.pow(2.0, mMap.getZoom())) + ",SD=LAT,UN=METRES,SK=0.0,TA=90.0,PI=UNKNOWN,SP=UNKNOWN,PP="
-		    + (laMax - laMin) / 2 + "\r\n");
-		osw.write("REF/1,0,0," + laMax + "," + loMin + "\r\n");
-		osw.write("REF/2," + width + ",0," + laMax + "," + loMax + "\r\n");
-		osw.write("REF/3," + width + "," + height + "," + laMin + "," + loMax + "\r\n");
-		osw.write("REF/4,0," + height + "," + laMin + "," + loMin + "\r\n");
-		osw.write("PLY/1," + laMax + "," + loMin + "\r\n");
-		osw.write("PLY/2," + laMax + "," + loMax + "\r\n");
-		osw.write("PLY/3," + laMin + "," + loMax + "\r\n");
-		osw.write("PLY/4," + laMin + "," + loMin + "\r\n");
-		osw.write("DTM/0.0,0.0\r\n");
-		osw.write("CPH/0.0\r\n");
-		osw.write("OST/1\r\n");
-		osw.write("IFM/7\r\n");
+		    + (laMax - laMin) / 2 + LINEEND);
+		osw.write("REF/1,0,0," + laMax + "," + loMin + LINEEND);
+		osw.write("REF/2," + width + ",0," + laMax + "," + loMax + LINEEND);
+		osw.write("REF/3," + width + "," + height + "," + laMin + "," + loMax + LINEEND);
+		osw.write("REF/4,0," + height + "," + laMin + "," + loMin + LINEEND);
+		osw.write("PLY/1," + laMax + "," + loMin + LINEEND);
+		osw.write("PLY/2," + laMax + "," + loMax + LINEEND);
+		osw.write("PLY/3," + laMin + "," + loMax + LINEEND);
+		osw.write("PLY/4," + laMin + "," + loMin + LINEEND);
+		osw.write("DTM/0.0,0.0" + LINEEND);
+		osw.write("CPH/0.0" + LINEEND);
+		osw.write("OST/1" + LINEEND);
+		osw.write("IFM/7" + LINEEND);
 		// two variants are possible
 		// - we use a fixed colortable and match the pixels against the predefined color (quick and the same look in all charts)
 		// - we create a new colortable for each map by some sophisticated algorithm (technically preferred, but nyr)
@@ -507,16 +508,16 @@ public class BCOpenCPN extends ACBundleCreator
 	protected void writeMapImage(BufferedImage img, ImageOutputStream ios, IFOSMPalette tPal, long nPos)
 	{
 		log.trace("START");
-		int nFCnt = 0;
+		int nErrCnt = 0;
 		ArrayList<Long> tLIdx = new ArrayList<Long>(img.getHeight());
 		try
 		{
-			// write the bits per color (currently fixed to 7 - meaning we have 127 color in the palette)
+			// write the bits per color (currently fixed to 7 - meaning we have up to 127 color in the palette. Unused colors may be omitted)
 			ios.write(7);
 
-			// write the image pixel by pixel we use rle (see ...)
-			// the line numbers start with 1 not 0
-			// as of 2016-01-22 info by OpenCPN Dave aka bdbcat OpenCPN expect index 0 as the start
+			// Write the image pixel by pixel. we use rle (see ...).
+			// The line numbers start with 1 not 0 according to libbsb for V2 and earlier, with 0 according to OpenCPN for V3 and later.
+			// As of 2016-01-22 info by OpenCPN Dave aka bdbcat OpenCPN expect index 0 as the starting line.
 			// for (int nY = 1; nY <= img.getHeight(); nY++)
 			for (int nY = 0; nY < img.getHeight(); nY++)
 			{
@@ -550,20 +551,21 @@ public class BCOpenCPN extends ACBundleCreator
 					{
 						// log.error(mMap.getName() + " [" + nX + "|" + (nY - 1) + "], (" + new OSMColor(img.getRGB(nX, nY - 1)).toStringRGB() + "), " + nCnt
 						log.error(mMap.getName() + " [" + nX + "|" + (nY) + "], (" + new OSMColor(img.getRGB(nX, nY)).toStringRGB() + "), " + nCnt
-						    + ", palette index wrong=" + nPalIdx + ", used=" + (nPalIdx & 0x7F) + ", errors=" + nFCnt);
-						++nFCnt;
+						    + ", palette index wrong=" + nPalIdx + ", used=" + (nPalIdx & 0x7F) + ", errors=" + nErrCnt);
+						++nErrCnt;
 					}
-					if (nPalIdx == 0)
+					// if (nPalIdx == 0)
+					if (false)
 					{
 						// log.error(mMap.getName() + " [" + nX + "|" + (nY - 1) + "], (" + new OSMColor(img.getRGB(nX, nY - 1)).toStringRGB() + "), " + nCnt
 						log.error(mMap.getName() + " [" + nX + "|" + (nY) + "], (" + new OSMColor(img.getRGB(nX, nY)).toStringRGB() + "), " + nCnt
-						    + ", palette index wrong=" + nPalIdx + ", used=" + (1) + ", errors=" + nFCnt);
+						    + ", palette index wrong=" + nPalIdx + ", used=" + (1) + ", errors=" + nErrCnt);
 						nPalIdx = 1;
-						++nFCnt;
+						++nErrCnt;
 					}
-					// for our 7bit palette the whole first Byte is used by the color index, so the count will follow -> set bit 7
+					// for our 7bit palette the whole first byte is used by the color index, so the count will follow in the next byte -> set bit 7
 					ios.write((nPalIdx & 0x7F) | 0x80);
-					// calculate the run count
+					// calculate the run length
 					nCnt--;
 					if (nCnt > 0x1FFFFF)
 					{
@@ -582,18 +584,22 @@ public class BCOpenCPN extends ACBundleCreator
 				// write the line end marker
 				ios.write(0);
 			}
+			// write the image data end marker
 			ios.writeInt(0);
-			// write the line offset index table
-			for (int nY = 0; nY < img.getHeight(); nY++)
+
+			// write the line offset index table. we use the tLIdx ArrayList instead of the original image lines to address.
+			// for (int nY = 0; nY < img.getHeight(); nY++)
+			for (int nY = 0; nY < tLIdx.size(); nY++)
 			{
 				long nIdx = tLIdx.get(nY);
 				ios.write(((int) nIdx & 0xFF000000) >> 24);
-				ios.write(((int) nIdx & 0xFF0000) >> 16);
-				ios.write(((int) nIdx & 0xFF00) >> 8);
-				ios.write(((int) nIdx & 0xFF) >> 0);
+				ios.write(((int) nIdx & 0x00FF0000) >> 16);
+				ios.write(((int) nIdx & 0x0000FF00) >> 8);
+				ios.write(((int) nIdx & 0x000000FF) >> 0);
 			}
+			log.debug("finished writing line index with" + tLIdx.size() + " lines");
 			ios.close();
-			log.info("finished writing image file for='" + mMap.getName() + "'");
+			log.debug("finished writing image file for='" + mMap.getName() + "'");
 		}
 		catch (IOException e)
 		{
