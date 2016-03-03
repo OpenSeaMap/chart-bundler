@@ -16,20 +16,12 @@
  ******************************************************************************/
 package osmcb.program.bundlecreators;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
 
 import osmb.program.map.IfLayer;
 import osmb.program.map.IfMap;
-import osmb.utilities.OSMBUtilities;
+import osmb.program.tiles.TileException;
 import osmcb.program.bundle.BundleTestException;
 import osmcb.program.bundle.IfBundle;
 import osmcb.program.bundle.MapCreationException;
@@ -131,79 +123,81 @@ public abstract class ACPlainImage extends ACBundleCreator
 		return BufferedImage.TYPE_4BYTE_ABGR;
 	}
 
-	protected void createImage() throws InterruptedException, MapCreationException
+	protected void createImage() throws InterruptedException, MapCreationException, TileException
 	{
-		// bundleProgress.initMapCreation((xMax - xMin + 1) * (yMax - yMin +
-		// 1));
-		ImageIO.setUseCache(false);
-
-		int mapWidth = (mMap.getXMax() - mMap.getXMin() + 1) * mTileSize;
-		int mapHeight = (mMap.getYMax() - mMap.getYMin() + 1) * mTileSize;
-
-		int maxImageSize = getMaxImageSize();
-		int imageWidth = Math.min(maxImageSize, mapWidth);
-		int imageHeight = Math.min(maxImageSize, mapHeight);
-
-		int len = Math.max(mapWidth, mapHeight);
-		double scaleFactor = 1.0;
-		boolean scaleImage = (len > maxImageSize);
-		if (scaleImage)
-		{
-			scaleFactor = (double) getMaxImageSize() / (double) len;
-			if (mapWidth != mapHeight)
-			{
-				// Map is not rectangle -> adapt height or width
-				if (mapWidth > mapHeight)
-					imageHeight = (int) (scaleFactor * mapHeight);
-				else
-					imageWidth = (int) (scaleFactor * mapWidth);
-			}
-		}
-		if (imageHeight < 0 || imageWidth < 0)
-			throw new MapCreationException("Invalid map size: (width/height: " + imageWidth + "/" + imageHeight + ")", mMap);
-		long imageSize = 3l * (imageWidth) * (imageHeight);
-		if (imageSize > Integer.MAX_VALUE)
-			throw new MapCreationException("Map image too large: (width/height: " + imageWidth + "/" + imageHeight + ") - reduce the map size and try again", mMap);
-		BufferedImage tileImage = OSMBUtilities.safeCreateBufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_3BYTE_BGR);
-		Graphics2D graphics = tileImage.createGraphics();
-		try
-		{
-			if (scaleImage)
-			{
-				graphics.setTransform(AffineTransform.getScaleInstance(scaleFactor, scaleFactor));
-				graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-			}
-			int lineY = 0;
-			for (int y = mMap.getYMin(); y <= mMap.getYMax(); y++)
-			{
-				int lineX = 0;
-				for (int x = mMap.getXMin(); x <= mMap.getXMax(); x++)
-				{
-					// bundleProgress.incMapCreationProgress();
-					try
-					{
-						byte[] sourceTileData = mapDlTileProvider.getTileData(x, y);
-						if (sourceTileData != null)
-						{
-							BufferedImage tile = ImageIO.read(new ByteArrayInputStream(sourceTileData));
-							graphics.drawImage(tile, lineX, lineY, mTileSize, mTileSize, Color.WHITE, null);
-						}
-					}
-					catch (IOException e)
-					{
-						log.error("", e);
-					}
-					lineX += mTileSize;
-				}
-				lineY += mTileSize;
-			}
-		}
-		finally
-		{
-			graphics.dispose();
-		}
-		writeTileImage(tileImage);
-	}
+		/*
+		 * // bundleProgress.initMapCreation((xMax - xMin + 1) * (yMax - yMin +
+		 * // 1));
+		 * ImageIO.setUseCache(false);
+		 * 
+		 * int mapWidth = (mMap.getXMax() - mMap.getXMin() + 1) * sTileSize;
+		 * int mapHeight = (mMap.getYMax() - mMap.getYMin() + 1) * sTileSize;
+		 * 
+		 * int maxImageSize = getMaxImageSize();
+		 * int imageWidth = Math.min(maxImageSize, mapWidth);
+		 * int imageHeight = Math.min(maxImageSize, mapHeight);
+		 * 
+		 * int len = Math.max(mapWidth, mapHeight);
+		 * double scaleFactor = 1.0;
+		 * boolean scaleImage = (len > maxImageSize);
+		 * if (scaleImage)
+		 * {
+		 * scaleFactor = (double) getMaxImageSize() / (double) len;
+		 * if (mapWidth != mapHeight)
+		 * {
+		 * // Map is not rectangle -> adapt height or width
+		 * if (mapWidth > mapHeight)
+		 * imageHeight = (int) (scaleFactor * mapHeight);
+		 * else
+		 * imageWidth = (int) (scaleFactor * mapWidth);
+		 * }
+		 * }
+		 * if (imageHeight < 0 || imageWidth < 0)
+		 * throw new MapCreationException("Invalid map size: (width/height: " + imageWidth + "/" + imageHeight + ")", mMap);
+		 * long imageSize = 3l * (imageWidth) * (imageHeight);
+		 * if (imageSize > Integer.MAX_VALUE)
+		 * throw new MapCreationException("Map image too large: (width/height: " + imageWidth + "/" + imageHeight + ") - reduce the map size and try again", mMap);
+		 * BufferedImage tileImage = OSMBUtilities.safeCreateBufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_3BYTE_BGR);
+		 * Graphics2D graphics = tileImage.createGraphics();
+		 * try
+		 * {
+		 * if (scaleImage)
+		 * {
+		 * graphics.setTransform(AffineTransform.getScaleInstance(scaleFactor, scaleFactor));
+		 * graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		 * }
+		 * int lineY = 0;
+		 * for (int y = mMap.getYMin(); y <= mMap.getYMax(); y++)
+		 * {
+		 * int lineX = 0;
+		 * for (int x = mMap.getXMin(); x <= mMap.getXMax(); x++)
+		 * {
+		 * // bundleProgress.incMapCreationProgress();
+		 * try
+		 * {
+		 * // byte[] sourceTileData = mapDlTileProvider.getTileData(x, y);
+		 * byte[] sourceTileData = mMap.getMapSource().getTileData(mMap.getZoom(), x, y, null);
+		 * if (sourceTileData != null)
+		 * {
+		 * BufferedImage tile = ImageIO.read(new ByteArrayInputStream(sourceTileData));
+		 * graphics.drawImage(tile, lineX, lineY, sTileSize, sTileSize, Color.WHITE, null);
+		 * }
+		 * }
+		 * catch (IOException e)
+		 * {
+		 * log.error("", e);
+		 * }
+		 * lineX += sTileSize;
+		 * }
+		 * lineY += sTileSize;
+		 * }
+		 * }
+		 * finally
+		 * {
+		 * graphics.dispose();
+		 * }
+		 * writeTileImage(tileImage);
+		 */ }
 
 	protected abstract void writeTileImage(BufferedImage tileImage) throws MapCreationException;
 }

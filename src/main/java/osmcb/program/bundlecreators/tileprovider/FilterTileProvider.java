@@ -16,12 +16,8 @@
  ******************************************************************************/
 package osmcb.program.bundlecreators.tileprovider;
 
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-
 import org.apache.log4j.Logger;
 
-import osmb.mapsources.IfMapSource;
 import osmb.program.tiles.IfTileProvider;
 
 /**
@@ -29,7 +25,7 @@ import osmb.program.tiles.IfTileProvider;
  */
 public abstract class FilterTileProvider implements IfTileProvider
 {
-	protected final Logger log;
+	protected static Logger log;
 
 	protected final IfTileProvider tileProvider;
 
@@ -37,23 +33,5 @@ public abstract class FilterTileProvider implements IfTileProvider
 	{
 		log = Logger.getLogger(this.getClass());
 		this.tileProvider = tileProvider;
-	}
-
-	@Override
-	public BufferedImage getTileImage(int x, int y) throws IOException
-	{
-		return tileProvider.getTileImage(x, y);
-	}
-
-	@Override
-	public byte[] getTileData(int x, int y) throws IOException
-	{
-		return tileProvider.getTileData(x, y);
-	}
-
-	@Override
-	public IfMapSource getMapSource()
-	{
-		return tileProvider.getMapSource();
 	}
 }

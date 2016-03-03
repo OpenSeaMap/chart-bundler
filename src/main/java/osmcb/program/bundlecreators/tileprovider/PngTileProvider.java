@@ -20,9 +20,11 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import osmb.mapsources.TileAddress;
 import osmb.program.tiledatawriter.IfTileImageDataWriter;
 import osmb.program.tiledatawriter.TileImagePngDataWriter;
 import osmb.program.tiles.IfTileProvider;
+import osmb.program.tiles.Tile;
 import osmb.program.tiles.TileImageType;
 import osmcb.utilities.OSMCBUtilities;
 
@@ -41,20 +43,44 @@ public class PngTileProvider extends FilterTileProvider
 	}
 
 	@Override
-	public byte[] getTileData(int x, int y) throws IOException
+	public byte[] loadTileData(TileAddress tAddr)
 	{
-		// if (!tileProvider.preferTileImageUsage())
+		byte[] data = null;
+		try
 		{
-			byte[] data = super.getTileData(x, y);
-			if (OSMCBUtilities.getImageType(data) == TileImageType.PNG)
-				return data;
+			{
+				data = loadTileData(tAddr);
+				if (OSMCBUtilities.getImageType(data) == TileImageType.PNG)
+					return data;
+			}
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream(32000);
+			BufferedImage image = loadTileImage(tAddr);
+			if (image != null)
+			{
+				writer.processImage(image, buffer);
+				data = buffer.toByteArray();
+			}
 		}
-		ByteArrayOutputStream buffer = new ByteArrayOutputStream(32000);
-		BufferedImage image = getTileImage(x, y);
-		if (image == null)
-			return null;
-		writer.processImage(image, buffer);
-		return buffer.toByteArray();
+		catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return data;
+	}
+
+	@Override
+	public BufferedImage loadTileImage(TileAddress tAddr)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Tile loadTile(TileAddress tAddr)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	// @Override

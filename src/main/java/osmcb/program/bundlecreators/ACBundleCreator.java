@@ -26,8 +26,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 
+import osmb.mapsources.ACMapSource;
 import osmb.mapsources.IfFileBasedMapSource;
-import osmb.mapsources.IfMapSource;
 import osmb.mapsources.MP2MapSpace;
 //W #mapSpace import osmb.mapsources.MP2MapSpace;
 //W #mapSpace import osmb.mapsources.mapspace.MercatorPower2MapSpace;
@@ -36,15 +36,14 @@ import osmb.program.map.IfLayer;
 import osmb.program.map.IfMap;
 //W #mapSpaceimport osmb.program.map.IfMapSpace;
 //W #mapSpace import osmb.program.map.IfMapSpace.ProjectionCategory;
-import osmb.program.tiles.IfMemoryTileCacheHolder;
 import osmb.program.tiles.IfTileLoaderListener;
-import osmb.program.tiles.IfTileProvider;
 import osmb.program.tiles.MemoryTileCache;
 import osmb.program.tiles.Tile;
 import osmb.program.tiles.TileImageParameters;
 import osmb.program.tiles.TileLoader;
-import osmb.program.tilestore.ACSiTileStore;
+import osmb.program.tilestore.ACTileStore;
 import osmb.program.tilestore.berkeleydb.TileDbEntry;
+import osmb.program.tilestore.sqlitedb.SQLiteDbTileStore;
 import osmb.utilities.Charsets;
 import osmb.utilities.OSMBStrs;
 import osmcb.OSMCBSettings;
@@ -68,28 +67,45 @@ import osmcb.utilities.OSMCBUtilities;
  * The glue, common to all implementations, is implemented in this ACBundleCreator class and should NOT be overridden by implementations.
  * 
  */
-public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, IfMemoryTileCacheHolder
+public class ACBundleCreator implements Runnable, IfTileLoaderListener
 {
+	// static/class data
+	protected static final Logger log = Logger.getLogger(ACBundleCreator.class);
+
 	public static final Charset TEXT_FILE_CHARSET = Charsets.ISO_8859_1;
 	/**
 	 * This is a default date/time format for naming bundles etc.
 	 */
-	public static final String STR_BUFMT = "yyyyMMdd-HHmmss";
+	protected static final String STR_BUFMT = "yyyyMMdd-HHmm";
+
+	protected static MemoryTileCache sTC = new MemoryTileCache();
+	protected static ACTileStore sTS = ACTileStore.getInstance();
+	protected static ACTileStore sNTS = new SQLiteDbTileStore(); // the 'new' SQLite tile store
+
+	private static AtomicInteger sCompletedMaps = new AtomicInteger(0);
+	protected static AtomicInteger sScheduledTiles = new AtomicInteger(0);
+	protected static AtomicInteger sDownloadedTiles = new AtomicInteger(0);
 
 	protected static ACBundleProgress sBundleProgress = null; // all messages regarding the progress go there
-	protected static MemoryTileCache mTC = new MemoryTileCache();
-	protected static ACSiTileStore mTS = ACSiTileStore.getInstance();
+
+	/**
+	 * somehow the {@link ACBundleProgress} displays or logs the creation progress.
+	 * 
+	 * @param bP
+	 */
+	public static void setBundleProgress(ACBundleProgress bP)
+	{
+		sBundleProgress = bP;
+	}
+
+	protected static int sTileSize = MP2MapSpace.TECH_TILESIZE;
+
+	// instance data
 
 	private AtomicInteger mActiveJobs = new AtomicInteger(0);
 	private AtomicInteger mJobsCompleted = new AtomicInteger(0);
 	private AtomicInteger mJobsRetryError = new AtomicInteger(0);
 	private AtomicInteger mJobsPermanentError = new AtomicInteger(0);
-
-	protected final Logger log;
-
-	private static AtomicInteger sCompletedMaps = new AtomicInteger(0);
-	private static AtomicInteger sScheduledTiles = new AtomicInteger(0);
-	private static AtomicInteger sDownloadedTiles = new AtomicInteger(0);
 
 	// protected ExecutorService mExec = null;
 	protected JobDispatcher mExec = null;
@@ -97,16 +113,14 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	protected IfLayer mLayer = null;
 	protected IfMap mMap = null;
 
-	protected int mTileSize = MP2MapSpace.TECH_TILESIZE; // W #mapSpace MP2MapSpaceIfMapSpace.TECH_TILESIZE;
-
 	// protected PauseResumeHandler pauseResumeHandler = null;
 
 	/**
 	 * Custom tile processing parameters. <code>null</code> if disabled in GUI
 	 */
 	protected TileImageParameters parameters = null;
-	protected BundleOutputFormat bundleOutputFormat = null;
-	protected IfTileProvider mapDlTileProvider = null;
+	// protected BundleOutputFormat bundleOutputFormat = null;
+	// protected IfTileP0rovider mapDlTileProvider = null;
 	protected File mOutputDir = null;
 	/**
 	 * way out
@@ -122,7 +136,6 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	 */
 	public ACBundleCreator()
 	{
-		log = Logger.getLogger(this.getClass());
 	};
 
 	/**
@@ -199,7 +212,6 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	public void run()
 	{
 		log.trace(OSMBStrs.RStr("START"));
-		log.trace(OSMCBStrs.RStr("BundleThread.CB.RunCalled"));
 		if (sBundleProgress == null)
 			sBundleProgress = new BundleProgress(this);
 		try
@@ -236,8 +248,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	 */
 	protected void runBundle()
 	{
-		log.trace(OSMBStrs.RStr("START"));
-		log.trace(OSMCBStrs.RStr("BundleThread.CB.RunBundleCalled") + " [" + Thread.currentThread().getName() + "], pool=" + mExec.toString());
+		log.trace(OSMBStrs.RStr("START") + " [" + Thread.currentThread().getName() + "], pool=" + mExec.toString());
 		// log.trace("creation of bundle='" + mBundle.getName() + "' started with some tests");
 		// log.debug(OSMCBStrs.RStr("BundleThread.CB.ModeUnknown", mBundle.getName()));
 		// do some top-level preflight checks
@@ -296,8 +307,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	 */
 	protected void runLayer()
 	{
-		log.trace(OSMBStrs.RStr("START"));
-		log.trace(OSMCBStrs.RStr("BundleThread.CB.RunLayerCalled") + " [" + Thread.currentThread().getName() + "], pool=" + mExec.toString());
+		log.trace(OSMBStrs.RStr("START") + " [" + Thread.currentThread().getName() + "], pool=" + mExec.toString());
 		try
 		{
 			initializeLayer();
@@ -315,6 +325,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 			finishLayer();
 			log.trace("after finishLayer()");
 			jobFinishedSuccessfully(0);
+			log.info("layer='" + mLayer.getName() + "' finished");
 			log.info("layer '" + mLayer.getName() + "' of " + mBundle.getLayers() + " finished");
 		}
 		catch (IOException | InterruptedException e)
@@ -334,11 +345,10 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	 */
 	protected void runMap()
 	{
-		log.trace(OSMBStrs.RStr("START"));
-		log.trace(OSMCBStrs.RStr("BundleThread.CB.RunMapCalled") + " [" + Thread.currentThread().getName() + "], pool=" + mExec.toString());
+		log.trace(OSMBStrs.RStr("START") + " [" + Thread.currentThread().getName() + "], pool=" + mExec.toString());
 		try
 		{
-			mTS.prepareTileStore(mMap.getMapSource());
+			sTS.prepareTileStore(mMap.getMapSource());
 			initializeMap();
 			// load all necessary tiles. They should go directly into the tile store...
 			loadMapTiles();
@@ -375,16 +385,6 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 		{
 			jobFinishedWithError(false);
 		}
-	}
-
-	/**
-	 * somehow the {@link ACBundleProgress} displays or logs the creation progress.
-	 * 
-	 * @param bP
-	 */
-	final static public void setBundleProgress(ACBundleProgress bP)
-	{
-		sBundleProgress = bP;
 	}
 
 	// public void jobStarted()
@@ -480,7 +480,7 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	 * @return <code>true</code> if supported otherwise <code>false</code>
 	 * @see AtlasCreator
 	 */
-	protected boolean testMapSource(IfMapSource mapSource)
+	protected boolean testMapSource(ACMapSource mapSource)
 	{
 		// W #mapSpace ???
 		return true; // TODO ???
@@ -548,7 +548,6 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	/**
 	 * @see osmcb.program.bundlecreators.IfBundleCreator#initializeBundle()
 	 */
-	@Override
 	public void initializeBundle() throws IOException, BundleTestException
 	{
 		log.trace(OSMBStrs.RStr("START"));
@@ -581,9 +580,10 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	}
 
 	/**
-	 * @see osmcb.program.bundlecreators.IfBundleCreator#createBundle()
+	 * 
+	 * @throws IOException
+	 * @throws InterruptedException
 	 */
-	@Override
 	public void createBundle() throws IOException, InterruptedException
 	{
 		log.trace(OSMBStrs.RStr("START"));
@@ -613,7 +613,6 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	/**
 	 * @see osmcb.program.bundlecreators.IfBundleCreator#finishBundle()
 	 */
-	@Override
 	public void finishBundle()
 	{
 		log.trace(OSMBStrs.RStr("START"));
@@ -622,7 +621,6 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 		log.info("bundle='" + mBundle.getName() + "' finished");
 	}
 
-	@Override
 	public void initializeLayer() throws IOException, InterruptedException
 	{
 		log.trace(OSMBStrs.RStr("START"));
@@ -630,7 +628,6 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 		log.trace("layer='" + mLayer.getName() + "' initialized");
 	}
 
-	@Override
 	public void createLayer() throws IOException, InterruptedException
 	{
 		log.trace(OSMBStrs.RStr("START"));
@@ -653,7 +650,6 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 		log.trace("layer='" + mLayer.getName() + "' created");
 	}
 
-	@Override
 	public void finishLayer() throws IOException
 	{
 		log.trace(OSMBStrs.RStr("START"));
@@ -662,7 +658,6 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 		mLayer = null;
 	}
 
-	@Override
 	public void initializeMap() throws IOException
 	{
 		log.trace(OSMBStrs.RStr("START"));
@@ -689,11 +684,10 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	 * 3. We can use a lot of threads to fetch tiles from the store, while not overburdening the download server(s) by limiting the
 	 * number of threads which actually access the server.
 	 */
-	@Override
 	public boolean loadMapTiles() throws Exception
 	{
 		log.trace(OSMBStrs.RStr("START"));
-		log.debug("start map=" + mMap.getName() + ", TileStore=" + mTS);
+		log.debug("start map=" + mMap.getName() + ", TileStore=" + sTS);
 
 		if (Thread.currentThread().isInterrupted())
 		{
@@ -712,16 +706,16 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 			// we download only from online map sources, not from file based map sources
 			if (!(mMap.getMapSource() instanceof IfFileBasedMapSource))
 			{
-				TileLoader tl = new TileLoader(this, mTC);
+				TileLoader tl = new TileLoader(this, sTC);
 
 				log.trace("TileLoader instanciated");
 				for (int tileX = mMap.getMinTileCoordinate().x; tileX <= mMap.getMaxTileCoordinate().x; ++tileX)
 				{
 					for (int tileY = mMap.getMinTileCoordinate().y; tileY <= mMap.getMaxTileCoordinate().y; ++tileY)
 					{
-						Tile tile = new Tile(mMap.getMapSource(), tileX, tileY, mMap.getZoom());
-						log.debug("schedule job " + tile + ", jobs=" + mExec.getActiveCount());
-						sBundleProgress.initTileDownload(tile);
+						// Tile tile = new Tile(mMap.getMapSource(), tileX, tileY, mMap.getZoom());
+						// log.debug("schedule job " + tile + ", jobs=" + mExec.getActiveCount());
+						// sBundleProgress.initTileDownload(tile);
 						log.debug("tiles=" + sScheduledTiles.incrementAndGet() + " of " + mBundle.calculateTilesToLoad());
 						mExec.execute(tl.createTileLoaderJob(mMap.getMapSource(), tileX, tileY, mMap.getZoom()));
 					}
@@ -740,7 +734,6 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 		return true;
 	}
 
-	@Override
 	public void createMap() throws MapCreationException, InterruptedException
 	{
 		log.trace(OSMBStrs.RStr("START"));
@@ -748,7 +741,6 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 		log.trace("map='" + mMap.getName() + "' created");
 	}
 
-	@Override
 	public void finishMap()
 	{
 		log.trace(OSMBStrs.RStr("START"));
@@ -768,19 +760,22 @@ public class ACBundleCreator implements IfBundleCreator, IfTileLoaderListener, I
 	{
 		log.trace(OSMBStrs.RStr("START"));
 		TileDbEntry tTSE = new TileDbEntry(tile.getXtile(), tile.getYtile(), tile.getZoom(), tile.getImage());
-		mTS.putTile(tTSE, tile.getSource());
-		mTC.addTile(tile);
-		log.debug("tiles=" + sDownloadedTiles.incrementAndGet() + " of " + mBundle.calculateTilesToLoad());
-		if (sDownloadedTiles.get() % 500 == 0)
-			log.info("tiles=" + sDownloadedTiles.get() + " of " + mBundle.calculateTilesToLoad());
+		sTS.putTile(tTSE, tile.getSource());
+		sTC.addTile(tile);
+		int nTiles = sDownloadedTiles.incrementAndGet();
+		log.debug("tiles=" + nTiles + " of " + mBundle.calculateTilesToLoad());
+		// info at 0.5% steps
+		if (nTiles % (mBundle.calculateTilesToLoad() / 200) == 0)
+			log.info("tiles=" + nTiles + " of " + mBundle.calculateTilesToLoad() + ", " + nTiles / (mBundle.calculateTilesToLoad() / 200) * 0.5 + "%");
 		sBundleProgress.finishTileDownload(tile);
-		log.trace("tile=" + tile + " loaded=" + success);
+		if (!success)
+			log.debug("tile=" + tile + " loaded=" + success);
+		else
+			log.trace("tile=" + tile + " loaded=" + success);
 	}
 
-	@Override
-	public MemoryTileCache getTileImageCache()
+	public static MemoryTileCache getTileImageCache()
 	{
-		log.trace("MemoryTileCache requested");
-		return mTC;
+		return sTC;
 	}
 }

@@ -24,15 +24,17 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.log4j.Logger;
 
-import osmb.mapsources.IfMapSource;
+import osmb.mapsources.TileAddress;
 import osmb.program.tiles.IfTileProvider;
+import osmb.program.tiles.Tile;
 
 /**
- * A tile cache with speculative loading on a separate thread. Usually this decreases iMap generation time on multi-core systems.
+ * A tile cache with speculative loading on a separate thread. Usually this decreases map generation time on multi-core systems.
+ * Currently (2016-02-25) unused.
  */
-public class CacheTileProvider implements IfTileProvider
+public class CachedTileProvider implements IfTileProvider
 {
-	private Logger log = Logger.getLogger(CacheTileProvider.class);
+	private Logger log = Logger.getLogger(CachedTileProvider.class);
 
 	/**
 	 * Counter for identifying the different threads
@@ -42,58 +44,47 @@ public class CacheTileProvider implements IfTileProvider
 	private PreLoadThread preLoader = new PreLoadThread();
 	protected final IfTileProvider tileProvider;
 
-	public CacheTileProvider(IfTileProvider tileProvider)
+	public CachedTileProvider(IfTileProvider tileProvider)
 	{
 		this.tileProvider = tileProvider;
 		cache = new Hashtable<CacheKey, SRCachedTile>(500);
 		preLoader.start();
 	}
 
-	// @Override
-	// public boolean preferTileImageUsage()
-	// {
-	// return true;
-	// }
-
 	@Override
-	public BufferedImage getTileImage(int x, int y) throws IOException
+	public BufferedImage loadTileImage(TileAddress tAddr)
 	{
-		SRCachedTile cachedTile = cache.get(new CacheKey(x, y));
 		BufferedImage image = null;
-		if (cachedTile != null)
-		{
-			CachedTile tile = cachedTile.get();
-			if (tile != null)
-			{
-				if (tile.loaded)
-					log.trace(String.format("Cache hit: x=%d y=%d", x, y));
-				image = tile.getImage();
-				if (!tile.nextLoadJobCreated)
-				{
-					// log.debug(String.format("Preload job added : x=%d y=%d l=%d",
-					// x + 1, y, layer));
-					preloadTile(new CachedTile(new CacheKey(x + 1, y)));
-					tile.nextLoadJobCreated = true;
-				}
-			}
-		}
-		if (image == null)
-		{
-			log.trace(String.format("Cache miss: x=%d y=%d", x, y));
-			// log.debug(String.format("Preload job added : x=%d y=%d l=%d", x +
-			// 1, y, layer));
-			preloadTile(new CachedTile(new CacheKey(x + 1, y)));
-			image = internalGetTileImage(x, y);
-		}
+		/*
+		 * SRCachedTile cachedTile = cache.get(new CacheKey(x, y));
+		 * 
+		 * if (cachedTile != null)
+		 * {
+		 * CachedTile tile = cachedTile.get();
+		 * if (tile != null)
+		 * {
+		 * if (tile.loaded)
+		 * log.trace(String.format("Cache hit: x=%d y=%d", x, y));
+		 * image = tile.getImage();
+		 * if (!tile.nextLoadJobCreated)
+		 * {
+		 * // log.debug(String.format("Preload job added : x=%d y=%d l=%d",
+		 * // x + 1, y, layer));
+		 * preloadTile(new CachedTile(new CacheKey(x + 1, y)));
+		 * tile.nextLoadJobCreated = true;
+		 * }
+		 * }
+		 * }
+		 * if (image == null)
+		 * {
+		 * log.trace(String.format("Cache miss: x=%d y=%d", x, y));
+		 * // log.debug(String.format("Preload job added : x=%d y=%d l=%d", x +
+		 * // 1, y, layer));
+		 * preloadTile(new CachedTile(new CacheKey(x + 1, y)));
+		 * // image = internalGetTileImage(x, y);
+		 * }
+		 */
 		return image;
-	}
-
-	protected BufferedImage internalGetTileImage(int x, int y) throws IOException
-	{
-		synchronized (tileProvider)
-		{
-			return tileProvider.getTileImage(x, y);
-		}
 	}
 
 	public byte[] getTileData(int layer, int x, int y) throws IOException
@@ -102,15 +93,9 @@ public class CacheTileProvider implements IfTileProvider
 	}
 
 	@Override
-	public byte[] getTileData(int x, int y) throws IOException
+	public byte[] loadTileData(TileAddress tAddr)
 	{
 		throw new RuntimeException("Not implemented");
-	}
-
-	@Override
-	public IfMapSource getMapSource()
-	{
-		return tileProvider.getMapSource();
 	}
 
 	private void preloadTile(CachedTile tile)
@@ -195,7 +180,7 @@ public class CacheTileProvider implements IfTileProvider
 					}
 				}
 			}
-			catch (InterruptedException e)
+			catch (InterruptedException | IOException e)
 			{
 				log.debug("Image pre-loader thread terminated");
 			}
@@ -252,7 +237,7 @@ public class CacheTileProvider implements IfTileProvider
 	private class CachedTile
 	{
 		CacheKey key;
-		private BufferedImage image;
+		private BufferedImage image = null;
 		private IOException loadException = null;
 		boolean loaded = false;
 		boolean nextLoadJobCreated = false;
@@ -264,15 +249,11 @@ public class CacheTileProvider implements IfTileProvider
 			image = null;
 		}
 
-		public synchronized void loadImage()
+		public synchronized void loadImage() throws IOException
 		{
 			try
 			{
-				image = internalGetTileImage(key.x, key.y);
-			}
-			catch (IOException e)
-			{
-				loadException = e;
+				// image = internalGetTileImage(key.x, key.y);
 			}
 			catch (Exception e)
 			{
@@ -295,5 +276,12 @@ public class CacheTileProvider implements IfTileProvider
 		{
 			return "CachedTile [key=" + key + ", loaded=" + loaded + ", nextLoadJobCreated=" + nextLoadJobCreated + "]";
 		}
+	}
+
+	@Override
+	public Tile loadTile(TileAddress tAddr)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

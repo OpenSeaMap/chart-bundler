@@ -26,7 +26,7 @@ import org.apache.log4j.Logger;
  *
  * @param <tPE>
  */
-public class OSMFixedHSLPalette implements IFOSMPalette
+public class OSMFixedHSLPalette implements IfOSMPalette
 {
 	/**
 	 * 20150812 AH v1 initial version

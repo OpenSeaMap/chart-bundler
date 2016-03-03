@@ -1,7 +1,6 @@
 package osmcb.program.bundle;
 
 import osmb.program.catalog.Catalog;
-import osmb.program.catalog.IfCatalog;
 import osmcb.program.bundlecreators.ACBundleCreator;
 
 public class Bundle extends Catalog implements IfBundle
@@ -24,7 +23,7 @@ public class Bundle extends Catalog implements IfBundle
 	 * @param catalog
 	 * @param bundleOutputFormat
 	 */
-	public Bundle(IfCatalog catalog, BundleOutputFormat bundleOutputFormat)
+	public Bundle(Catalog catalog, BundleOutputFormat bundleOutputFormat)
 	{
 		super(catalog);
 		mBOF = bundleOutputFormat;

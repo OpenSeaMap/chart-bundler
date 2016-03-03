@@ -154,7 +154,7 @@ public class BundleOutputFormat implements Comparable<BundleOutputFormat>
 	}
 
 	/**
-	 * Seems never used.
+	 * Seems never to be used.
 	 * 
 	 * @return
 	 */
@@ -169,7 +169,7 @@ public class BundleOutputFormat implements Comparable<BundleOutputFormat>
 	}
 
 	/**
-	 * This actually creates the bundle creator instance, which can in turn do the bundle creation.
+	 * This actually creates the bundle creator instance, which can in turn does the bundle creation.
 	 * 
 	 * @return An instance of a subclass of ACBundleCreator.
 	 */

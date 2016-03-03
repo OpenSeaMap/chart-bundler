@@ -18,7 +18,7 @@ package osmcb.program.bundle;
 
 import java.io.StringWriter;
 
-import osmb.mapsources.IfMapSource;
+import osmb.mapsources.ACMapSource;
 import osmb.mapsources.MapSourceLoaderInfo;
 import osmb.program.map.IfMap;
 import osmb.utilities.IFExceptionExtendedInfo;
@@ -53,7 +53,7 @@ public class MapCreationException extends Exception implements IFExceptionExtend
 		if (map != null)
 		{
 			sw.append(map.getInfoText());
-			IfMapSource mapSource = map.getMapSource();
+			ACMapSource mapSource = map.getMapSource();
 			if (mapSource != null)
 			{
 				MapSourceLoaderInfo loaderInfo = map.getMapSource().getLoaderInfo();

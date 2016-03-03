@@ -25,7 +25,7 @@ public class OSMCBColorMap extends HashMap<OSMColor, ColorInfo>
 	 * AH 2015-08-15 Initial version
 	 */
 	private static final long serialVersionUID = 1L;
-	protected final Logger log;
+	protected final Logger log = Logger.getLogger(OSMCBColorMap.class);;
 
 	/**
 	 * This comparator sorts the colors according to their usage count with the most used colors listed first.
@@ -83,7 +83,6 @@ public class OSMCBColorMap extends HashMap<OSMColor, ColorInfo>
 
 	public OSMCBColorMap()
 	{
-		log = Logger.getLogger(this.getClass());
 	}
 
 	public OSMColor getMColor(OSMColor tColor)
@@ -174,8 +173,11 @@ public class OSMCBColorMap extends HashMap<OSMColor, ColorInfo>
 	 */
 	public Iterator<Entry<OSMColor, ColorInfo>> getLessUsageIt(Entry<OSMColor, ColorInfo> tPE)
 	{
+		SortedSet<Entry<OSMColor, ColorInfo>> tColorsTmp = new TreeSet<>(BYCOUNTDESC);
+		// tColorsLessUsed.addAll(mColorsUse.tailSet(tPE));
+		tColorsTmp.addAll(mColorsUse);
 		SortedSet<Entry<OSMColor, ColorInfo>> tColorsLessUsed = new TreeSet<>(BYCOUNTDESC);
-		tColorsLessUsed.addAll(mColorsUse.tailSet(tPE));
+		tColorsLessUsed.addAll(tColorsTmp.tailSet(tPE));
 		return tColorsLessUsed.iterator();
 	}
 

@@ -30,7 +30,7 @@ import osmcb.OSMCBStrs;
 import osmcb.program.bundlecreators.ACBundleCreator;
 
 /**
- * A window showing the progress while {@link AtlasThread} downloads and processes the map tiles.
+ * A window showing the progress while XXX downloads and processes the map tiles.
  * 
  */
 public class ACBundleProgress implements IfMapSourceListener

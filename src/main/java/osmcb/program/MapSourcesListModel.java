@@ -23,17 +23,17 @@ import java.util.Vector;
 
 import javax.swing.AbstractListModel;
 
-import osmb.mapsources.IfMapSource;
+import osmb.mapsources.ACMapSource;
 
 public class MapSourcesListModel extends AbstractListModel<Object> // W ? <IfMapSource>
 {
 	private static final long serialVersionUID = 1L;
-	
-	ArrayList<IfMapSource> mapSources;
 
-	public MapSourcesListModel(Vector<IfMapSource> source)
+	ArrayList<ACMapSource> mapSources;
+
+	public MapSourcesListModel(Vector<ACMapSource> source)
 	{
-		this.mapSources = new ArrayList<IfMapSource>(source);
+		this.mapSources = new ArrayList<ACMapSource>(source);
 	}
 
 	@Override
@@ -48,18 +48,18 @@ public class MapSourcesListModel extends AbstractListModel<Object> // W ? <IfMap
 		return mapSources.size();
 	}
 
-	public Vector<IfMapSource> getVector()
+	public Vector<ACMapSource> getVector()
 	{
-		return new Vector<IfMapSource>(mapSources);
+		return new Vector<ACMapSource>(mapSources);
 	}
 
-	public IfMapSource removeElement(int index)
+	public ACMapSource removeElement(int index)
 	{
 		fireIntervalRemoved(this, index, index);
 		return mapSources.remove(index);
 	}
 
-	public void addElement(IfMapSource element)
+	public void addElement(ACMapSource element)
 	{
 		mapSources.add(element);
 		fireIntervalAdded(this, mapSources.size(), mapSources.size());
@@ -69,7 +69,7 @@ public class MapSourcesListModel extends AbstractListModel<Object> // W ? <IfMap
 	{
 		if (index < 1)
 			return false;
-		IfMapSource ms = mapSources.remove(index - 1);
+		ACMapSource ms = mapSources.remove(index - 1);
 		mapSources.add(index, ms);
 		fireContentsChanged(this, index - 1, index);
 		return true;
@@ -79,7 +79,7 @@ public class MapSourcesListModel extends AbstractListModel<Object> // W ? <IfMap
 	{
 		if (index + 1 >= mapSources.size())
 			return false;
-		IfMapSource ms = mapSources.remove(index + 1);
+		ACMapSource ms = mapSources.remove(index + 1);
 		mapSources.add(index, ms);
 		fireContentsChanged(this, index, index + 1);
 		return true;
@@ -87,10 +87,10 @@ public class MapSourcesListModel extends AbstractListModel<Object> // W ? <IfMap
 
 	public void sort()
 	{
-		Collections.sort(mapSources, new Comparator<IfMapSource>()
+		Collections.sort(mapSources, new Comparator<ACMapSource>()
 		{
 			@Override
-			public int compare(IfMapSource o1, IfMapSource o2)
+			public int compare(ACMapSource o1, ACMapSource o2)
 			{
 				return o1.toString().compareTo(o2.toString());
 			}

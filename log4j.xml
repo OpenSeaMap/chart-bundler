@@ -22,7 +22,7 @@
 	</logger>
 
 	<logger name="MemoryTileCache">
-		<level value="DEBUG" />
+		<level value="INFO" />
 	</logger>
 
 	<root>

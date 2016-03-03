@@ -22,8 +22,10 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import osmb.mapsources.TileAddress;
 import osmb.program.tiledatawriter.IfTileImageDataWriter;
 import osmb.program.tiles.IfTileProvider;
+import osmb.program.tiles.Tile;
 import osmb.program.tiles.TileImageFormat;
 
 /**
@@ -43,14 +45,39 @@ public class ConvertedRawTileProvider extends FilterTileProvider
 	}
 
 	@Override
-	public byte[] getTileData(int x, int y) throws IOException
+	public byte[] loadTileData(TileAddress tAddr)
 	{
-		BufferedImage image = getTileImage(x, y);
-		if (image == null)
-			return null;
-		ByteArrayOutputStream buffer = new ByteArrayOutputStream(32000);
-		writer.processImage(image, buffer);
-		return buffer.toByteArray();
+		byte[] data = null;
+		BufferedImage image = loadTileImage(tAddr);
+		try
+		{
+			if (image != null)
+			{
+				ByteArrayOutputStream buffer = new ByteArrayOutputStream(32000);
+				writer.processImage(image, buffer);
+				data = buffer.toByteArray();
+			}
+		}
+		catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return data;
+	}
+
+	@Override
+	public BufferedImage loadTileImage(TileAddress tAddr)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Tile loadTile(TileAddress tAddr)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	// @Override

@@ -121,7 +121,6 @@ public class BCTrekBuddyTared extends BCTrekBuddy
 		}
 	}
 
-	@Override
 	protected IfMapTileWriter createMapTileWriter() throws IOException
 	{
 		return new TarTileWriter();

@@ -28,7 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import osmb.mapsources.IfMapSource;
+import osmb.mapsources.ACMapSource;
 import osmb.program.ACApp;
 // W #mapSpace import osmb.program.map.IfMapSpace;
 // W #mapSpace import osmb.program.map.IfMapSpace.ProjectionCategory;
@@ -41,7 +41,6 @@ import osmcb.program.bundle.MapCreationException;
 import osmcb.program.bundlecreators.ACBundleCreator;
 import osmcb.program.bundlecreators.IfBundleCreatorName;
 import osmcb.program.bundlecreators.IfRequiresSQLite;
-import osmcb.program.bundlecreators.tileprovider.ConvertedRawTileProvider;
 import osmcb.utilities.OSMCBUtilities;
 
 /**
@@ -87,16 +86,16 @@ public class BCRMapsSQLite extends ACBundleCreator implements IfRequiresSQLite
 	}
 
 	@Override
-	public boolean testMapSource(IfMapSource mapSource)
+	public boolean testMapSource(ACMapSource mapSource)
 	{
-	// W #mapSpace ???		
-		//TODO ??? 
+		// W #mapSpace ???
+		// TODO ???
 		return true;
-//		IfMapSpace mapSpace = mapSource.getMapSpace();
-//		boolean correctTileSize = (256 == mapSpace.getTileSize());
-//		ProjectionCategory pc = mapSpace.getProjectionCategory();
-//		boolean correctProjection = (ProjectionCategory.SPHERE.equals(pc) || ProjectionCategory.ELLIPSOID.equals(pc));
-//		return correctTileSize && correctProjection;
+		// IfMapSpace mapSpace = mapSource.getMapSpace();
+		// boolean correctTileSize = (256 == mapSpace.getTileSize());
+		// ProjectionCategory pc = mapSpace.getProjectionCategory();
+		// boolean correctProjection = (ProjectionCategory.SPHERE.equals(pc) || ProjectionCategory.ELLIPSOID.equals(pc));
+		// return correctTileSize && correctProjection;
 	}
 
 	@Override
@@ -105,7 +104,7 @@ public class BCRMapsSQLite extends ACBundleCreator implements IfRequiresSQLite
 		File bundleOutputDir = ((OSMCBSettings) ACApp.getApp().getSettings()).getChartBundleOutputDirectory();
 		bundleOutputDir = new File(bundleOutputDir, "OsmAnd-SQLITE");
 		OSMCBUtilities.mkDirs(bundleOutputDir);
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-hhmmss");
+		SimpleDateFormat sdf = new SimpleDateFormat(STR_BUFMT);
 		String bundleDirName = "OSM-OsmAnd-sqlitedb-" + mBundle.getName() + "-" + sdf.format(new Date());
 		bundleOutputDir = new File(bundleOutputDir, bundleDirName);
 		super.initializeBundle(bundleOutputDir);
@@ -195,8 +194,8 @@ public class BCRMapsSQLite extends ACBundleCreator implements IfRequiresSQLite
 		int maxMapProgress = 2 * (mMap.getXMax() - mMap.getXMin() + 1) * (mMap.getYMax() - mMap.getYMin() + 1);
 		// bundleProgress.initMapCreation(maxMapProgress);
 		TileImageParameters param = mMap.getParameters();
-		if (param != null)
-			mapDlTileProvider = new ConvertedRawTileProvider(mapDlTileProvider, param.getFormat());
+		// if (param != null)
+		// mapDlTileProvider = new ConvertedRawTileProvider(mapDlTileProvider, param.getFormat());
 		try
 		{
 			conn.setAutoCommit(false);
@@ -213,7 +212,8 @@ public class BCRMapsSQLite extends ACBundleCreator implements IfRequiresSQLite
 					// bundleProgress.incMapCreationProgress();
 					try
 					{
-						byte[] sourceTileData = mapDlTileProvider.getTileData(x, y);
+						// byte[] sourceTileData = mapDlTileProvider.getTileData(x, y);
+						byte[] sourceTileData = null;
 						if (sourceTileData != null)
 						{
 							writeTile(x, y, mMap.getZoom(), sourceTileData);

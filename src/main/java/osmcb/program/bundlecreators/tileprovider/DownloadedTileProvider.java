@@ -24,9 +24,11 @@ import javax.imageio.ImageIO;
 
 import org.apache.log4j.Logger;
 
-import osmb.mapsources.IfMapSource;
+import osmb.mapsources.ACMapSource;
+import osmb.mapsources.TileAddress;
 import osmb.program.map.IfMap;
 import osmb.program.tiles.IfTileProvider;
+import osmb.program.tiles.Tile;
 import osmb.program.tiles.TileImageType;
 import osmcb.utilities.tar.TarIndex;
 
@@ -46,30 +48,48 @@ public class DownloadedTileProvider implements IfTileProvider
 	}
 
 	@Override
-	public byte[] getTileData(int x, int y) throws IOException
+	public byte[] loadTileData(TileAddress tAddr)
 	{
-		log.trace("Reading tile x=" + x + " y=" + y);
-		return tarIndex.getEntryContent(String.format(TILE_FILENAME_PATTERN, x, y));
+		log.trace("Reading tile x=" + tAddr.getX() + " y=" + tAddr.getY());
+		try
+		{
+			return tarIndex.getEntryContent(String.format(TILE_FILENAME_PATTERN, tAddr.getX(), tAddr.getY()));
+		}
+		catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	@Override
-	public BufferedImage getTileImage(int x, int y) throws IOException
+	public BufferedImage loadTileImage(TileAddress tAddr)
 	{
-		byte[] unconvertedTileData = getTileData(x, y);
+		byte[] unconvertedTileData = loadTileData(tAddr);
 		if (unconvertedTileData == null)
 			return null;
-		return ImageIO.read(new ByteArrayInputStream(unconvertedTileData));
+		try
+		{
+			return ImageIO.read(new ByteArrayInputStream(unconvertedTileData));
+		}
+		catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
-	// @Override
-	// public boolean preferTileImageUsage()
-	// {
-	// return false;
-	// }
-
-	@Override
-	public IfMapSource getMapSource()
+	public ACMapSource getMapSource()
 	{
 		return map.getMapSource();
+	}
+
+	@Override
+	public Tile loadTile(TileAddress tAddr)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -23,10 +23,10 @@ public interface IfMapTileWriter
 	/**
 	 * 
 	 * @param tilex
-	 *          x tile number regarding regarding the currently processed iMap
+	 *          x tile number regarding the currently processed map
 	 *          (0..mapWidth / tileWidth)]
 	 * @param tiley
-	 *          y tile number regarding regarding the currently processed iMap
+	 *          y tile number regarding the currently processed map
 	 *          (0..mapheight / tileHeight)]
 	 * @param tileType
 	 * @param tileData

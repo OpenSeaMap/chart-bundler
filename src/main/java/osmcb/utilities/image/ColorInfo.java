@@ -17,7 +17,7 @@ public class ColorInfo
 	}
 
 	/**
-	 * Creates a new color info as a mapping to an already known target color
+	 * Creates a new color info as a mapping to an already known target color.
 	 * 
 	 * @param tMColor
 	 */
@@ -27,9 +27,10 @@ public class ColorInfo
 	}
 
 	/**
-	 * Creates a new color info with a known usage count
+	 * Creates a new color info with a known usage count.
 	 * 
 	 * @param nCount
+	 *          to be set.
 	 */
 	public ColorInfo(int nCount)
 	{
@@ -47,7 +48,7 @@ public class ColorInfo
 	}
 
 	/**
-	 * @return The 'optical distance' to the best matching color
+	 * @return The 'optical distance' to the best matching color.
 	 */
 	public double getDist()
 	{
@@ -56,7 +57,7 @@ public class ColorInfo
 
 	/**
 	 * @param dDist
-	 *          The 'optical distance' to the best matching color
+	 *          The 'optical distance' to the best matching color to be set.
 	 */
 	public void setDist(double dDist)
 	{
@@ -64,7 +65,7 @@ public class ColorInfo
 	}
 
 	/**
-	 * @return The index of this color in the final palette
+	 * @return The index of this color in the final palette.
 	 */
 	public int getPIdx()
 	{
@@ -73,7 +74,7 @@ public class ColorInfo
 
 	/**
 	 * @param nIdx
-	 *          The index of this color in the final palette
+	 *          The index of this color in the final palette to be set.
 	 */
 	public void setPIdx(int nIdx)
 	{
@@ -86,10 +87,10 @@ public class ColorInfo
 	}
 
 	/**
-	 * Maps this color to another color
+	 * Maps this color to another color.
 	 * 
 	 * @param tMColor
-	 *          The mapping target color
+	 *          The mapping target color.
 	 * @return The usage count of this color, it will be used to update the usage count of the mapping target color
 	 */
 	public int setMColor(OSMColor tMColor)
@@ -106,10 +107,10 @@ public class ColorInfo
 	}
 
 	/**
-	 * Updates the usage count
+	 * Updates the usage count.
 	 * 
 	 * @param nCount
-	 * @return The previous usage count before the update
+	 * @return The previous usage count before the update.
 	 */
 	public int setCount(int nCount)
 	{
@@ -120,11 +121,11 @@ public class ColorInfo
 	}
 
 	/**
-	 * Updates the usage count by incrementing it by the given increment
+	 * Updates the usage count by incrementing it by the given increment.
 	 * 
 	 * @param nCount
-	 *          The increment to apply to the usage count
-	 * @return The previous usage count before the update
+	 *          The increment to apply to the usage count.
+	 * @return The previous usage count before the update.
 	 */
 	public int incCount(int nCount)
 	{
@@ -135,9 +136,9 @@ public class ColorInfo
 	}
 
 	/**
-	 * Updates the usage count by incrementing it by one
+	 * Updates the usage count by incrementing it by one.
 	 * 
-	 * @return The previous usage count before the update
+	 * @return The previous usage count before the update.
 	 */
 	public int incCount()
 	{

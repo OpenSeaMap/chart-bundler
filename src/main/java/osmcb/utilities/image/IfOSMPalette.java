@@ -1,6 +1,6 @@
 package osmcb.utilities.image;
 
-public interface IFOSMPalette
+public interface IfOSMPalette
 {
 	/**
 	 * this creates a specific String in the format required by the BSB-KAP file format

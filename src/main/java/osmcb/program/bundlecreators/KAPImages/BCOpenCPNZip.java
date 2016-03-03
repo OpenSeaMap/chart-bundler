@@ -41,7 +41,6 @@ import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageOutputStream;
 
 import osmb.exceptions.InvalidNameException;
-import osmb.mapsources.IfMapSource.LoadMethod;
 import osmb.program.ACApp;
 import osmb.program.map.IfMap;
 // W #mapSpace import osmb.program.map.IfMapSpace;
@@ -54,7 +53,7 @@ import osmcb.program.bundlecreators.ACBundleCreator;
 import osmcb.program.bundlecreators.IfBundleCreatorName;
 import osmcb.program.bundlecreators.IfMapTileWriter;
 import osmcb.utilities.OSMCBUtilities;
-import osmcb.utilities.image.IFOSMPalette;
+import osmcb.utilities.image.IfOSMPalette;
 import osmcb.utilities.image.OSMAdaptivePalette;
 import osmcb.utilities.image.OSMColor;
 
@@ -348,7 +347,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 		// it consists of a BSB-header part and an image part (see misc/BSB-KAP Format.txt)
 		try
 		{
-			IFOSMPalette sPal = makePalette(img);
+			IfOSMPalette sPal = makePalette(img);
 			mFS = Files.newOutputStream(mapFile, CREATE);
 
 			log.debug("Writing map file (.kap)");
@@ -377,7 +376,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 		// ImageIO.write(img, "tiff", testTiff2);
 	}
 
-	protected void writeMapHeader(OutputStream os, IFOSMPalette sPal) throws IOException
+	protected void writeMapHeader(OutputStream os, IfOSMPalette sPal) throws IOException
 	{
 		log.trace("START");
 		// W #mapSpace IfMapSpace mapSpace = mMap.getMapSource().getMapSpace();
@@ -516,7 +515,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 		os.write(0x00);
 	}
 
-	protected IFOSMPalette makePalette(BufferedImage img)
+	protected IfOSMPalette makePalette(BufferedImage img)
 	{
 		log.trace("START");
 		OSMAdaptivePalette tPal = new OSMAdaptivePalette(img);
@@ -533,7 +532,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 	 * @param ios
 	 * @param tPal
 	 */
-	protected void writeMapImage(BufferedImage img, ImageOutputStream ios, IFOSMPalette tPal, long nPos)
+	protected void writeMapImage(BufferedImage img, ImageOutputStream ios, IfOSMPalette tPal, long nPos)
 	{
 		log.trace("START");
 		ArrayList<Long> tLIdx = new ArrayList<Long>(img.getHeight());
@@ -703,6 +702,14 @@ public class BCOpenCPNZip extends ACBundleCreator
 		}
 	}
 
+	/**
+	 * When this is called, all tiles should be locally available. So, we use only locally tiles here, including an 'error overlay' and simply log the failure.
+	 * Probably later we will write a list of tiles to be downloaded in the near future, but this is not yet implemented.
+	 * 
+	 * @return The maps image
+	 * @throws InterruptedException
+	 * @throws MapCreationException
+	 */
 	protected BufferedImage createMapFromTiles() throws InterruptedException, MapCreationException
 	{
 		log.trace("START");
@@ -726,17 +733,23 @@ public class BCOpenCPNZip extends ACBundleCreator
 				// bundleProgress.incMapCreationProgress();
 				try
 				{
-					BufferedImage tile = mMap.getMapSource().getTileImage(mMap.getZoom(), x, y, LoadMethod.CACHE);
+					// mtc.getTileImage()..
+					BufferedImage tile = mMap.getMapSource().getTileImage(mMap.getZoom(), x, y);
+					if (tile == null)
+					{
+						// ts.getTileImage()
+						if (tile == null)
+						{
+							log.debug(String.format("Tile x=%d y=%d not found in tile archive - creating default", tilex, tiley));
+							// create error tile
+							// mapTileWriter.writeTile(tilex, tiley, tileType, emptyTileData);
+							gc.drawImage(tile, tilex * tileSize, tiley * tileSize, tileSize, tileSize, null);
+						}
+					}
 					if (tile != null)
 					{
 						log.trace(String.format("Tile x=%d y=%d ", tilex, tiley));
 						// mapTileWriter.writeTile(tilex, tiley, tileType, sourceTileData);
-						gc.drawImage(tile, tilex * tileSize, tiley * tileSize, tileSize, tileSize, null);
-					}
-					else
-					{
-						log.debug(String.format("Tile x=%d y=%d not found in tile archive - creating default", tilex, tiley));
-						// mapTileWriter.writeTile(tilex, tiley, tileType, emptyTileData);
 						gc.drawImage(tile, tilex * tileSize, tiley * tileSize, tileSize, tileSize, null);
 					}
 				}

@@ -13,7 +13,7 @@ import org.apache.log4j.Logger;
 public class OSMColor extends Color
 {
 	private static final long serialVersionUID = 1L;
-	
+
 	/**
 	 * takes the hsl value in the range 0..1. If you have rgb values in 1..255 use HSL2RGB(int, int, int)
 	 */
@@ -119,10 +119,10 @@ public class OSMColor extends Color
 	}
 
 	/**
-	 * calculates the linear difference between two colors in the rgb color space
+	 * Calculates the linear difference between two colors in the rgb color space.
 	 * 
 	 * @param cCol
-	 * @return
+	 * @return The linear difference
 	 */
 	public int diff(OSMColor cCol)
 	{
@@ -134,24 +134,20 @@ public class OSMColor extends Color
 	}
 
 	/**
-	 * calculates the linear difference between two colors with alpha channel in the rgb color space
+	 * Calculates the linear difference between two colors with alpha channel in the rgb color space.
 	 * 
 	 * @param cCol
-	 * @return
-	 * 
+	 * @return The linear difference including alpha
 	 */
 	public int diffAlpha(OSMColor cCol)
 	{
-		int nDiff = 0;
-		nDiff += Math.abs(getBlue() - cCol.getBlue());
-		nDiff += Math.abs(getGreen() - cCol.getGreen());
-		nDiff += Math.abs(getRed() - cCol.getRed());
-		nDiff += Math.abs(getAlpha() - cCol.getAlpha());
+		int nDiff = Math.abs(getAlpha() - cCol.getAlpha());
+		nDiff += diff(cCol);
 		return nDiff;
 	}
 
 	/**
-	 * Calculates the quadratic distance between two colors in the rgb color space
+	 * Calculates the quadratic distance between two colors in the rgb color space.
 	 * 
 	 * @param cCol
 	 *          the 'other' color
@@ -166,7 +162,7 @@ public class OSMColor extends Color
 	}
 
 	/**
-	 * calculates the quadratic difference between two colors with alpha channel in the rgb color space
+	 * Calculates the quadratic difference between two colors with alpha channel in the rgb color space
 	 * 
 	 * @param cCol
 	 *          the 'other' color
@@ -175,10 +171,8 @@ public class OSMColor extends Color
 	 */
 	public long qDiffAlpha(OSMColor cCol)
 	{
-		int nDiff = (getBlue() - cCol.getBlue()) * (getBlue() - cCol.getBlue());
-		nDiff += (getGreen() - cCol.getGreen()) * (getGreen() - cCol.getGreen());
-		nDiff += (getRed() - cCol.getRed()) * (getRed() - cCol.getRed());
-		nDiff += (getAlpha() - cCol.getAlpha()) * (getAlpha() - cCol.getAlpha());
+		int nDiff = (getAlpha() - cCol.getAlpha()) * (getAlpha() - cCol.getAlpha());
+		nDiff += qDist(cCol);
 		return nDiff;
 	}
 
@@ -235,15 +229,28 @@ public class OSMColor extends Color
 
 	public String toStringKmpl()
 	{
-		String str = "color=RGB(" + toStringRGB() + "), HSL(" + toStringHSL() + ")";
+		// String str = "color=RGB(" + toStringRGB() + "), HSL(" + toStringHSL() + ")";
+		String str = "color=RGB(" + toStringRGB() + ")";
 		return str;
 	}
 
+	/**
+	 * Compares the color with a RGB integer value. This comparison ignores the alpha value.
+	 * 
+	 * @param nRGB
+	 * @return TRUE if the RGB value are the same.
+	 */
 	public boolean equals(int nRGB)
 	{
-		return ((getRed() == ((nRGB & 0xFF0000) >> 16)) && (getGreen() == ((nRGB & 0xFF00) >> 8)) && (getBlue() == ((nRGB & 0xFF))));
+		return ((getRed() == ((nRGB & 0xFF0000) >> 16)) && (getGreen() == ((nRGB & 0x00FF00) >> 8)) && (getBlue() == ((nRGB & 0x0000FF))));
 	}
 
+	/**
+	 * Compares two colors. This comparison ignores the alpha value.
+	 * 
+	 * @param tColor
+	 * @return TRUE if the color value are the same.
+	 */
 	public boolean equals(OSMColor tColor)
 	{
 		return ((getRed() == tColor.getRed()) && (getGreen() == tColor.getGreen()) && (getBlue() == tColor.getBlue()));
@@ -430,5 +437,4 @@ public class OSMColor extends Color
 		nLight = Math.max(0, Math.min(100, nLight));
 		this.mLight = nLight;
 	}
-
 }

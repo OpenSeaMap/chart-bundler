@@ -17,15 +17,8 @@
 package osmcb.program;
 
 import java.io.File;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import osmb.program.IfCommandLine;
-import osmb.program.catalog.Catalog;
-import osmb.program.catalog.IfCatalogProfile;
-import osmb.utilities.GUIExceptionHandler;
-import osmcb.program.bundle.IfBundle;
-import osmcb.program.bundlecreators.ACBundleCreator;
 
 public class CmdlCreateBundle implements IfCommandLine
 {
@@ -64,40 +57,40 @@ public class CmdlCreateBundle implements IfCommandLine
 	 */
 	public void createBundle()
 	{
-		ExecutorService mExec = Executors.newFixedThreadPool(1);
-		try
-		{
-			IfCatalogProfile p = new Catalog(catalogName);
-			if (!p.exists())
-			{
-				System.err.println("Catalog \"" + catalogName + "\" could not be loaded:");
-				System.err.println("File \"" + p.getFile().getAbsolutePath() + "\" does not exist.");
-				System.exit(1);
-			}
-			IfBundle bundle = null;
-			// try
-			// {
-			// // bundle = new Bundle(p.load(), format);
-			// }
-			// catch (JAXBException e)
-			// {
-			// System.err.println("Error loading catalog \"" + catalogName + "\".");
-			// e.printStackTrace();
-			// System.exit(1);
-			// }
-
-			ACBundleCreator bc = bundle.createBundleCreatorInstance();
-			mExec.execute(bc);
-
-			// BundleThread bundleThread = new BundleThread(bundle);
-			// if (outputDir != null)
-			// bundleThread.setCustomBundleDir(outputDir);
-			// bundleThread.setQuitOsmcbAfterBundleCreation(true);
-			// bundleThread.start();
-		}
-		catch (Exception e)
-		{
-			GUIExceptionHandler.processException(e);
-		}
+		// ExecutorService mExec = Executors.newFixedThreadPool(1);
+		// try
+		// {
+		// IfCatalogProfile p = new Catalog(catalogName);
+		// if (!p.exists())
+		// {
+		// System.err.println("Catalog \"" + catalogName + "\" could not be loaded:");
+		// System.err.println("File \"" + p.getFile().getAbsolutePath() + "\" does not exist.");
+		// System.exit(1);
+		// }
+		// IfBundle bundle = null;
+		// // try
+		// // {
+		// // // bundle = new Bundle(p.load(), format);
+		// // }
+		// // catch (JAXBException e)
+		// // {
+		// // System.err.println("Error loading catalog \"" + catalogName + "\".");
+		// // e.printStackTrace();
+		// // System.exit(1);
+		// // }
+		//
+		// ACBundleCreator bc = bundle.createBundleCreatorInstance();
+		// mExec.execute(bc);
+		//
+		// // BundleThread bundleThread = new BundleThread(bundle);
+		// // if (outputDir != null)
+		// // bundleThread.setCustomBundleDir(outputDir);
+		// // bundleThread.setQuitOsmcbAfterBundleCreation(true);
+		// // bundleThread.start();
+		// }
+		// catch (Exception e)
+		// {
+		// GUIExceptionHandler.processException(e);
+		// }
 	}
 }

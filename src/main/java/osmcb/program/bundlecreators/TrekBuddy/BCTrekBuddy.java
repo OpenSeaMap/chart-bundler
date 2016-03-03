@@ -30,8 +30,7 @@ import java.util.Locale;
 
 import javax.imageio.ImageIO;
 
-import osmb.mapsources.IfMapSource;
-import osmb.mapsources.IfMapSource.LoadMethod;
+import osmb.mapsources.ACMapSource;
 //W #mapSpace import osmb.mapsources.mapspace.MercatorPower2MapSpace;
 import osmb.program.ACApp;
 //W #mapSpace import osmb.program.map.IfMapSpace;
@@ -76,7 +75,7 @@ public class BCTrekBuddy extends ACBundleCreator
 	// }
 	//
 	@Override
-	public boolean testMapSource(IfMapSource mapSource)
+	public boolean testMapSource(ACMapSource mapSource)
 	{
 		// W #mapSpace ??? MP2MapSpace
 		// IfMapSpace mapSpace = mapSource.getMapSpace();
@@ -179,8 +178,8 @@ public class BCTrekBuddy extends ACBundleCreator
 		double latitudeMin = mMap.getMinLat();
 		double latitudeMax = mMap.getMaxLat();
 
-		int width = (mMap.getXMax() - mMap.getXMin() + 1) * mTileSize;
-		int height = (mMap.getYMax() - mMap.getYMin() + 1) * mTileSize;
+		int width = (mMap.getXMax() - mMap.getXMin() + 1) * sTileSize;
+		int height = (mMap.getYMax() - mMap.getYMin() + 1) * sTileSize;
 
 		mapWriter.write(prepareMapString(imageFileName, longitudeMin, longitudeMax, latitudeMin, latitudeMax, width, height));
 		mapWriter.flush();
@@ -192,16 +191,12 @@ public class BCTrekBuddy extends ACBundleCreator
 		try
 		{
 			log.debug("Creating map");
-			// OSMCBUtilities.mkDirs(mMapDir);
 
 			// write the .map file containing the calibration points
 			writeMapFile();
-
-			// This means there should not be any resizing of the tiles.
-			mapTileWriter = createMapTileWriter();
-
+			// write each tile as a separate file
+			mapTileWriter = new FileTileWriter();
 			createTiles();
-
 			mapTileWriter.finalizeMap();
 		}
 		catch (MapCreationException e)
@@ -218,11 +213,6 @@ public class BCTrekBuddy extends ACBundleCreator
 		}
 	}
 
-	protected IfMapTileWriter createMapTileWriter() throws IOException
-	{
-		return new FileTileWriter();
-	}
-
 	protected void createTiles() throws InterruptedException, MapCreationException
 	{
 		int tilex = 0;
@@ -233,17 +223,20 @@ public class BCTrekBuddy extends ACBundleCreator
 		ImageIO.setUseCache(false);
 		byte[] emptyTileData = OSMCBUtilities.createEmptyTileData(mMap.getMapSource());
 		String tileType = mMap.getMapSource().getTileImageType().getFileExt();
-		for (int x = mMap.getXMin() / 256; x <= mMap.getXMax() / 256; x++)
+		for (int x = mMap.getXMin(); x <= mMap.getXMax(); x++)
 		{
 			tiley = 0;
-			for (int y = mMap.getYMin() / 256; y <= mMap.getYMax() / 256; y++)
+			for (int y = mMap.getYMin(); y <= mMap.getYMax(); y++)
 			{
 				// checkUserAbort();
 				// bundleProgress.incMapCreationProgress();
 				try
 				{
 					// byte[] sourceTileData = mapDlTileProvider.getTileData(x, y);
-					byte[] sourceTileData = mMap.getMapSource().getTileData(mMap.getZoom(), x, y, LoadMethod.DEFAULT);
+					// byte[] sourceTileData = mMap.getMapSource().getTileData(mMap.getZoom(), x, y, LoadMethod.DEFAULT);
+					byte[] sourceTileData = mMap.getMapSource().getTileData(mMap.getZoom(), x, y);
+					// byte[] sourceTileData = mMap.getMapSource().getTileStore().getTile(x, tiley, zoom, mapSource).getTileData(mMap.getZoom(), x, y,
+					// LoadMethod.DEFAULT);
 					if (sourceTileData != null)
 					{
 						mapTileWriter.writeTile(tilex, tiley, tileType, sourceTileData);

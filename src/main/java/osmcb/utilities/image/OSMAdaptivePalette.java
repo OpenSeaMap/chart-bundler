@@ -20,7 +20,7 @@ import org.apache.log4j.Logger;
  * @author humbach
  *
  */
-public class OSMAdaptivePalette implements IFOSMPalette
+public class OSMAdaptivePalette implements IfOSMPalette
 {
 	/**
 	 * 20140112 AH v1 initial version
@@ -28,7 +28,7 @@ public class OSMAdaptivePalette implements IFOSMPalette
 	@SuppressWarnings("unused") // W #unused -> no need for serialVersionUID
 	private static final long serialVersionUID = 1L;
 
-	protected final Logger log;
+	protected final Logger log = Logger.getLogger(OSMAdaptivePalette.class);
 
 	/**
 	 * 'index' Map containing all colors found in the map image. It maps color value to color IDs.
@@ -58,29 +58,30 @@ public class OSMAdaptivePalette implements IFOSMPalette
 	};
 
 	/**
-	 * creates the palette of the given image with 'adaptive' colors
+	 * Creates the palette of the given image with 'adaptive' colors
 	 *
 	 * @param img
+	 *          - The image for which to create the palette.
 	 */
 	public OSMAdaptivePalette(BufferedImage img)
 	{
-		log = Logger.getLogger(this.getClass());
-
 		try
 		{
-			// Init some standard colors
-			mColorsHM.put(new OSMColor(0, 0, 0), new ColorInfo(21100000));
-			mColorsHM.put(new OSMColor(255, 0, 0), new ColorInfo(21000000));
-			mColorsHM.put(new OSMColor(0, 255, 0), new ColorInfo(20900000));
-			mColorsHM.put(new OSMColor(0, 0, 255), new ColorInfo(20800000));
-			mColorsHM.put(new OSMColor(255, 255, 0), new ColorInfo(20700000));
-			mColorsHM.put(new OSMColor(0, 255, 255), new ColorInfo(20600000));
-			mColorsHM.put(new OSMColor(255, 0, 255), new ColorInfo(20500000));
-			mColorsHM.put(new OSMColor(255, 255, 255), new ColorInfo(20400000));
-			mColorsHM.put(new OSMColor(181, 208, 208), new ColorInfo(20300000));
-			mColorsHM.put(new OSMColor(228, 198, 171), new ColorInfo(20200000));
-			mColorsHM.put(new OSMColor(177, 139, 190), new ColorInfo(20100000));
-			mColorsHM.put(new OSMColor(127, 127, 127), new ColorInfo(20000000));
+			// Initialize some standard colors
+			mColorsHM.put(new OSMColor(0, 0, 0), new ColorInfo(2147000000));
+			mColorsHM.put(new OSMColor(255, 0, 0), new ColorInfo(2146000000));
+			mColorsHM.put(new OSMColor(0, 255, 0), new ColorInfo(2145000000));
+			mColorsHM.put(new OSMColor(0, 0, 255), new ColorInfo(2144000000));
+			mColorsHM.put(new OSMColor(255, 255, 0), new ColorInfo(2143000000));
+			mColorsHM.put(new OSMColor(0, 255, 255), new ColorInfo(2142000000));
+			mColorsHM.put(new OSMColor(255, 0, 255), new ColorInfo(2141000000));
+			mColorsHM.put(new OSMColor(255, 255, 255), new ColorInfo(2140000000));
+			mColorsHM.put(new OSMColor(127, 127, 127), new ColorInfo(2139000000));
+			mColorsHM.put(new OSMColor(181, 208, 208), new ColorInfo(2138000000));
+			mColorsHM.put(new OSMColor(228, 198, 171), new ColorInfo(2137000000));
+			mColorsHM.put(new OSMColor(177, 139, 190), new ColorInfo(2136000000));
+			mColorsHM.put(new OSMColor(235, 219, 232), new ColorInfo(2135000000));
+			mColorsHM.put(new OSMColor(181, 181, 146), new ColorInfo(2134000000));
 			for (int y = 0; y < img.getHeight(); ++y)
 			{
 				for (int x = 0; x < img.getWidth(); ++x)
@@ -120,6 +121,9 @@ public class OSMAdaptivePalette implements IFOSMPalette
 		// prevents 'color drifting' while chained mapping.
 		// It stops when the usage count of the color has reached 0, so colors which have already been mapped earlier are skipped.
 		// The first round maps neatly matching colors, so the most often used colors move to the front of the palette.
+
+		// The HashMap does not 'reorder' when colors have been matched, so it goes trough all colors every time.
+		// Either we find a way to update the HashMap and both iterators or we need a 'specialized' structure here.
 		log.trace("start");
 
 		int nSrcColor = mStartColorIdx;
@@ -132,7 +136,7 @@ public class OSMAdaptivePalette implements IFOSMPalette
 				    + tPE.getValue().getMColor().toStringRGB());
 			else
 			{
-				log.trace("tgt color=[" + nSrcColor + "], " + tColor.toStringKmpl() + ", cnt=" + tPE.getValue().getCount());
+				// log.trace("tgt color=[" + nSrcColor + "], " + tColor.toStringKmpl() + ", cnt=" + tPE.getValue().getCount());
 
 				for (Iterator<Map.Entry<OSMColor, ColorInfo>> iSrcColor = mColorsHM.getLessUsageIt(tPE); iSrcColor.hasNext();)
 				{
@@ -142,22 +146,25 @@ public class OSMAdaptivePalette implements IFOSMPalette
 						if ((tSPE.getValue().getCount() > 0) && (tPE.getKey().qDist(tSPE.getKey()) < 17))
 						{
 							// map the source color to the target
-							tPE.getValue().incCount(tSPE.getValue().setMColor(tPE.getKey()));
-							if (tSPE.getValue().getMColor() != null)
-								log.trace(
-								    "src " + tSPE.getKey().toStringKmpl() + ", cnt=" + tSPE.getValue().getCount() + " mapped to= " + tSPE.getValue().getMColor().toStringRGB());
-							else
-								log.trace("src " + tSPE.getKey().toStringKmpl() + ", cnt=" + tSPE.getValue().getCount());
+							// tPE.getValue().incCount(tSPE.getValue().setMColor(tPE.getKey()));
+							ColorInfo ci = tPE.getValue();
+							ci.incCount(tSPE.getValue().setMColor(tPE.getKey()));
+							tPE.setValue(ci);
+							// if (tSPE.getValue().getMColor() != null)
+							// log.trace(
+							// "src " + tSPE.getKey().toStringKmpl() + ", cnt=" + tSPE.getValue().getCount() + " mapped to= " + tSPE.getValue().getMColor().toStringRGB());
+							// else
+							// log.trace("src " + tSPE.getKey().toStringKmpl() + ", cnt=" + tSPE.getValue().getCount());
 							mColorsHM.decMColorCnt();
 						}
-						else if (tSPE.getValue().getCount() == 0)
-						{
-							log.debug("src " + tSPE.getKey().toStringKmpl() + ", last color=" + nSrcColor);
-							// break;
-						}
+						// else if (tSPE.getValue().getCount() == 0)
+						// {
+						// log.debug("src " + tSPE.getKey().toStringKmpl() + ", tgt " + tPE.getKey().toStringKmpl() + ", last color=" + nSrcColor + ", cnt[src]=0");
+						// // break;
+						// }
 					}
 				}
-				log.trace("tgt after=[" + nSrcColor + "], " + tColor.toStringKmpl() + ", cnt=" + tPE.getValue().getCount());
+				// log.trace("tgt after=[" + nSrcColor + "], " + tColor.toStringKmpl() + ", cnt=" + tPE.getValue().getCount());
 			}
 			nSrcColor++;
 		}
@@ -183,7 +190,7 @@ public class OSMAdaptivePalette implements IFOSMPalette
 		nSrcColor = 0;
 		int nTstColor = mStartColorIdx;
 
-		while ((mColorsHM.getMColorCnt() > 127) && (nTstColor < 20000))
+		while ((mColorsHM.getMColorCnt() > 128) && (nTstColor < 20000))
 		{
 			Map.Entry<OSMColor, ColorInfo> tPE = mColorsHM.getBestODist();
 			ColorInfo tCI = tPE.getValue();
@@ -325,9 +332,9 @@ public class OSMAdaptivePalette implements IFOSMPalette
 	}
 
 	/**
-	 * this creates a specific String in the format required by the BSB-KAP file format
-	 * it runs at most over the first mPaletteCnt entries in the palette
-	 * it ends with a 0x0D,0x0A sequence("\r\n").
+	 * This creates a specific String in the format required by the BSB-KAP file format.
+	 * It runs at most over the first mPaletteCnt entries in the palette
+	 * It ends with a 0x0D,0x0A sequence("\r\n").
 	 */
 	@Override
 	public String asBSBStr()
@@ -345,7 +352,7 @@ public class OSMAdaptivePalette implements IFOSMPalette
 	}
 
 	/**
-	 * this creates a specific String in a format suited for logging or tracing
+	 * This creates a specific String in a format suited for logging or tracing. It lists all colors in the palette.
 	 */
 	@Override
 	public String toString()

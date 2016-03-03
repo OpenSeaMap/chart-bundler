@@ -11,7 +11,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 
 import osmb.mapsources.MP2MapSpace;
-import osmb.mapsources.MapSourceTools;
 //W #mapSpaceimport osmb.mapsources.mapspace.MercatorPower2MapSpace;
 //W #mapSpaceimport osmb.program.map.IfMapSpace;
 
@@ -26,20 +25,20 @@ public class Tools
 	}
 
 	public static final SecureRandom RND = new SecureRandom();
-// W #mapSpace
-//	public static final IfMapSpace OSM_MERCATOR = MercatorPower2MapSpace.INSTANCE_256; // W #mapSpace =
+	// W #mapSpace
+	// public static final IfMapSpace OSM_MERCATOR = MercatorPower2MapSpace.INSTANCE_256; // W #mapSpace =
 
 	@MethodDescription("Converts an horizontal tile number on a certain zoom level " + "into the corespondent longitude")
 	public static double xTileToLon(int x, int zoom)
 	{
-// W #mapSpace		return OSM_MERCATOR.cXToLon(x, zoom);
+		// W #mapSpace return OSM_MERCATOR.cXToLon(x, zoom);
 		return MP2MapSpace.cXToLon(x, zoom);
 	}
 
 	@MethodDescription("Converts an vertical tile number on a certain zoom level " + "into the corespondent latitude")
 	public static double yTileToLat(int y, int zoom)
 	{
-// W #mapSpace		return OSM_MERCATOR.cYToLat(y, zoom);
+		// W #mapSpace return OSM_MERCATOR.cYToLat(y, zoom);
 		return MP2MapSpace.cYToLat(y, zoom);
 	}
 
@@ -47,12 +46,6 @@ public class Tools
 	public int getRandomInt(int max)
 	{
 		return RND.nextInt(max + 1);
-	}
-
-	@MethodDescription("Converts a tile numer on a certain zoom level into a quad tree coordinate")
-	public static String encodeQuadTree(int zoom, int tilex, int tiley)
-	{
-		return MapSourceTools.encodeQuadTree(zoom, tilex, tiley);
 	}
 
 	@MethodDescription("Returns a byte array of length <b>length</b> filled with random data.")

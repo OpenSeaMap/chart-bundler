@@ -16,7 +16,7 @@
  ******************************************************************************/
 package osmcb.program.bundlecreators.SQLite;
 
-import osmb.mapsources.IfMapSource;
+import osmb.mapsources.ACMapSource;
 //W #mapSpace import osmb.mapsources.mapspace.MercatorPower2MapSpace;
 import osmcb.program.bundle.IfBundle;
 import osmcb.program.bundlecreators.IfBundleCreatorName;
@@ -30,11 +30,11 @@ public class BCOSMAND_SQlite extends BCRMapsSQLite
 	}
 
 	@Override
-	public boolean testMapSource(IfMapSource mapSource)
+	public boolean testMapSource(ACMapSource mapSource)
 	{
-	// W #mapSpace ???		
-			//TODO ??? 
-			return true;
-//		return MercatorPower2MapSpace.INSTANCE_256.equals(mapSource.getMapSpace()); // W #mapSpace =
+		// W #mapSpace ???
+		// TODO ???
+		return true;
+		// return MercatorPower2MapSpace.INSTANCE_256.equals(mapSource.getMapSpace()); // W #mapSpace =
 	}
 }

@@ -29,8 +29,7 @@ import osmb.program.JArgs.Option.StringOption;
 import osmb.program.JArgs.OptionException;
 import osmb.program.JobDispatcher;
 import osmb.program.catalog.Catalog;
-import osmb.program.catalog.IfCatalog;
-import osmb.program.tilestore.ACSiTileStore;
+import osmb.program.tilestore.ACTileStore;
 import osmb.utilities.GUIExceptionHandler;
 import osmcb.program.Logging;
 import osmcb.program.ProgramInfo;
@@ -93,7 +92,7 @@ public class OSMCBApp extends ACConsoleApp
 
 			// EnvironmentSetup.copyMapPacks();
 			DefaultMapSourcesManager.initialize();
-			ACSiTileStore.initialize();
+			ACTileStore.initialize();
 			EnvironmentSetup.upgrade();
 			Logging.logSystemInfo();
 			runWithoutMainGUI();
@@ -131,7 +130,7 @@ public class OSMCBApp extends ACConsoleApp
 		try
 		{
 			JobDispatcher mBCExec = new JobDispatcher();
-			IfCatalog cat = Catalog.load(new File(ACSettings.getInstance().getCatalogsDirectory(), Catalog.getCatalogFileName(catalogName)));
+			Catalog cat = Catalog.load(new File(ACSettings.getInstance().getCatalogsDirectory(), Catalog.getCatalogFileName(catalogName)));
 			Bundle bundle = new Bundle(cat, BundleOutputFormat.getFormatByName(strBundleFormat));
 			ACBundleCreator bundleCreator = bundle.createBundleCreatorInstance();
 			bundleCreator.init(bundle, null);
@@ -143,13 +142,13 @@ public class OSMCBApp extends ACConsoleApp
 				log.debug("still running");
 			}
 			log.debug("bundle creator thread shutdown.");
-			ACSiTileStore.getInstance().closeAll();
+			ACTileStore.getInstance().closeAll();
 		}
 		catch (Exception e)
 		{
 			// System.err.println("Error loading catalog \"" + catalogName + "\".");
 			GUIExceptionHandler.processException(e);
-			ACSiTileStore.getInstance().closeAll();
+			ACTileStore.getInstance().closeAll();
 		}
 	}
 

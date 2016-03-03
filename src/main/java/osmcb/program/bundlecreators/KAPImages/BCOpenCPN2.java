@@ -35,8 +35,8 @@ import osmcb.utilities.OSMCBUtilities;
 
 /**
  * BCOpenCPN2 does nearly the same as BCOpenCPN.
- * The difference is that this only uses the even zoom layer. This is done to decrement the bundles size and the number of maps included.
- * OpenCPN can effectively handle bundles with a wider spacing of zoom level. It is not necessary to have all zoom level in the bundle.
+ * The difference is that this only uses the even zoom layers. This is done to decrement the bundles size and the number of maps included.
+ * OpenCPN can effectively handle bundles with a wider spacing of zoom level. It is not necessary to have all zoom levels in the bundle.
  * 
  * @author humbach
  *
