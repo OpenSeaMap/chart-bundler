@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 
 import osmb.mapsources.ACMapSource;
+import osmb.mapsources.TileAddress;
 import osmb.program.tiles.Tile;
 import osmb.program.tiles.TileLoader;
 import osmb.program.tilestore.berkeleydb.TileDbEntry;
@@ -124,7 +125,7 @@ public class BCTileStoreDownload extends ACBundleCreator
 				for (int tileY = mMap.getMinTileCoordinate().y; tileY <= mMap.getMaxTileCoordinate().y; ++tileY)
 				{
 					log.debug("tiles=" + sScheduledTiles.incrementAndGet() + " of " + mBundle.calculateTilesToLoad());
-					mExec.execute(tl.createTileLoaderJob(mMap.getMapSource(), tileX, tileY, mMap.getZoom()));
+					mExec.execute(tl.createTileLoaderJob(mMap.getMapSource(), new TileAddress(tileX, tileY, mMap.getZoom())));
 				}
 			}
 		}
@@ -159,6 +160,6 @@ public class BCTileStoreDownload extends ACBundleCreator
 		else
 			log.trace("tile=" + tile + " loaded=" + success);
 		// new SQLite tile store
-		sNTS.putTile(tile, tile.getSource());
+		sNTS.putTile(tile);
 	}
 }

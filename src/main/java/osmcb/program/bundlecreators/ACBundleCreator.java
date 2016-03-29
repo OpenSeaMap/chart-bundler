@@ -29,6 +29,7 @@ import org.apache.log4j.Logger;
 import osmb.mapsources.ACMapSource;
 import osmb.mapsources.IfFileBasedMapSource;
 import osmb.mapsources.MP2MapSpace;
+import osmb.mapsources.TileAddress;
 //W #mapSpace import osmb.mapsources.MP2MapSpace;
 //W #mapSpace import osmb.mapsources.mapspace.MercatorPower2MapSpace;
 import osmb.program.JobDispatcher;
@@ -42,6 +43,7 @@ import osmb.program.tiles.Tile;
 import osmb.program.tiles.TileImageParameters;
 import osmb.program.tiles.TileLoader;
 import osmb.program.tilestore.ACTileStore;
+import osmb.program.tilestore.TileStoreException;
 import osmb.program.tilestore.berkeleydb.TileDbEntry;
 import osmb.program.tilestore.sqlitedb.SQLiteDbTileStore;
 import osmb.utilities.Charsets;
@@ -70,7 +72,7 @@ import osmcb.utilities.OSMCBUtilities;
 public class ACBundleCreator implements Runnable, IfTileLoaderListener
 {
 	// static/class data
-	protected static final Logger log = Logger.getLogger(ACBundleCreator.class);
+	protected static Logger log = Logger.getLogger(ACBundleCreator.class);
 
 	public static final Charset TEXT_FILE_CHARSET = Charsets.ISO_8859_1;
 	/**
@@ -80,7 +82,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 
 	protected static MemoryTileCache sTC = new MemoryTileCache();
 	protected static ACTileStore sTS = ACTileStore.getInstance();
-	protected static ACTileStore sNTS = new SQLiteDbTileStore(); // the 'new' SQLite tile store
+	protected static SQLiteDbTileStore sNTS = null; // the 'new' SQLite tile store
 
 	private static AtomicInteger sCompletedMaps = new AtomicInteger(0);
 	protected static AtomicInteger sScheduledTiles = new AtomicInteger(0);
@@ -195,6 +197,17 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 		mLayer = layer;
 		mMap = map;
 		mOutputDir = mapOutputDir;
+		if (sNTS == null)
+			try
+			{
+				sNTS = SQLiteDbTileStore.prepareTileStore(map.getMapSource());
+			}
+			catch (TileStoreException e)
+			{
+				log.error("init of " + map + " failed", e);
+				e.printStackTrace();
+			}
+
 		// limit the number of threads, maybe we will get the limit value from settings in the future
 		// we will need some kind of dynamic max thread limit, depending on the number of remaining maps and layers
 		int nThreads = 4;
@@ -348,7 +361,10 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 		log.trace(OSMBStrs.RStr("START") + " [" + Thread.currentThread().getName() + "], pool=" + mExec.toString());
 		try
 		{
+			if (sTS == null)
+				log.error("no tile store init yet");
 			sTS.prepareTileStore(mMap.getMapSource());
+			// mMap.getMapSource().initialize();
 			initializeMap();
 			// load all necessary tiles. They should go directly into the tile store...
 			loadMapTiles();
@@ -701,8 +717,6 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 		{
 			log.debug("download tiles=" + tileCount);
 			sBundleProgress.initMapDownload(mMap);
-			// tileArchive = null;
-			// IfTileProvider mapTileProvider = null;
 			// we download only from online map sources, not from file based map sources
 			if (!(mMap.getMapSource() instanceof IfFileBasedMapSource))
 			{
@@ -713,11 +727,8 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 				{
 					for (int tileY = mMap.getMinTileCoordinate().y; tileY <= mMap.getMaxTileCoordinate().y; ++tileY)
 					{
-						// Tile tile = new Tile(mMap.getMapSource(), tileX, tileY, mMap.getZoom());
-						// log.debug("schedule job " + tile + ", jobs=" + mExec.getActiveCount());
-						// sBundleProgress.initTileDownload(tile);
 						log.debug("tiles=" + sScheduledTiles.incrementAndGet() + " of " + mBundle.calculateTilesToLoad());
-						mExec.execute(tl.createTileLoaderJob(mMap.getMapSource(), tileX, tileY, mMap.getZoom()));
+						mExec.execute(tl.createTileLoaderJob(mMap.getMapSource(), new TileAddress(tileX, tileY, mMap.getZoom())));
 					}
 				}
 			}
@@ -765,13 +776,25 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 		int nTiles = sDownloadedTiles.incrementAndGet();
 		log.debug("tiles=" + nTiles + " of " + mBundle.calculateTilesToLoad());
 		// info at 0.5% steps
-		if (nTiles % (mBundle.calculateTilesToLoad() / 200) == 0)
-			log.info("tiles=" + nTiles + " of " + mBundle.calculateTilesToLoad() + ", " + nTiles / (mBundle.calculateTilesToLoad() / 200) * 0.5 + "%");
+		if (nTiles % (mBundle.calculateTilesToLoad() / 200.0) == 0)
+			log.info("tiles=" + nTiles + " of " + mBundle.calculateTilesToLoad() + ", " + nTiles / (mBundle.calculateTilesToLoad() / 200.0) * 0.5 + "%");
 		sBundleProgress.finishTileDownload(tile);
 		if (!success)
 			log.debug("tile=" + tile + " loaded=" + success);
 		else
 			log.trace("tile=" + tile + " loaded=" + success);
+	}
+
+	@Override
+	public void tileDownloaded(Tile tile, int size)
+	{
+		log.info(tile + " loaded from online map source, size=" + size);
+	}
+
+	@Override
+	public void tileLoadedFromCache(Tile tile, int size)
+	{
+		log.info(tile + " loaded from mtc, size=" + size);
 	}
 
 	public static MemoryTileCache getTileImageCache()

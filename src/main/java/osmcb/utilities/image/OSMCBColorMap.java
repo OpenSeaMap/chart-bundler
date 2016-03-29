@@ -25,7 +25,7 @@ public class OSMCBColorMap extends HashMap<OSMColor, ColorInfo>
 	 * AH 2015-08-15 Initial version
 	 */
 	private static final long serialVersionUID = 1L;
-	protected final Logger log = Logger.getLogger(OSMCBColorMap.class);;
+	protected static Logger log = Logger.getLogger(OSMCBColorMap.class);;
 
 	/**
 	 * This comparator sorts the colors according to their usage count with the most used colors listed first.
@@ -83,21 +83,32 @@ public class OSMCBColorMap extends HashMap<OSMColor, ColorInfo>
 
 	public OSMCBColorMap()
 	{
+		// adjust to actual implementation
+		log = Logger.getLogger(this.getClass());
 	}
 
 	public OSMColor getMColor(OSMColor tColor)
 	{
-		if (this.get(tColor) != null)
-			return this.get(tColor).mMColor;
+		ColorInfo tCInfo = get(tColor);
+		if (tCInfo != null)
+			return tCInfo.mMColor;
 		else
 			return null;
 	}
 
+	/**
+	 * @return The number of unmapped colors.
+	 */
 	public int getMColorCnt()
 	{
 		return mUnmappedColors;
 	}
 
+	/**
+	 * reduce the number of unmapped colors by 1
+	 * 
+	 * @return The number of unmapped colors before the reduction.
+	 */
 	public int decMColorCnt()
 	{
 		return mUnmappedColors--;

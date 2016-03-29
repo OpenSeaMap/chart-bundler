@@ -31,11 +31,9 @@ import java.util.Locale;
 import javax.imageio.ImageIO;
 
 import osmb.mapsources.ACMapSource;
+import osmb.mapsources.TileAddress;
 //W #mapSpace import osmb.mapsources.mapspace.MercatorPower2MapSpace;
 import osmb.program.ACApp;
-//W #mapSpace import osmb.program.map.IfMapSpace;
-//W #mapSpace import osmb.program.map.IfMapSpace.ProjectionCategory;
-import osmb.program.tiles.TileException;
 import osmb.utilities.geo.GeoUtils;
 import osmcb.OSMCBSettings;
 import osmcb.program.bundle.BundleTestException;
@@ -232,10 +230,7 @@ public class BCTrekBuddy extends ACBundleCreator
 				// bundleProgress.incMapCreationProgress();
 				try
 				{
-					// byte[] sourceTileData = mapDlTileProvider.getTileData(x, y);
-					// byte[] sourceTileData = mMap.getMapSource().getTileData(mMap.getZoom(), x, y, LoadMethod.DEFAULT);
-					byte[] sourceTileData = mMap.getMapSource().getTileData(mMap.getZoom(), x, y);
-					// byte[] sourceTileData = mMap.getMapSource().getTileStore().getTile(x, tiley, zoom, mapSource).getTileData(mMap.getZoom(), x, y,
+					byte[] sourceTileData = mMap.getMapSource().loadTileData(new TileAddress(x, y, mMap.getZoom()));
 					// LoadMethod.DEFAULT);
 					if (sourceTileData != null)
 					{
@@ -247,7 +242,7 @@ public class BCTrekBuddy extends ACBundleCreator
 						mapTileWriter.writeTile(tilex, tiley, tileType, emptyTileData);
 					}
 				}
-				catch (IOException | TileException e)
+				catch (IOException e)
 				{
 					throw new MapCreationException("Error writing tile image: " + e.getMessage(), mMap, e);
 				}

@@ -24,7 +24,6 @@ import java.util.Date;
 import osmb.program.ACApp;
 import osmb.program.map.IfMap;
 import osmb.utilities.OSMBStrs;
-import osmb.utilities.lzma.OsmbLzma;
 import osmcb.OSMCBSettings;
 import osmcb.program.bundle.BundleTestException;
 import osmcb.program.bundle.IfBundle;
@@ -83,15 +82,15 @@ public class BCOpenCPN2 extends BCOpenCPN
 		super.finishBundle();
 		log.debug("Bundle dir='" + mOutputDir + "'");
 		// zip bundle 'mOutputDir' is the root dir for this bundle
-		try
-		{
-			OsmbLzma.encode7z(mOutputDir.getAbsolutePath(), mOutputDir + ".7z");
-		}
-		catch (IOException e)
-		{
-			log.error("7zip excepted '" + mOutputDir.getAbsolutePath() + "'");
-			e.printStackTrace();
-		}
+		// try
+		// {
+		// OsmbLzma.encode7z(mOutputDir.getAbsolutePath(), mOutputDir + ".7z");
+		// }
+		// catch (IOException e)
+		// {
+		// log.error("7zip excepted '" + mOutputDir.getAbsolutePath() + "'");
+		// e.printStackTrace();
+		// }
 	}
 
 	@Override

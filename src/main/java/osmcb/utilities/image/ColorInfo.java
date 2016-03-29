@@ -1,5 +1,11 @@
 package osmcb.utilities.image;
 
+/**
+ * This provides information about the {@link OSMColor} and its usage in the image. It allows dynamically matching OSMColors depending on their optical distance
+ * and usage.
+ * 
+ * @author humbach
+ */
 public class ColorInfo
 {
 	protected OSMColor mMColor = null; // the mapping target color

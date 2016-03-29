@@ -35,12 +35,16 @@ import java.util.Date;
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageOutputStream;
 
+import org.apache.log4j.Logger;
+
 import osmb.exceptions.InvalidNameException;
+import osmb.mapsources.MP2MapSpace;
+import osmb.mapsources.TileAddress;
 import osmb.program.ACApp;
 import osmb.program.map.IfMap;
 import osmb.program.tiles.Tile;
-//W #mapSpace import osmb.program.map.IfMapSpace;
-import osmb.program.tiles.TileException;
+import osmb.program.tiles.Tile.TileState;
+import osmb.utilities.OSMBStrs;
 import osmcb.OSMCBSettings;
 import osmcb.program.bundle.BundleTestException;
 import osmcb.program.bundle.IfBundle;
@@ -64,6 +68,7 @@ public class BCOpenCPN extends ACBundleCreator
 	public BCOpenCPN()
 	{
 		super();
+		log = Logger.getLogger(this.getClass());
 	}
 
 	public BCOpenCPN(IfBundle bundle, File bundleOutputDir)
@@ -79,7 +84,7 @@ public class BCOpenCPN extends ACBundleCreator
 	@Override
 	public void initializeBundle() throws IOException, BundleTestException
 	{
-		log.trace("START");
+		log.trace(OSMBStrs.RStr("START"));
 		File bundleOutputDir = ((OSMCBSettings) ACApp.getApp().getSettings()).getChartBundleOutputDirectory();
 		bundleOutputDir = new File(bundleOutputDir, STR_BUNDLE_TYPE);
 		OSMCBUtilities.mkDirs(bundleOutputDir);
@@ -105,7 +110,7 @@ public class BCOpenCPN extends ACBundleCreator
 	@Override
 	public void initializeMap() throws IOException
 	{
-		log.trace("START");
+		log.trace(OSMBStrs.RStr("START"));
 		// each map goes in its own folder BUT all maps are in the same folder 'ChartBundleRoot'
 		// NOAA has its own numbering scheme for the charts with more digits for smaller charts, but not a clear description to make subdivisions
 		super.initializeMap();
@@ -127,7 +132,7 @@ public class BCOpenCPN extends ACBundleCreator
 	@Override
 	public void createMap() throws MapCreationException, InterruptedException
 	{
-		log.trace("START");
+		log.trace(OSMBStrs.RStr("START"));
 		// the map is stored as a two file ensemble, one bsb file with a description and a kap file with the image data, so all tiles have to be put together
 		try
 		{
@@ -142,7 +147,7 @@ public class BCOpenCPN extends ACBundleCreator
 
 	protected void writeBsbFile()
 	{
-		log.trace("START");
+		log.trace(OSMBStrs.RStr("START"));
 		File bsbFile = new File(mOutputDir, mMap.getName() + ".bsb");
 		// !
 		// CRR/This electronic chart was produced under the authority of USA-NOAA/NOS.
@@ -289,7 +294,7 @@ public class BCOpenCPN extends ACBundleCreator
 
 	protected void writeKapFile() throws IOException
 	{
-		log.trace("START");
+		log.trace(OSMBStrs.RStr("START"));
 		OutputStream mFS = null;
 
 		Path mapFile = Files.createFile(mOutputDir.toPath().resolve(mMap.getName() + "_1.kap"));
@@ -344,7 +349,7 @@ public class BCOpenCPN extends ACBundleCreator
 
 	protected void writeMapHeader(OutputStream os, IfOSMPalette tPal) throws IOException
 	{
-		log.trace("START");
+		log.trace(OSMBStrs.RStr("START"));
 		int tileSize = mMap.getTileSize().width;
 		@SuppressWarnings("unused")
 		int zoom = mMap.getZoom();
@@ -444,7 +449,7 @@ public class BCOpenCPN extends ACBundleCreator
 		osw.write("IFM/7" + LINEEND);
 		// two variants are possible
 		// - we use a fixed colortable and match the pixels against the predefined color (quick and the same look in all charts)
-		// - we create a new colortable for each map by some sophisticated algorithm (technically preferred, but nyr)
+		// - we create a new colortable for each map by some sophisticated algorithm (technically preferred, currently used)
 		osw.write(tPal.asBSBStr());
 		osw.flush();
 		// write the separator before the image description
@@ -458,7 +463,6 @@ public class BCOpenCPN extends ACBundleCreator
 		String strCHF = null;
 		switch (mMap.getLayer().getZoomLvl())
 		{
-			case 7:
 			case 8:
 			case 9:
 				strCHF = "Overview";
@@ -473,7 +477,10 @@ public class BCOpenCPN extends ACBundleCreator
 				break;
 			case 16:
 			case 17:
+				strCHF = "Harbour";
+				break;
 			case 18:
+			case 19:
 				strCHF = "Berthing";
 				break;
 			default:
@@ -506,7 +513,7 @@ public class BCOpenCPN extends ACBundleCreator
 	 */
 	protected void writeMapImage(BufferedImage img, ImageOutputStream ios, IfOSMPalette tPal, long nPos)
 	{
-		log.trace("START");
+		log.trace(OSMBStrs.RStr("START"));
 		int nErrCnt = 0;
 		ArrayList<Long> tLIdx = new ArrayList<Long>(img.getHeight());
 		try
@@ -536,19 +543,6 @@ public class BCOpenCPN extends ACBundleCreator
 					ios.write(((nY >> 7) & 0x7F) | 0x80);
 				}
 				ios.write((nY) & 0x7F);
-				// if (nY < 0x80)
-				// ios.write(nY);
-				// else if (nY < 0x4000)
-				// {
-				// ios.write(((nY >> 7) & 0x7F) | 0x80);
-				// ios.write(nY & 0x7F);
-				// }
-				// else
-				// {
-				// ios.write(((nY >> 14) & 0x7F) | 0x80);
-				// ios.write(((nY >> 7) & 0x7F) | 0x80);
-				// ios.write(nY & 0x7F);
-				// }
 				// now look for encodable runs
 				for (int nX = 0; nX < img.getWidth(); nX++)
 				{
@@ -603,12 +597,13 @@ public class BCOpenCPN extends ACBundleCreator
 			}
 			// write the image data end marker
 			ios.writeInt(0);
+			// store the start of line index position into the table as the index of the last line ???? This is not neccessary for OpenCPN, but all libbsb based
+			// programs need it.
+			tLIdx.add(ios.getStreamPosition() + nPos);
 
 			// write the line offset index table. we use the tLIdx ArrayList instead of the original image lines to address.
 			// the last entry in the line index is the start of the line index itself.
 			// This can skip line 0, the we get an 'unindexed' entry with 0000 at the start of the line index.
-			// for (int nY = 0; nY < img.getHeight(); nY++)
-			// TODO store address of start of line index
 			for (int nY = 0; nY < tLIdx.size(); nY++)
 			{
 				long nIdx = tLIdx.get(nY);
@@ -617,8 +612,8 @@ public class BCOpenCPN extends ACBundleCreator
 				ios.write(((int) nIdx & 0x0000FF00) >> 8);
 				ios.write(((int) nIdx & 0x000000FF) >> 0);
 			}
-			// TODO write address of start of line index as last entry in line index
-			log.debug("finished writing line index with" + tLIdx.size() + " lines");
+			// adjusted for 'line index start' entry as last entry in the line index
+			log.debug("finished writing line index with " + (tLIdx.size() - 1) + " lines");
 			ios.close();
 			log.debug("finished writing image file for='" + mMap.getName() + "'");
 		}
@@ -635,7 +630,7 @@ public class BCOpenCPN extends ACBundleCreator
 	 */
 	protected void writeTestMapImage(IfMap map, BufferedImage img, ImageOutputStream ios, OSMAdaptivePalette tPal, long nPos)
 	{
-		log.trace("START");
+		log.trace(OSMBStrs.RStr("START"));
 		ArrayList<Long> tLIdx = new ArrayList<Long>(img.getHeight());
 		try
 		{
@@ -727,10 +722,9 @@ public class BCOpenCPN extends ACBundleCreator
 
 	protected BufferedImage createMapFromTiles() throws InterruptedException, MapCreationException
 	{
-		log.trace("START");
-		int tileSize = mMap.getTileSize().width;
-		int width = (mMap.getXMax() - mMap.getXMin() + 1) * tileSize;
-		int height = (mMap.getYMax() - mMap.getYMin() + 1) * tileSize;
+		log.trace(OSMBStrs.RStr("START"));
+		int width = (mMap.getXMax() - mMap.getXMin() + 1) * MP2MapSpace.TECH_TILESIZE;
+		int height = (mMap.getYMax() - mMap.getYMin() + 1) * MP2MapSpace.TECH_TILESIZE;
 		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D gc = img.createGraphics();
 		int tilex = 0;
@@ -744,34 +738,39 @@ public class BCOpenCPN extends ACBundleCreator
 			tiley = 0;
 			for (int y = mMap.getYMin(); y <= mMap.getYMax(); y++)
 			{
-				// checkUserAbort();
-				// bundleProgress.incMapCreationProgress();
-				try
+				BufferedImage tileImage = null;
+				Tile tile = null;
+				TileAddress tAddr = new TileAddress(x, y, mMap.getZoom());
+				// try to get the tile from the mtc
+				if ((tile = sTC.getTile(mMap.getMapSource(), tAddr)) != null)
 				{
-					BufferedImage tileImage = null;
-					Tile tile = null;
-					if ((tile = sTC.getTile(mMap.getMapSource(), x, y, mMap.getZoom())) != null)
+					if (tile.getTileState() == TileState.TS_LOADING)
+						log.warn("tried to load loading tile from mtc" + tile);
+					else
 						tileImage = tile.getImage();
-					else
-						tileImage = mMap.getMapSource().getTileImage(mMap.getZoom(), x, y);
-					if (tileImage != null)
-					{
-						log.trace(String.format("Tile x=%d y=%d ", tilex, tiley));
-						// mapTileWriter.writeTile(tilex, tiley, tileType, sourceTileData);
-						gc.drawImage(tileImage, tilex * tileSize, tiley * tileSize, tileSize, tileSize, null);
-					}
-					else
-					{
-						log.warn(String.format("Tile x=%d y=%d not found in tile archive - creating error tile", tilex, tiley));
-						// mapTileWriter.writeTile(tilex, tiley, tileType, emptyTileData);
-						tile = new Tile(mMap.getMapSource(), tilex, tiley, mMap.getZoom());
-						tile.setErrorImage();
-						gc.drawImage(tile.getImage(), tilex * tileSize, tiley * tileSize, tileSize, tileSize, null);
-					}
 				}
-				catch (IOException | TileException e)
+				if (tileImage == null)
 				{
-					throw new MapCreationException("Error creating map image: " + e.getMessage(), mMap, e);
+					// if the tile is not available in the mtc, get it from the tile store
+					tile = mMap.getMapSource().getNTileStore().getTile(tAddr);
+					if (tile.getTileState() == TileState.TS_LOADING)
+						log.warn("tried to load loading tile from tile store" + tile);
+					else
+						tileImage = tile.getImage();
+				}
+				if (tileImage != null)
+				{
+					log.trace(String.format("Tile x=%d y=%d ", tilex, tiley));
+					gc.drawImage(tileImage, tilex * MP2MapSpace.TECH_TILESIZE, tiley * MP2MapSpace.TECH_TILESIZE, MP2MapSpace.TECH_TILESIZE, MP2MapSpace.TECH_TILESIZE,
+					    null);
+				}
+				else
+				{
+					log.warn(String.format("Tile x=%d y=%d not found in tile archive - creating error tile", tilex, tiley));
+					tile = new Tile(mMap.getMapSource(), tilex, tiley, mMap.getZoom());
+					tile.setErrorImage();
+					gc.drawImage(tile.getImage(), tilex * MP2MapSpace.TECH_TILESIZE, tiley * MP2MapSpace.TECH_TILESIZE, MP2MapSpace.TECH_TILESIZE,
+					    MP2MapSpace.TECH_TILESIZE, null);
 				}
 				tiley++;
 			}

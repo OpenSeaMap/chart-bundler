@@ -12,20 +12,18 @@ public class OSMPaletteEntry implements Comparable<Object>
 	/**
 	 * 20140112 AH v1 initial version
 	 */
-	@SuppressWarnings("unused") // W #unused -> no need for serialVersionUID
-	private static final long serialVersionUID = 1L;
 
 	protected OSMColor mColor; // the color in the image
-	// protected int mCount; // the number of pixels of this color in the image
-	// protected int mColIdx; // the color index in the palette
+	protected int mCount; // the number of pixels of this color in the image
+	protected int mColIdx; // the color index in the palette
 	protected int mMapIdx = -1; // index of the color used in the mapped image
 
 	@SuppressWarnings("unused")
 	private OSMPaletteEntry()
 	{
 		mColor = new OSMColor(0);
-		// mCount = 0;
-		// mColIdx = 0;
+		mCount = 0;
+		mColIdx = 0;
 	}
 
 	/**
@@ -38,8 +36,8 @@ public class OSMPaletteEntry implements Comparable<Object>
 	public OSMPaletteEntry(OSMColor tCol, int nCnt, int nIdx)
 	{
 		mColor = tCol;
-		// mCount = nCnt;
-		// mColIdx = nIdx;
+		mCount = nCnt;
+		mColIdx = nIdx;
 	}
 
 	public OSMPaletteEntry(OSMColor tCol)
