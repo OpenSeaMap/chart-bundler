@@ -181,16 +181,16 @@ public class Logging
 			log.info("Platform: " + GUIExceptionHandler.prop("os.name") + " (" + GUIExceptionHandler.prop("os.version") + ")");
 			log.info("Java VM: " + GUIExceptionHandler.prop("java.vm.name") + " (" + GUIExceptionHandler.prop("java.runtime.version") + ")");
 			log.info(OSMCBStrs.RStr("RSTR_Directories") /**/
-					+ n + "  currentDir:      " + DirectoryManager.currentDir /**/
-					+ n + "  programDir:      " + DirectoryManager.programDir /**/
-					+ n + "  tempDir:         " + DirectoryManager.tempDir /**/
-					+ n + "  userHomeDir:     " + DirectoryManager.userHomeDir /**/
-					+ n + "  userSettingsDir: " + DirectoryManager.userSettingsDir /**/
-					+ n + "  userAppDataDir:  " + DirectoryManager.userAppDataDir /**/
-					+ n + "  catalogsDir:     " + pSets.getCatalogsDirectory() /**/
-					+ n + "  tileStoreDir:    " + pSets.getTileStoreDirectory() /**/
-					// + n + "  chartBundleDir:  " + pSets.getChartBundleOutputDirectory() /**/
-					+ n + "  mapSourcesDir:   " + pSets.getMapSourcesDirectory() /**/
+			    + n + "  currentDir:      " + DirectoryManager.currentDir /**/
+			    + n + "  programDir:      " + DirectoryManager.programDir /**/
+			    + n + "  tempDir:         " + DirectoryManager.tempDir /**/
+			    + n + "  userHomeDir:     " + DirectoryManager.userHomeDir /**/
+			    + n + "  userSettingsDir: " + DirectoryManager.userSettingsDir /**/
+			    + n + "  userAppDataDir:  " + DirectoryManager.userAppDataDir /**/
+			    + n + "  catalogsDir:     " + pSets.getCatalogsDirectory() /**/
+			    + n + "  tileStoreDir:    " + pSets.getTileStoreDirectory() /**/
+			// + n + " chartBundleDir: " + pSets.getChartBundleOutputDirectory() /**/
+			    + n + "  mapSourcesDir:   " + pSets.getMapSourcesDirectory() /**/
 			);
 			log.info("System console available: " + (System.console() != null));
 			String[] args = gApp.getArgs();

@@ -510,7 +510,7 @@ public class OSMFixedHSLPalette implements IfOSMPalette
 	}
 
 	@Override
-	public int getPID(OSMColor tColor)
+	public int getPIdx(OSMColor tColor)
 	{
 		return 0;
 	}

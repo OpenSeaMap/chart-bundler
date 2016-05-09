@@ -28,5 +28,5 @@ public interface IfOSMPalette
 	 * @param tColor
 	 * @return The index in the final color palette
 	 */
-	public abstract int getPID(OSMColor tColor);
+	public abstract int getPIdx(OSMColor tColor);
 }

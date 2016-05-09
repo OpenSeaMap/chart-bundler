@@ -559,11 +559,11 @@ public class BCOpenCPNZip extends ACBundleCreator
 				for (int nX = 0; nX < img.getWidth(); nX++)
 				{
 					int nCnt = 1;
-					int nPalIdx = tPal.getPID(new OSMColor(img.getRGB(nX, nY - 1)));
+					int nPalIdx = tPal.getPIdx(new OSMColor(img.getRGB(nX, nY - 1)));
 
 					// should compare the mapped colors
 					// while ((nX < img.getWidth() - 1) && (img.getRGB(nX + 1, nY - 1) == tCol.getRGB()))
-					while ((nX < img.getWidth() - 1) && (tPal.getPID(new OSMColor(img.getRGB(nX + 1, nY - 1))) == nPalIdx))
+					while ((nX < img.getWidth() - 1) && (tPal.getPIdx(new OSMColor(img.getRGB(nX + 1, nY - 1))) == nPalIdx))
 					{
 						nCnt++;
 						nX++;

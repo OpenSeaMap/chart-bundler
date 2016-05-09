@@ -456,7 +456,7 @@ public class OSMAdaptivePalette implements IfOSMPalette
 	}
 
 	@Override
-	public int getPID(OSMColor tColor)
+	public int getPIdx(OSMColor tColor)
 	{
 		int nIdx = mColorsHM.get(tColor).getPIdx();
 		return nIdx;

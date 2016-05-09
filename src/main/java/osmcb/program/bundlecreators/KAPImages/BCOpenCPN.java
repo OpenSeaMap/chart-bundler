@@ -54,6 +54,7 @@ import osmcb.program.bundlecreators.IfBundleCreatorName;
 import osmcb.utilities.OSMCBUtilities;
 import osmcb.utilities.image.IfOSMPalette;
 import osmcb.utilities.image.OSMAdaptivePalette;
+import osmcb.utilities.image.OSMCB2AdaptivePalette;
 import osmcb.utilities.image.OSMColor;
 
 @IfBundleCreatorName(value = "OpenCPN KAP bundle", type = "OpenCPN")
@@ -493,7 +494,7 @@ public class BCOpenCPN extends ACBundleCreator
 	protected IfOSMPalette makePalette(BufferedImage img)
 	{
 		log.trace("START");
-		OSMAdaptivePalette tPal = new OSMAdaptivePalette(img);
+		OSMCB2AdaptivePalette tPal = new OSMCB2AdaptivePalette(img);
 		// OSMFixedHSLPalette tPal = new OSMFixedHSLPalette(img);
 		// log.debug("final Palette:" + tPal.toString());
 		return tPal;
@@ -548,12 +549,12 @@ public class BCOpenCPN extends ACBundleCreator
 				{
 					int nCnt = 1;
 					// int nPalIdx = tPal.getPID(new OSMColor(img.getRGB(nX, nY - 1)));
-					int nPalIdx = tPal.getPID(new OSMColor(img.getRGB(nX, nY)));
+					int nPalIdx = tPal.getPIdx(new OSMColor(img.getRGB(nX, nY)));
 
 					// should compare the mapped colors. The current pixel and the next one.
 					// while ((nX < img.getWidth() - 1) && (img.getRGB(nX + 1, nY - 1) == tCol.getRGB()))
 					// while ((nX < img.getWidth() - 1) && (tPal.getPID(new OSMColor(img.getRGB(nX + 1, nY - 1))) == nPalIdx))
-					while ((nX < img.getWidth() - 1) && (tPal.getPID(new OSMColor(img.getRGB(nX + 1, nY))) == nPalIdx))
+					while ((nX < img.getWidth() - 1) && (tPal.getPIdx(new OSMColor(img.getRGB(nX + 1, nY))) == nPalIdx))
 					{
 						nCnt++;
 						nX++;

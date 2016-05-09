@@ -7,7 +7,7 @@ package osmcb.utilities.image;
  * @author humbach
  *
  */
-public class OSMPaletteEntry implements Comparable<Object>
+public class OSMCB2PaletteEntry implements Comparable<Object>
 {
 	/**
 	 * 20140112 AH v1 initial version
@@ -17,9 +17,10 @@ public class OSMPaletteEntry implements Comparable<Object>
 	protected int mCount; // the number of pixels of this color in the image
 	protected int mColIdx; // the color index in the palette
 	protected int mMapIdx = -1; // index of the color used in the mapped image
+	protected int mColID; // the 'sequential' ID of the color
 
 	@SuppressWarnings("unused")
-	private OSMPaletteEntry()
+	private OSMCB2PaletteEntry()
 	{
 		mColor = new OSMColor(0);
 		mCount = 0;
@@ -33,14 +34,14 @@ public class OSMPaletteEntry implements Comparable<Object>
 	 * @param tCol
 	 * @param nCnt
 	 */
-	public OSMPaletteEntry(OSMColor tCol, int nCnt, int nIdx)
+	public OSMCB2PaletteEntry(OSMColor tCol, int nCnt, int nIdx)
 	{
 		mColor = tCol;
 		mCount = nCnt;
 		mColIdx = nIdx;
 	}
 
-	public OSMPaletteEntry(OSMColor tCol)
+	public OSMCB2PaletteEntry(OSMColor tCol)
 	{
 		mColor = tCol;
 	}
@@ -52,7 +53,7 @@ public class OSMPaletteEntry implements Comparable<Object>
 	 *          - the color to be mapped to this
 	 * @return the new usage count of this
 	 */
-	public int map(OSMPaletteEntry tPE)
+	public int map(OSMCB2PaletteEntry tPE)
 	{
 		tPE.setMIndex(mColIdx);
 		mCount += tPE.getCount();
@@ -144,7 +145,7 @@ public class OSMPaletteEntry implements Comparable<Object>
 		{
 			return false;
 		}
-		OSMPaletteEntry other = (OSMPaletteEntry) obj;
+		OSMCB2PaletteEntry other = (OSMCB2PaletteEntry) obj;
 		if (mColor == null)
 		{
 			if (other.mColor != null)

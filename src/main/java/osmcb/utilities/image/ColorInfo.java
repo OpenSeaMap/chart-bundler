@@ -9,7 +9,7 @@ package osmcb.utilities.image;
 public class ColorInfo
 {
 	protected OSMColor mMColor = null; // the mapping target color
-	protected int mCount = 0; // the usage count if this color is not mapped
+	protected int mCount = 1; // the usage count if this color is not mapped
 	protected OSMColor mBMColor = null; // the 'best matching' color
 	protected double mDist = 1e100; // the 'optical distance' to the best matching color
 	protected int mPIdx = 0; // index of this color in the final palette
@@ -26,6 +26,7 @@ public class ColorInfo
 	 * Creates a new color info as a mapping to an already known target color.
 	 * 
 	 * @param tMColor
+	 *          The target color.
 	 */
 	public ColorInfo(OSMColor tMColor)
 	{
@@ -43,6 +44,11 @@ public class ColorInfo
 		mCount = nCount;
 	}
 
+	/**
+	 * The best matching color, which is not mapped by itself.
+	 * 
+	 * @return The target color.
+	 */
 	public OSMColor getBestMatch()
 	{
 		return mBMColor;
@@ -107,6 +113,9 @@ public class ColorInfo
 		return prevCount;
 	}
 
+	/**
+	 * @return The usage count of this color.
+	 */
 	public int getCount()
 	{
 		return mCount;
