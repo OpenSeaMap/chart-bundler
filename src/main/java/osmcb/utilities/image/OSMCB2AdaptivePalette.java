@@ -319,7 +319,10 @@ public class OSMCB2AdaptivePalette implements IfOSMPalette
 		{
 			// evade collision
 			log.debug("optical distance already in map. " + dDiff);
-			dDiff += (mMatchesTM.higherKey(dDiff) - dDiff) / 2;
+			Double dHK = mMatchesTM.higherKey(dDiff);
+			if (dHK == null)
+				dHK = 15.0;
+			dDiff += (dHK - dDiff) / 2;
 		}
 		mMatchesTM.put(dDiff, new OSMCB2ColorPair(tMCol, tTCol));
 	}
