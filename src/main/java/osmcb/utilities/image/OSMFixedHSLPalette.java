@@ -297,7 +297,7 @@ public class OSMFixedHSLPalette implements IfOSMPalette
 			{
 				OSMPaletteEntry tSPE = mColorList.get(nSCol);
 
-				if (tTPE.getColor().qDist(tSPE.getColor()) < 17)
+				if (tTPE.getColor().qDiff(tSPE.getColor()) < 17)
 				{
 					// map(tTPE, tSPE);
 				}

@@ -51,7 +51,6 @@ import osmb.utilities.OSMBStrs;
 import osmcb.OSMCBSettings;
 import osmcb.OSMCBStrs;
 import osmcb.program.bundle.ACBundleProgress;
-import osmcb.program.bundle.BundleOutputFormat;
 import osmcb.program.bundle.BundleTestException;
 import osmcb.program.bundle.IfBundle;
 import osmcb.program.bundle.MapCreationException;
@@ -376,14 +375,10 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 				Thread.sleep(1000);
 			}
 			log.debug("after shutdown(), completed tasks=" + mExec.getCompletedTaskCount() + ", total jobs=" + mExec.getTaskCount());
-			// only if the output format is not 'tilestore only' we actually create a map
-			if (!BundleOutputFormat.TILESTORE.equals(mBundle.getOutputFormat()))
-			{
-				// create the map from all downloaded tiles
-				createMap();
-				// wait for the map creation to finish
-				finishMap();
-			}
+			// create the map from all downloaded tiles
+			createMap();
+			// wait for the map creation to finish
+			finishMap();
 		}
 		catch (IOException e)
 		{

@@ -54,7 +54,7 @@ import osmcb.program.bundlecreators.IfBundleCreatorName;
 import osmcb.utilities.OSMCBUtilities;
 import osmcb.utilities.image.IfOSMPalette;
 import osmcb.utilities.image.OSMAdaptivePalette;
-import osmcb.utilities.image.OSMCB2AdaptivePalette;
+import osmcb.utilities.image.OSMCB3AdaptivePalette;
 import osmcb.utilities.image.OSMColor;
 
 @IfBundleCreatorName(value = "OpenCPN KAP bundle", type = "OpenCPN")
@@ -494,7 +494,7 @@ public class BCOpenCPN extends ACBundleCreator
 	protected IfOSMPalette makePalette(BufferedImage img)
 	{
 		log.trace("START");
-		OSMCB2AdaptivePalette tPal = new OSMCB2AdaptivePalette(img);
+		OSMCB3AdaptivePalette tPal = new OSMCB3AdaptivePalette(img);
 		// OSMFixedHSLPalette tPal = new OSMFixedHSLPalette(img);
 		// log.debug("final Palette:" + tPal.toString());
 		return tPal;

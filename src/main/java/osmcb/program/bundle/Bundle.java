@@ -1,10 +1,44 @@
 package osmcb.program.bundle;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElements;
+import javax.xml.bind.annotation.XmlRootElement;
+
 import osmb.program.catalog.Catalog;
+import osmb.program.map.IfLayer;
+import osmb.program.map.IfMap;
 import osmcb.program.bundlecreators.ACBundleCreator;
 
 public class Bundle extends Catalog implements IfBundle
 {
+	protected class MapDescriptor
+	{
+		@XmlAttribute
+		protected String name = null;
+		@XmlAttribute
+		protected String number = null;
+	}
+
+	@XmlRootElement
+	protected class BundleDescriptor
+	{
+		@XmlAttribute
+		protected String getName()
+		{
+			return name;
+		};
+
+		protected int version = 1;
+
+		@XmlElements(
+		{ @XmlElement(name = "map", type = MapDescriptor.class) })
+		protected List<IfMap> maps = new LinkedList<IfMap>();
+	}
+
 	protected BundleOutputFormat mBOF;
 
 	/**
@@ -46,6 +80,39 @@ public class Bundle extends Catalog implements IfBundle
 	public BundleOutputFormat getOutputFormat()
 	{
 		return mBOF;
+	}
+
+	/**
+	 * @see osmb.program.catalog.Catalog#calculateTilesToLoad()
+	 */
+	@Override
+	public long calculateTilesToLoad()
+	{
+		long tiles = 0;
+
+		for (IfLayer layer : layers)
+		{
+			if (mBOF.filterLayers(layer))
+				tiles += layer.calculateTilesToLoad();
+		}
+		log.trace("catalog=" + getName() + ", tiles=" + tiles);
+		return tiles;
+	}
+
+	/**
+	 * @see osmb.program.catalog.Catalog#calcMapsToCompose()
+	 */
+	@Override
+	public long calcMapsToCompose()
+	{
+		long nMaps = 0;
+		for (IfLayer layer : layers)
+		{
+			if (mBOF.filterLayers(layer))
+				nMaps += layer.getMapCount();
+		}
+		log.trace("catalog=" + getName() + ", maps=" + nMaps);
+		return nMaps;
 	}
 
 	/**

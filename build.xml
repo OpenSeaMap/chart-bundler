@@ -18,7 +18,7 @@
 	<property name="osmcb.dir" value="../OSeaMChartBundler" />
 	<property name="src.dir" value="src/main/java" />
 <!--	<property name="resrc.dir" value="src/osmcd/resources" /> -->
-	<property name="build.dir" value="build" />
+	<property name="build.dir" value="bin" />
 	<property name="osmcb.srcdir" value="${osmcb.dir}/src/main/java" />
 	<property name="mp.srcdir" value="${osmcb.srcdir}/osmcb/mapsources/mappacks" />
 	<property name="mp.builddir" value="${osmcb.dir}/build" />
@@ -27,7 +27,7 @@
 	</tstamp>
 
 	<!-- Java target version -->
-	<property name="java-target" value="1.7" />
+	<property name="java-target" value="1.8" />
 	<!-- version dependent libraries -->
 	<property name="je-version" value="3.3.93" />
 	<property name="sqlite-version" value="3.8.11.1" />
@@ -74,11 +74,11 @@
 
 	<target name="build">
 		<mkdir dir="${build.dir}" />
-		<!-- Compile the starter class for Java 1.5 (shows an verbose error if the JRE requirements are not met -->
+		<!-- Compile the starter class for Java ${java-target} (shows an verbose error if the JRE requirements are not met -->
 		<javac srcdir="${src.dir}"
 				destdir="${build.dir}"
-				target="${java-target}"
-				source="${java-target}"
+			target="${java-target}"
+			source="${java-target}"
 				debug="true"
 				includeantruntime="false"
 				encoding="UTF-8"
@@ -191,7 +191,7 @@
 	</target>
 -->
 
-	<target name="create_jar">
+	<target name="create_jar" depends="build" >
 		<delete file="${jar.name}" />
 		<jar destfile="${jar.name}" filesetmanifest="mergewithoutmain">
 			<manifest>
@@ -324,7 +324,7 @@
 		</propertyfile>
 	</target>
 
-	<target name="create_release" description="Packs all necessary files for the binary release into one zip archive">
+	<target name="create_release"  depends="create_jar" description="Packs all necessary files for the binary release into one zip archive">
 		<zip destfile="${zip.name}" update="false">
 			<fileset dir="./">
 				<include name="${jar.name}" />
@@ -342,7 +342,7 @@
 		</zip>
 	</target>
 
-	<target name="create_release_src" description="Packs all necessary files for the source code release into one zip archive">
+	<target name="create_release_src"  depends="create_jar" description="Packs all necessary files for the source code release into one zip archive">
 		<zip destfile="${zip_src.name}" update="false">
 			<fileset dir="./">
 				<include name="src/**" />

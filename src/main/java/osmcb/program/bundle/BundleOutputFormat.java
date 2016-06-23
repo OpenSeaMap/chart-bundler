@@ -24,6 +24,9 @@ import java.util.Vector;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.apache.log4j.Logger;
+
+import osmb.program.map.IfLayer;
 import osmcb.program.bundlecreators.ACBundleCreator;
 import osmcb.program.bundlecreators.BCTileStoreDownload;
 import osmcb.program.bundlecreators.IfBundleCreatorName;
@@ -41,12 +44,13 @@ import osmcb.program.bundlecreators.TrekBuddy.BCTrekBuddyTared;
 @XmlJavaTypeAdapter(BundleOutputFormatAdapter.class)
 public class BundleOutputFormat implements Comparable<BundleOutputFormat>
 {
+	protected static Logger log = Logger.getLogger(BundleOutputFormatAdapter.class);
 	public static List<BundleOutputFormat> FORMATS;
-	public static final BundleOutputFormat TILESTORE = createByClass(BCTileStoreDownload.class);
 
 	static
 	{
 		FORMATS = new ArrayList<BundleOutputFormat>(40);
+		FORMATS.add(createByClass(BCTileStoreDownload.class));
 		FORMATS.add(createByClass(BCTrekBuddy.class));
 		FORMATS.add(createByClass(BCTrekBuddyTared.class));
 		FORMATS.add(createByClass(BCOpenCPN.class));
@@ -98,7 +102,6 @@ public class BundleOutputFormat implements Comparable<BundleOutputFormat>
 		// FORMATS.add(createByClass(BCTwoNavRMAP.class));
 		// FORMATS.add(createByClass(BCUblox.class));
 		// FORMATS.add(createByClass(BCViewranger.class));
-		FORMATS.add(TILESTORE);
 	}
 
 	/**
@@ -132,7 +135,7 @@ public class BundleOutputFormat implements Comparable<BundleOutputFormat>
 	{
 		IfBundleCreatorName acName = bundleCreatorClass.getAnnotation(IfBundleCreatorName.class);
 		if (acName == null)
-			throw new RuntimeException("ACBundleCreator " + bundleCreatorClass.getName() + " has no name");
+			throw new RuntimeException("ACBundleCreator '" + bundleCreatorClass.getName() + "' has no name");
 		String typeName = acName.type();
 		if (typeName == null || typeName.length() == 0)
 			typeName = bundleCreatorClass.getSimpleName();
@@ -142,6 +145,7 @@ public class BundleOutputFormat implements Comparable<BundleOutputFormat>
 
 	private BundleOutputFormat(Class<? extends ACBundleCreator> bundleCreatorClass, String typeName, String name)
 	{
+		log = Logger.getLogger(this.getClass());
 		this.setBundleCreatorClass(bundleCreatorClass);
 		this.typeName = typeName;
 		this.name = name;
@@ -201,5 +205,13 @@ public class BundleOutputFormat implements Comparable<BundleOutputFormat>
 	public void setBundleCreatorClass(Class<? extends ACBundleCreator> bundleCreatorClass)
 	{
 		this.bundleCreatorClass = bundleCreatorClass;
+	}
+
+	public boolean filterLayers(IfLayer layer)
+	{
+		boolean bOK = true;
+		if (BCOpenCPN2.class == bundleCreatorClass)
+			bOK = ((layer.getZoomLvl() & 0x1) == 0x0);
+		return bOK;
 	}
 }

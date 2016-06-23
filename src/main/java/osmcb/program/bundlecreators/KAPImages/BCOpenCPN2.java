@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import osmb.program.ACApp;
+import osmb.program.map.IfLayer;
 import osmb.program.map.IfMap;
 import osmb.utilities.OSMBStrs;
 import osmcb.OSMCBSettings;
@@ -57,6 +58,44 @@ public class BCOpenCPN2 extends BCOpenCPN
 	public BCOpenCPN2(IfBundle bundle, File bundleOutputDir)
 	{
 		super(bundle, bundleOutputDir);
+	}
+
+	// general bundle actions
+	/**
+	 * chance to test a bundle before starting the creation
+	 * 
+	 * @throws BundleTestException
+	 */
+	@Override
+	protected void testBundle() throws BundleTestException
+	{
+		log.trace(OSMBStrs.RStr("START"));
+		try
+		{
+			for (IfLayer layer : mBundle)
+			{
+				for (IfMap map : layer)
+				{
+					if ((map.getZoom() & 0x1) == 0x0)
+					{
+						if (!testMapSource(map.getMapSource()))
+							throw new BundleTestException(
+							    "The selected bundle output format \"" + mBundle.getOutputFormat() + "\" does not support the map source \"" + map.getMapSource() + "\"");
+					}
+				}
+			}
+			log.info("bundle with " + mBundle.calcMapsToCompose() + " maps, " + mBundle.calculateTilesToLoad() + " tiles");
+			log.trace("bundle successfully tested");
+		}
+		catch (BundleTestException e)
+		{
+			throw e;
+		}
+		catch (Exception e)
+		{
+			throw new BundleTestException(e);
+		}
+		log.trace("bundle='" + mBundle.getName() + "' tested");
 	}
 
 	/**

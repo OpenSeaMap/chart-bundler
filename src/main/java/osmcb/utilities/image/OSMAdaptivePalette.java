@@ -183,7 +183,7 @@ public class OSMAdaptivePalette implements IfOSMPalette
 					Map.Entry<OSMColor, ColorInfo> tSPE = iSrcColor.next();
 					if (tSPE != tPE)
 					{
-						if ((tSPE.getValue().getCount() > 0) && (tPE.getKey().qDist(tSPE.getKey()) < 17))
+						if ((tSPE.getValue().getCount() > 0) && (tPE.getKey().qDiff(tSPE.getKey()) < 17))
 						{
 							// map the source color to the target
 							// tPE.getValue().incCount(tSPE.getValue().setMColor(tPE.getKey()));

@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import osmb.utilities.OSMBStrs;
 import osmcb.OSMCBStrs;
 
 public class OSMCB2ColorMap
@@ -142,7 +143,6 @@ public class OSMCB2ColorMap
 			{
 				if (nInfo.mCID.equals(nCID))
 					return nInfo;
-				indexOf(nInfo);
 			}
 			return null;
 		}
@@ -154,13 +154,14 @@ public class OSMCB2ColorMap
 		 */
 		private Integer indexByCID(Integer nCID)
 		{
-			Integer nIdx;
-			for (nIdx = 0; nIdx < size(); nIdx++)
+			// Integer nIdx;
+			// for (nIdx = 0; nIdx < size(); nIdx++)
+			for (OSMCB2UsageInfo nInfo : this)
 			{
-				if (get(nIdx).mCID.equals(nCID))
-					return nIdx;
+				if (nInfo.mCID.equals(nCID))
+					return indexOf(nInfo);
 			}
-			log.debug("color id=" + nCID + " not found. Idx=" + nIdx);
+			log.debug("color id=" + nCID + " not found");
 			return null;
 		}
 
@@ -219,9 +220,6 @@ public class OSMCB2ColorMap
 				add(nTgtIdx, tUInf);
 				log.trace("added: UI[" + nTgtIdx + "]=" + get(nTgtIdx) + ", found=" + bFound);
 			}
-			// insert at the correct position
-			// nIdx = search2Add(tUInf.mCnt);
-			// log.debug("add: UI[" + nIdx + "]=" + get(nIdx) + ", found=" + bFound);
 			return nCnt;
 		}
 
@@ -329,7 +327,7 @@ public class OSMCB2ColorMap
 	}
 
 	/**
-	 * Adds the specified color to the end of the map if it does not yet exist. A usage count of 1 is assumed.
+	 * Adds one pixel of the specified color to the end of the map if it does not yet exist. A usage count of 1 is assumed.
 	 * Otherwise the usage count of the existing entry is incremented by 1.
 	 * 
 	 * @param tColor
@@ -337,21 +335,36 @@ public class OSMCB2ColorMap
 	 */
 	public int addPixel(OSMColor tColor)
 	{
-		// log.trace(OSMBStrs.RStr("START"));
+		log.trace(OSMBStrs.RStr("START"));
+		return addPixels(tColor, 1);
+	}
+
+	/**
+	 * Adds nCnt pixels of the specified color to the map if it does not yet exist. A usage count of nCnt is assumed.
+	 * Otherwise the usage count of the existing entry is incremented by nCnt.
+	 * 
+	 * @param tColor
+	 * @param nCnt
+	 * @return The new color ID (or the current ID if the color already existed in map before).
+	 */
+	public int addPixels(OSMColor tColor, Integer nCnt)
+	{
+		log.trace(OSMBStrs.RStr("START"));
 		int nCID = mHM.size();
-		Integer nCnt = null;
 		if (mHM.containsKey(tColor))
 		{
-			log.trace("color RGB(" + tColor.toStringRGB() + ") should be in map, increment usage count");
+			if (log.isTraceEnabled())
+				log.trace("color RGB(" + tColor.toStringRGB() + ") should be in map, increment usage count");
 			try
 			{
 				nCID = mHM.get(tColor);
 				OSMCB2ColorInfo tCI = mCL.get(nCID);
 				if (tCI != null)
 				{
-					nCnt = tCI.mCnt++;
-					mUL.incCntByCID(nCID);
-					// log.trace("usage incremented RGB(" + tColor.toStringRGB() + "): " + mCL + ", " + mUL + ", ID=" + nCID + ", Cnt=" + nCnt);
+					tCI.mCnt += nCnt;
+					mUL.incCntByCID(nCID, nCnt);
+					if (log.isTraceEnabled())
+						log.trace("usage incremented RGB(" + tColor.toStringRGB() + "): " + mCL + ", " + mUL + ", ID=" + nCID + ", Cnt=" + nCnt);
 				}
 				else
 					log.debug("Unused color=" + tColor);
@@ -368,10 +381,12 @@ public class OSMCB2ColorMap
 		else
 		{
 			mHM.put(tColor, nCID);
-			mCL.add(new OSMCB2ColorInfo(tColor, nCID, 1));
-			mUL.append(new OSMCB2UsageInfo(1, nCID));
-			// log.debug("color added: " + mCL + ", " + mUL + ", ID=" + nCID + ", Cnt=" + 1);
-			// log.trace("RGB(" + tColor.toStringRGB() + ") added: " + mCL + ", " + mUL + ", ID=" + nCID + ", Cnt=" + 1);
+			mCL.add(new OSMCB2ColorInfo(tColor, nCID, nCnt));
+			mUL.append(new OSMCB2UsageInfo(nCnt, nCID));
+			if (log.isTraceEnabled())
+				log.trace("RGB(" + tColor.toStringRGB() + ") added: " + mCL + ", " + mUL + ", ID=" + nCID + ", Cnt=" + nCnt);
+			else if (log.isDebugEnabled())
+				log.debug("color added: ID=" + nCID + ", Cnt=" + nCnt);
 		}
 		return nCID;
 	}
@@ -382,7 +397,7 @@ public class OSMCB2ColorMap
 	 */
 	public Integer getCID(OSMColor tColor)
 	{
-		// log.trace(OSMBStrs.RStr("START"));
+		log.trace(OSMBStrs.RStr("START"));
 		return mHM.get(tColor);
 	}
 
@@ -392,7 +407,7 @@ public class OSMCB2ColorMap
 	 */
 	public OSMColor getColor(Integer nCID)
 	{
-		// log.trace(OSMBStrs.RStr("START"));
+		log.trace(OSMBStrs.RStr("START"));
 		OSMColor tColor = null;
 		try
 		{
@@ -421,11 +436,11 @@ public class OSMCB2ColorMap
 
 	/**
 	 * @param tColor
-	 * @return The ID of the specified color or of the color it is mapped to.
+	 * @return The palette index of the specified color or of the color it is finally mapped to.
 	 */
 	public Integer getMPIdx(OSMColor tColor)
 	{
-		// log.trace(OSMBStrs.RStr("START"));
+		log.trace(OSMBStrs.RStr("START"));
 		Integer nCID = getMCID(tColor);
 		if (nCID == null)
 			nCID = getCID(tColor);
@@ -444,7 +459,7 @@ public class OSMCB2ColorMap
 	 */
 	public Integer getCnt(OSMColor tColor)
 	{
-		// log.trace(OSMBStrs.RStr("START"));
+		log.trace(OSMBStrs.RStr("START"));
 		Integer nCnt = 0;
 		try
 		{
@@ -464,7 +479,7 @@ public class OSMCB2ColorMap
 	 */
 	public Integer getCnt(Integer nCID)
 	{
-		// log.trace(OSMBStrs.RStr("START"));
+		log.trace(OSMBStrs.RStr("START"));
 		Integer nCnt = 0;
 		try
 		{
@@ -483,7 +498,7 @@ public class OSMCB2ColorMap
 	 */
 	public Integer getMCID(OSMColor tColor)
 	{
-		// log.trace(OSMBStrs.RStr("START"));
+		log.trace(OSMBStrs.RStr("START"));
 		Integer nMCID = getCID(tColor);
 		try
 		{
