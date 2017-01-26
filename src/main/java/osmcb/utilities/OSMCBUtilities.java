@@ -35,6 +35,9 @@ import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.channels.FileChannel;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.sql.SQLException;
@@ -43,6 +46,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.text.ParsePosition;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -64,6 +68,7 @@ import osmb.program.Logging;
 import osmb.program.tiles.TileImageType;
 import osmb.utilities.Charsets;
 import osmb.utilities.file.DirectoryFileFilter;
+import osmb.utilities.path.CatalogFilter;
 import osmcb.OSMCBApp;
 import osmcb.OSMCBOutOfMemoryException;
 import osmcb.OSMCBStrs;
@@ -874,4 +879,43 @@ public class OSMCBUtilities
 		return Integer.parseInt(m.group(1));
 	}
 
+	/**
+	 * 
+	 */
+	public static List<String> listDirectory(Path tP)
+	{
+		List<String> fileNames = new ArrayList<>();
+		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(tP))
+		{
+			for (Path path : directoryStream)
+			{
+				fileNames.add("\r" + path.toString());
+			}
+		}
+		catch (IOException ex)
+		{
+		}
+		return fileNames;
+	}
+
+	/**
+	 * 
+	 */
+	public static List<String> listCatalogs(Path tP)
+	{
+		List<String> fileNames = new ArrayList<>();
+		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(tP, new CatalogFilter()))
+		{
+			for (Path path : directoryStream)
+			{
+				log.debug(path.subpath(path.getNameCount() - 1, path.getNameCount()).toString() + ": "
+				    + path.subpath(path.getNameCount() - 1, path.getNameCount()).toString().endsWith("xml"));
+				fileNames.add("\r" + path.toString());
+			}
+		}
+		catch (IOException ex)
+		{
+		}
+		return fileNames;
+	}
 }

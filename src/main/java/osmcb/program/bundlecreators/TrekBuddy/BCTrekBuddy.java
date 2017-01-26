@@ -30,6 +30,8 @@ import java.util.Locale;
 
 import javax.imageio.ImageIO;
 
+import org.apache.log4j.Logger;
+
 import osmb.mapsources.ACMapSource;
 import osmb.mapsources.TileAddress;
 //W #mapSpace import osmb.mapsources.mapspace.MercatorPower2MapSpace;
@@ -54,6 +56,7 @@ public class BCTrekBuddy extends ACBundleCreator
 	public BCTrekBuddy()
 	{
 		super();
+		log = Logger.getLogger(this.getClass());
 	}
 
 	public BCTrekBuddy(IfBundle bundle, File bundleOutputDir)

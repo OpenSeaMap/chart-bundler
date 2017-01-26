@@ -24,6 +24,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import osmb.program.ACApp;
 import osmcb.OSMCBSettings;
 import osmcb.program.bundle.BundleTestException;
@@ -40,6 +42,7 @@ public class BCTrekBuddyTared extends BCTrekBuddy
 	public BCTrekBuddyTared()
 	{
 		super();
+		log = Logger.getLogger(this.getClass());
 	}
 
 	public BCTrekBuddyTared(IfBundle bundle, File bundleOutputDir)

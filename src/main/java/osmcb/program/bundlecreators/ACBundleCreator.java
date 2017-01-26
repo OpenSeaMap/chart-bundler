@@ -338,7 +338,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 			log.trace("after finishLayer()");
 			jobFinishedSuccessfully(0);
 			log.info("layer='" + mLayer.getName() + "' finished");
-			log.info("layer '" + mLayer.getName() + "' of " + mBundle.getLayers() + " finished");
+			// log.info("layer '" + mLayer.getName() + "' of " + mBundle.getLayers() + " finished");
 		}
 		catch (IOException | InterruptedException e)
 		{
@@ -348,12 +348,12 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	}
 
 	/**
-	 * Is called for each map. No tests are performed because the bundle is already declared for ok.
+	 * Is called for each map. No tests are performed because the bundle is already declared for being ok.
 	 * It actually creates the layer in a three step process.
 	 * - initializeMap(); creates the necessary directories etc...
 	 * - downloadMapTiles(); downloads all tiles which are not yet in the tile store available.
-	 * - createMap(); actually build a map (usually one file, but some formats handle that different) from the tiles.
-	 * - finishMap();
+	 * - createMap(); actually build a map (usually one single file, but some bundle formats handle that different) from the tiles.
+	 * - finishMap(); do necessary clean up and packaging.
 	 */
 	protected void runMap()
 	{
@@ -666,7 +666,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 		log.trace(OSMBStrs.RStr("START"));
 		sBundleProgress.finishLayer(mLayer);
 		log.info("layer='" + mLayer.getName() + "' finished");
-		mLayer = null;
+		// mLayer = null;
 	}
 
 	public void initializeMap() throws IOException

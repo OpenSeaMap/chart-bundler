@@ -17,6 +17,7 @@
 package osmcb;
 
 import java.io.File;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.xml.bind.JAXBException;
@@ -36,6 +37,7 @@ import osmcb.program.ProgramInfo;
 import osmcb.program.bundle.Bundle;
 import osmcb.program.bundle.BundleOutputFormat;
 import osmcb.program.bundlecreators.ACBundleCreator;
+import osmcb.utilities.OSMCBUtilities;
 
 /**
  * main starter class
@@ -95,6 +97,10 @@ public class OSMCBApp extends ACConsoleApp
 			ACTileStore.initialize();
 			EnvironmentSetup.upgrade();
 			Logging.logSystemInfo();
+
+			// log.info(FileSystemProvider.installedProviders());
+			// no 7zip fs available
+
 			runWithoutMainGUI();
 			Thread.sleep(20000);
 			return 0;
@@ -107,14 +113,22 @@ public class OSMCBApp extends ACConsoleApp
 
 	private void runWithoutMainGUI()
 	{
-		try
+		List<String> lCatalogs = OSMCBUtilities.listCatalogs(((OSMCBSettings) gApp.getSettings()).getCatalogsDirectory().toPath());
+		while (!lCatalogs.isEmpty())
 		{
-			createBundle(mCmdlParser.getOptionValue(new StringOption('c', "create"), "OSM-Std"),
-			    mCmdlParser.getOptionValue(new StringOption('f', "format"), "OpenCPN-KAP"));
-		}
-		catch (Exception e)
-		{
-			GUIExceptionHandler.processException(e);
+			try
+			{
+				String strCat = lCatalogs.remove(0);
+				// createBundle(mCmdlParser.getOptionValue(new StringOption('c', "create"), "OSM-Std"),
+				// mCmdlParser.getOptionValue(new StringOption('f', "format"), "OpenCPN-KAP"));
+				log.info(strCat);
+				// createBundle(strCat, mCmdlParser.getOptionValue(new StringOption('f', "format"), "OpenCPN-KAP"));
+				wait();
+			}
+			catch (Exception e)
+			{
+				GUIExceptionHandler.processException(e);
+			}
 		}
 	}
 

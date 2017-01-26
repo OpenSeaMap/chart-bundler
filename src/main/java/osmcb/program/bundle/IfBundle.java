@@ -23,7 +23,6 @@ import osmcb.program.bundlecreators.ACBundleCreator;
  * The bundle is a catalog to be written in a specific offline chart package format
  * 
  * @author humbach
- *
  */
 public interface IfBundle extends IfCatalog
 {
