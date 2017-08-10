@@ -18,6 +18,8 @@ package osmcb.program.bundlecreators;
 
 import java.io.IOException;
 
+import osmb.program.tiles.Tile;
+
 public interface IfMapTileWriter
 {
 	/**
@@ -35,4 +37,6 @@ public interface IfMapTileWriter
 	public void writeTile(int tilex, int tiley, String tileType, byte[] tileData) throws IOException;
 
 	public void finalizeMap() throws IOException;
+
+	public void writeTile(int tilex, int tiley, String tileType, Tile tile) throws IOException;
 }

@@ -16,6 +16,8 @@
  ******************************************************************************/
 package osmcb.program.bundlecreators.TrekBuddy;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -30,10 +32,16 @@ import java.util.Locale;
 
 import javax.imageio.ImageIO;
 
+import org.apache.log4j.Logger;
+
 import osmb.mapsources.ACMapSource;
+import osmb.mapsources.MP2MapSpace;
 import osmb.mapsources.TileAddress;
 //W #mapSpace import osmb.mapsources.mapspace.MercatorPower2MapSpace;
 import osmb.program.ACApp;
+import osmb.program.tiles.Tile;
+import osmb.program.tiles.Tile.TileState;
+import osmb.utilities.OSMBStrs;
 import osmb.utilities.geo.GeoUtils;
 import osmcb.OSMCBSettings;
 import osmcb.program.bundle.BundleTestException;
@@ -48,12 +56,14 @@ import osmcb.utilities.OSMCBUtilities;
 // @SupportedTIParameters(names = {Name.format, Name.height, Name.width})
 public class BCTrekBuddy extends ACBundleCreator
 {
+	protected static final String STR_BUNDLE_TYPE = "TrekBuddy";
 	protected static final String FILENAME_PATTERN = "t_%d_%d.%s";
 	protected IfMapTileWriter mapTileWriter;
 
 	public BCTrekBuddy()
 	{
 		super();
+		log = Logger.getLogger(this.getClass());
 	}
 
 	public BCTrekBuddy(IfBundle bundle, File bundleOutputDir)
@@ -89,7 +99,8 @@ public class BCTrekBuddy extends ACBundleCreator
 		bundleOutputDir = new File(bundleOutputDir, "TrekBuddy-Atlas");
 		OSMCBUtilities.mkDirs(bundleOutputDir);
 		SimpleDateFormat sdf = new SimpleDateFormat(STR_BUFMT);
-		String bundleDirName = "OSM-TrekBuddy-" + mBundle.getName() + "-" + sdf.format(new Date());
+		mBundle.setBaseName("OSM-" + STR_BUNDLE_TYPE + "-" + mBundle.getName());
+		String bundleDirName = mBundle.getBaseName() + "-" + sdf.format(new Date());
 		bundleOutputDir = new File(bundleOutputDir, bundleDirName);
 		super.initializeBundle(bundleOutputDir);
 	}
@@ -194,7 +205,8 @@ public class BCTrekBuddy extends ACBundleCreator
 			writeMapFile();
 			// write each tile as a separate file
 			mapTileWriter = new FileTileWriter();
-			createTiles();
+			// createTiles();
+			createMapFromTiles();
 			mapTileWriter.finalizeMap();
 		}
 		catch (MapCreationException e)
@@ -209,6 +221,75 @@ public class BCTrekBuddy extends ACBundleCreator
 		{
 			throw new MapCreationException(mMap, e);
 		}
+	}
+
+	protected BufferedImage createMapFromTiles() throws InterruptedException, MapCreationException
+	{
+		log.trace(OSMBStrs.RStr("START"));
+		int width = (mMap.getXMax() - mMap.getXMin() + 1) * MP2MapSpace.TECH_TILESIZE;
+		int height = (mMap.getYMax() - mMap.getYMin() + 1) * MP2MapSpace.TECH_TILESIZE;
+		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D gc = img.createGraphics();
+		String tileType = mMap.getMapSource().getTileImageType().getFileExt();
+		int tilex = 0;
+		int tiley = 0;
+
+		ImageIO.setUseCache(false);
+		// byte[] emptyTileData = OSMCBUtilities.createEmptyTileData(mapSource);
+		// String tileType = mapSource.getTileImageType().getFileExt();
+		for (int x = mMap.getXMin(); x <= mMap.getXMax(); x++)
+		{
+			tiley = 0;
+			for (int y = mMap.getYMin(); y <= mMap.getYMax(); y++)
+			{
+				BufferedImage tileImage = null;
+				Tile tile = null;
+				TileAddress tAddr = new TileAddress(x, y, mMap.getZoom());
+				// try to get the tile from the mtc
+				if ((tile = sTC.getTile(mMap.getMapSource(), tAddr)) != null)
+				{
+					if (tile.getTileState() == TileState.TS_LOADING)
+						log.warn("tried to load loading tile from mtc" + tile);
+					else
+						tileImage = tile.getImage();
+				}
+				if (tileImage == null)
+				{
+					// if the tile is not available in the mtc, get it from the tile store
+					tile = mMap.getMapSource().getNTileStore().getTile(tAddr);
+					if (tile.getTileState() == TileState.TS_LOADING)
+						log.warn("tried to load loading tile from tile store" + tile);
+					else
+						tileImage = tile.getImage();
+				}
+				if (tileImage != null)
+				{
+					log.trace(String.format("Tile x=%d y=%d ", tilex, tiley));
+					// gc.drawImage(tileImage, tilex * MP2MapSpace.TECH_TILESIZE, tiley * MP2MapSpace.TECH_TILESIZE, MP2MapSpace.TECH_TILESIZE, MP2MapSpace.TECH_TILESIZE,
+					// null);
+				}
+				else
+				{
+					log.warn(String.format("Tile x=%d y=%d not found in tile archive - creating error tile", tilex, tiley));
+					tile = new Tile(mMap.getMapSource(), tilex, tiley, mMap.getZoom());
+					tile.setErrorImage();
+					// gc.drawImage(tile.getImage(), tilex * MP2MapSpace.TECH_TILESIZE, tiley * MP2MapSpace.TECH_TILESIZE, MP2MapSpace.TECH_TILESIZE,
+					// MP2MapSpace.TECH_TILESIZE, null);
+				}
+				try
+				{
+					mapTileWriter.writeTile(tilex, tiley, tileType, tile);
+				}
+				catch (IOException e)
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				tiley++;
+			}
+			tilex++;
+		}
+		return img;
 	}
 
 	protected void createTiles() throws InterruptedException, MapCreationException
@@ -238,7 +319,7 @@ public class BCTrekBuddy extends ACBundleCreator
 					}
 					else
 					{
-						log.trace(String.format("Tile x=%d y=%d not found in tile archive - creating default", tilex, tiley));
+						log.warn(String.format("Tile x=%d y=%d not found in tile archive - creating default", tilex, tiley));
 						mapTileWriter.writeTile(tilex, tiley, tileType, emptyTileData);
 					}
 				}
@@ -293,6 +374,24 @@ public class BCTrekBuddy extends ACBundleCreator
 			try
 			{
 				out.write(tileData);
+			}
+			finally
+			{
+				OSMCBUtilities.closeStream(out);
+			}
+		}
+
+		@Override
+		public void writeTile(int tilex, int tiley, String imageFormat, Tile tTile) throws IOException
+		{
+			String tileFileName = String.format(FILENAME_PATTERN, (tilex * tileWidth), (tiley * tileHeight), imageFormat);
+
+			File f = new File(setFolder, tileFileName);
+			FileOutputStream out = new FileOutputStream(f);
+			setFileWriter.write(tileFileName + "\r\n");
+			try
+			{
+				out.write(tTile.getImageData());
 			}
 			finally
 			{
@@ -388,7 +487,8 @@ public class BCTrekBuddy extends ACBundleCreator
 		try
 		{
 			FileWriter fw = new FileWriter(crtba);
-			fw.write("Bundle 1.0\r\n");
+			// fw.write("Bundle 1.0\r\n");
+			fw.write("Atlas 1.0\r\n"); // Trekbuddy needs it exactly as this
 			fw.close();
 		}
 		catch (IOException e)

@@ -23,7 +23,6 @@ import osmb.mapsources.ACMapSource;
 import osmb.mapsources.TileAddress;
 import osmb.program.tiles.Tile;
 import osmb.program.tiles.TileLoader;
-import osmb.program.tilestore.berkeleydb.TileDbEntry;
 import osmb.utilities.OSMBStrs;
 import osmcb.program.bundle.IfBundle;
 import osmcb.program.bundle.MapCreationException;
@@ -146,9 +145,9 @@ public class BCTileStoreDownload extends ACBundleCreator
 	{
 		log.trace(OSMBStrs.RStr("START"));
 		// old berkely tile store
-		TileDbEntry tTSE = new TileDbEntry(tile.getXtile(), tile.getYtile(), tile.getZoom(), tile.getImage());
-		sTS.putTile(tTSE, tile.getSource());
-		sTC.addTile(tile);
+		// TileDbEntry tTSE = new TileDbEntry(tile.getXtile(), tile.getYtile(), tile.getZoom(), tile.getImage());
+		// sTS.putTile(tTSE, tile.getSource());
+		// sTC.addTile(tile);
 		int nTiles = sDownloadedTiles.incrementAndGet();
 		log.debug("tiles=" + nTiles + " of " + mBundle.calculateTilesToLoad());
 		// info at 0.5% steps

@@ -36,12 +36,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.apache.log4j.Logger;
 
 import osmb.program.ACSettings;
+import osmb.utilities.stream.ThrottledInputStream;
 import osmcb.program.ProgramInfo;
 import osmcb.program.ProxyType;
 import osmcb.utilities.OSMCBUtilities;
-import osmcb.utilities.stream.ThrottledInputStream;
-//import osmcd.gui.panels.JCoordinatesPanel;
-//import osmcd.program.model.SettingsPaperAtlas;
 
 // some sort of singleton implementation
 
@@ -102,6 +100,22 @@ public class OSMCBSettings extends ACSettings
 	// protected Vector<String> cfgMapSourcesEnabled = new Vector<String>();
 
 	// protected boolean cfgIgnoreDlErrors = false;
+
+	/**
+	 * the time between updates for the bundle creation in days
+	 */
+	@XmlElement(name = "bundleUpdateTime")
+	protected int cfgBundleUpdateTime = 60;
+
+	public int getBundleUpdateDays()
+	{
+		return cfgBundleUpdateTime;
+	}
+
+	public int getBundleUpdateHours()
+	{
+		return cfgBundleUpdateTime * 24;
+	}
 
 	/**
 	 * constructor should provide default values for every element
