@@ -43,6 +43,7 @@ import javax.imageio.stream.ImageOutputStream;
 import osmb.exceptions.InvalidNameException;
 import osmb.program.ACApp;
 import osmb.program.map.IfMap;
+import osmb.program.tiles.Tile;
 // W #mapSpace import osmb.program.map.IfMapSpace;
 import osmb.program.tiles.TileException;
 import osmcb.OSMCBSettings;
@@ -535,7 +536,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 	protected void writeMapImage(BufferedImage img, ImageOutputStream ios, IfOSMPalette tPal, long nPos)
 	{
 		log.trace("START");
-		ArrayList<Long> tLIdx = new ArrayList<Long>(img.getHeight());
+		ArrayList<Long> tLIdx = new ArrayList<>(img.getHeight());
 		try
 		{
 			// write the bits per color (currently fixed to 7 - meaning we have 127 color in the palette)
@@ -619,7 +620,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 	protected void writeTestMapImage(IfMap map, BufferedImage img, ImageOutputStream ios, OSMAdaptivePalette tPal, long nPos)
 	{
 		log.trace("START");
-		ArrayList<Long> tLIdx = new ArrayList<Long>(img.getHeight());
+		ArrayList<Long> tLIdx = new ArrayList<>(img.getHeight());
 		try
 		{
 			// write the bits per color (currently fixed to 7 - meaning we have 127 color in the palette)
@@ -826,6 +827,13 @@ public class BCOpenCPNZip extends ACBundleCreator
 				log.error("", e);
 			}
 			OSMCBUtilities.closeWriter(setFileWriter);
+		}
+
+		@Override
+		public void writeTile(int tilex, int tiley, String tileType, Tile tile) throws IOException
+		{
+			// TODO Auto-generated method stub
+
 		}
 	}
 }

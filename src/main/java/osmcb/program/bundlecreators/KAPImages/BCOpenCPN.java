@@ -54,7 +54,7 @@ import osmcb.program.bundlecreators.IfBundleCreatorName;
 import osmcb.utilities.OSMCBUtilities;
 import osmcb.utilities.image.IfOSMPalette;
 import osmcb.utilities.image.OSMAdaptivePalette;
-import osmcb.utilities.image.OSMCB2AdaptivePalette;
+import osmcb.utilities.image.OSMCB3AdaptivePalette;
 import osmcb.utilities.image.OSMColor;
 
 @IfBundleCreatorName(value = "OpenCPN KAP bundle", type = "OpenCPN")
@@ -90,7 +90,8 @@ public class BCOpenCPN extends ACBundleCreator
 		bundleOutputDir = new File(bundleOutputDir, STR_BUNDLE_TYPE);
 		OSMCBUtilities.mkDirs(bundleOutputDir);
 		SimpleDateFormat sdf = new SimpleDateFormat(STR_BUFMT);
-		String bundleDirName = "OSM-" + STR_BUNDLE_TYPE + "-" + mBundle.getName() + "-" + sdf.format(new Date());
+		mBundle.setBaseName("OSM-" + STR_BUNDLE_TYPE + "-" + mBundle.getName());
+		String bundleDirName = mBundle.getBaseName() + "-" + sdf.format(new Date());
 		bundleOutputDir = new File(bundleOutputDir, bundleDirName);
 		super.initializeBundle(bundleOutputDir);
 	}
@@ -319,10 +320,10 @@ public class BCOpenCPN extends ACBundleCreator
 			writeMapImage(img, ios, tPal, pos);
 			tPal = null;
 
-			log.debug("Writing test map file (.png)");
-			// these are here for testing purposes
-			File test = new File(mOutputDir, mMap.getName() + ".png");
-			ImageIO.write(img, "png", test);
+			// log.debug("Writing test map file (.png)");
+			// // these are here for testing purposes
+			// File test = new File(mOutputDir, mMap.getName() + ".png");
+			// ImageIO.write(img, "png", test);
 
 			img = null;
 		}
@@ -494,7 +495,7 @@ public class BCOpenCPN extends ACBundleCreator
 	protected IfOSMPalette makePalette(BufferedImage img)
 	{
 		log.trace("START");
-		OSMCB2AdaptivePalette tPal = new OSMCB2AdaptivePalette(img);
+		OSMCB3AdaptivePalette tPal = new OSMCB3AdaptivePalette(img);
 		// OSMFixedHSLPalette tPal = new OSMFixedHSLPalette(img);
 		// log.debug("final Palette:" + tPal.toString());
 		return tPal;
@@ -516,7 +517,7 @@ public class BCOpenCPN extends ACBundleCreator
 	{
 		log.trace(OSMBStrs.RStr("START"));
 		int nErrCnt = 0;
-		ArrayList<Long> tLIdx = new ArrayList<Long>(img.getHeight());
+		ArrayList<Long> tLIdx = new ArrayList<>(img.getHeight());
 		try
 		{
 			// write the bits per color (currently fixed to 7 - meaning we have up to 127 color in the palette. Unused colors may be omitted)
@@ -632,7 +633,7 @@ public class BCOpenCPN extends ACBundleCreator
 	protected void writeTestMapImage(IfMap map, BufferedImage img, ImageOutputStream ios, OSMAdaptivePalette tPal, long nPos)
 	{
 		log.trace(OSMBStrs.RStr("START"));
-		ArrayList<Long> tLIdx = new ArrayList<Long>(img.getHeight());
+		ArrayList<Long> tLIdx = new ArrayList<>(img.getHeight());
 		try
 		{
 			// write the bits per color (currently fixed to 7 - meaning we have 127 color in the palette)

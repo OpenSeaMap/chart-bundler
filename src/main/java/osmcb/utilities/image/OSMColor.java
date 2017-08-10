@@ -147,18 +147,18 @@ public class OSMColor extends Color
 	}
 
 	/**
-	 * Calculates the quadratic distance between two colors in the rgb color space.
+	 * Calculates the quadratic difference between two colors in the rgb color space.
 	 * 
 	 * @param cCol
 	 *          the 'other' color
-	 * @return The quadratic distance in the range [0..3*255*255]
+	 * @return The quadratic difference in the range [0..3*255*255]
 	 */
-	public long qDist(OSMColor cCol)
+	public long qDiff(OSMColor cCol)
 	{
-		int nDist = (getBlue() - cCol.getBlue()) * (getBlue() - cCol.getBlue());
-		nDist += (getGreen() - cCol.getGreen()) * (getGreen() - cCol.getGreen());
-		nDist += (getRed() - cCol.getRed()) * (getRed() - cCol.getRed());
-		return nDist;
+		int nDiff = (getBlue() - cCol.getBlue()) * (getBlue() - cCol.getBlue());
+		nDiff += (getGreen() - cCol.getGreen()) * (getGreen() - cCol.getGreen());
+		nDiff += (getRed() - cCol.getRed()) * (getRed() - cCol.getRed());
+		return nDiff;
 	}
 
 	/**
@@ -172,7 +172,7 @@ public class OSMColor extends Color
 	public long qDiffAlpha(OSMColor cCol)
 	{
 		int nDiff = (getAlpha() - cCol.getAlpha()) * (getAlpha() - cCol.getAlpha());
-		nDiff += qDist(cCol);
+		nDiff += qDiff(cCol);
 		return nDiff;
 	}
 
@@ -191,18 +191,18 @@ public class OSMColor extends Color
 		double dDiff = 0.0;
 		if (length() > 0.0)
 		{
-			dDiff = Math.abs((getBlue() * dBDiff + getGreen() * dGDiff + getRed() * dRDiff) / (length() * Math.sqrt(qDist(cCol))));
+			dDiff = Math.abs((getBlue() * dBDiff + getGreen() * dGDiff + getRed() * dRDiff) / (length() * Math.sqrt(qDiff(cCol))));
 			if (dDiff > 1.0)
 			{
 				if (dDiff > 1.0000000000000002)
-					log.debug("d-Diff=" + dDiff + "; q-Dist=" + qDist(cCol));
+					log.debug("d-Diff=" + dDiff + "; q-Dist=" + qDiff(cCol));
 				dDiff = 1.0;
 			}
 		}
 		// double oDist = (2.0 - dDiff) * Math.sqrt(qDist(cCol)) / cCol.length();
-		double oDist = (2.0 - dDiff) * Math.sqrt(qDist(cCol));
+		double oDist = (2.0 - dDiff) * Math.sqrt(qDiff(cCol));
 		if (oDist <= 0)
-			log.debug("d-Diff=" + dDiff + "; o-Dist=" + oDist + "; q-Dist=" + qDist(cCol));
+			log.debug("d-Diff=" + dDiff + "; o-Dist=" + oDist + "; q-Dist=" + qDiff(cCol));
 		return oDist;
 	}
 
@@ -230,7 +230,7 @@ public class OSMColor extends Color
 	public String toStringKmpl()
 	{
 		// String str = "color=RGB(" + toStringRGB() + "), HSL(" + toStringHSL() + ")";
-		String str = "color=RGB(" + toStringRGB() + ")";
+		String str = "RGB(" + toStringRGB() + ")";
 		return str;
 	}
 

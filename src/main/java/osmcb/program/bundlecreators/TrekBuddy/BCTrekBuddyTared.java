@@ -24,10 +24,14 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import osmb.program.ACApp;
+import osmb.program.tiles.Tile;
 import osmcb.OSMCBSettings;
 import osmcb.program.bundle.BundleTestException;
 import osmcb.program.bundle.IfBundle;
+import osmcb.program.bundle.MapCreationException;
 import osmcb.program.bundlecreators.IfBundleCreatorName;
 import osmcb.program.bundlecreators.IfMapTileWriter;
 import osmcb.utilities.OSMCBUtilities;
@@ -37,9 +41,12 @@ import osmcb.utilities.tar.TarTmiArchive;
 @IfBundleCreatorName(value = "TrekBuddy tared bundle", type = "TaredAtlas")
 public class BCTrekBuddyTared extends BCTrekBuddy
 {
+	protected static final String STR_BUNDLE_TYPE = "TrekBuddyTar";
+
 	public BCTrekBuddyTared()
 	{
 		super();
+		log = Logger.getLogger(this.getClass());
 	}
 
 	public BCTrekBuddyTared(IfBundle bundle, File bundleOutputDir)
@@ -64,7 +71,8 @@ public class BCTrekBuddyTared extends BCTrekBuddy
 		bundleOutputDir = new File(bundleOutputDir, "TrekBuddy-TAR");
 		OSMCBUtilities.mkDirs(bundleOutputDir);
 		SimpleDateFormat sdf = new SimpleDateFormat(STR_BUFMT);
-		String bundleDirName = "OSM-TrekBuddyTar-" + mBundle.getName() + "-" + sdf.format(new Date());
+		mBundle.setBaseName("OSM-" + STR_BUNDLE_TYPE + "-" + mBundle.getName());
+		String bundleDirName = mBundle.getBaseName() + "-" + sdf.format(new Date());
 		bundleOutputDir = new File(bundleOutputDir, bundleDirName);
 		super.initializeBundle(bundleOutputDir);
 	}
@@ -78,12 +86,40 @@ public class BCTrekBuddyTared extends BCTrekBuddy
 		log.info("bundle='" + mBundle.getName() + "' finished");
 	}
 
+	@Override
+	public void createMap() throws MapCreationException, InterruptedException
+	{
+		try
+		{
+			log.debug("Creating map");
+
+			// write the .map file containing the calibration points
+			writeMapFile();
+			// write each tile as a separate file
+			mapTileWriter = new TarTileWriter();
+			createMapFromTiles();
+			mapTileWriter.finalizeMap();
+		}
+		catch (MapCreationException e)
+		{
+			throw e;
+		}
+		catch (InterruptedException e)
+		{
+			throw e;
+		}
+		catch (Exception e)
+		{
+			throw new MapCreationException(mMap, e);
+		}
+	}
+
 	private void createAtlasTarArchive(String name)
 	{
 		log.trace("Creating " + name + ".tar for bundle in dir \"" + mOutputDir.getPath() + "\"");
 
 		File[] atlasLayerDirs = OSMCBUtilities.listSubDirectories(mOutputDir);
-		List<File> atlasMapDirs = new LinkedList<File>();
+		List<File> atlasMapDirs = new LinkedList<>();
 		for (File dir : atlasLayerDirs)
 			OSMCBUtilities.addSubDirectories(atlasMapDirs, dir, 0);
 
@@ -176,6 +212,14 @@ public class BCTrekBuddyTared extends BCTrekBuddy
 				log.error("", e);
 			}
 			ta.close();
+		}
+
+		@Override
+		public void writeTile(int tilex, int tiley, String tileType, Tile tile) throws IOException
+		{
+			String tileFileName = String.format(FILENAME_PATTERN, (tilex * tileWidth), (tiley * tileHeight), "png");
+
+			ta.writeFileFromData("set/" + tileFileName, tile.getImageData());
 		}
 	}
 }

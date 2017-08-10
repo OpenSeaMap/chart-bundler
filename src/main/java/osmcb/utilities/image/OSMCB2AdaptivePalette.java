@@ -6,6 +6,8 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 
+import osmb.utilities.OSMBStrs;
+
 /**
  * This @class is used to assign the 127 colors available in the KAP-format to the most used colors in the image.
  * We need to
@@ -115,6 +117,7 @@ public class OSMCB2AdaptivePalette implements IfOSMPalette
 	public OSMCB2AdaptivePalette(BufferedImage img)
 	{
 		this();
+		log.info(OSMBStrs.RStr("START"));
 		try
 		{
 			// Initialize some (STD_COLOR_COUNT) standard colors
@@ -150,17 +153,40 @@ public class OSMCB2AdaptivePalette implements IfOSMPalette
 			addPixel(new OSMColor(204, 222, 193));
 			addPixel(new OSMColor(209, 224, 197));
 			addPixel(new OSMColor(164, 204, 149));
+			mStdColors = mColorsHM.size();
 
 			for (int y = 0; y < img.getHeight(); ++y)
 			{
+				int nCnt = 0;
+				OSMColor tCol = null;
+				OSMColor tNCol = null;
 				for (int x = 0; x < img.getWidth(); ++x)
 				{
-					addPixel(new OSMColor(img.getRGB(x, y)));
+					mColorsHM.addPixels(new OSMColor(img.getRGB(x, y)), 1);
+					// if (x == 0)
+					// {
+					// tCol = new OSMColor(img.getRGB(x, y));
+					// nCnt++;
+					// }
+					// else
+					// {
+					// if ((tNCol = new OSMColor(img.getRGB(x, y))) == tCol)
+					// nCnt++;
+					// else
+					// {
+					// mColorsHM.addPixel(tCol, nCnt);
+					// tCol = tNCol;
+					// nCnt = 1;
+					// }
+					// }
 				}
 			}
-			log.debug("Palette[" + mColorsHM.getUsedColors() + "] after put()");
-			test();
-			// log.debug("Colors:" + toString());
+			log.info("Palette[" + mColorsHM.getUsedColors() + "] after put()");
+			if (log.isDebugEnabled())
+			{
+				test();
+				log.debug("Colors:" + toString());
+			}
 
 			// in the possible case the image contains less than 128 color adjust the palette size
 			if (mColorsHM.size() < mPaletteCnt)
@@ -169,12 +195,13 @@ public class OSMCB2AdaptivePalette implements IfOSMPalette
 			// if more colors are used than find place in the palette reduce the number of colors by mapping
 			if (mColorsHM.getUsedColors() > mPaletteCnt)
 			{
-				reduce();
-				log.debug("Palette[" + mColorsHM.getUsedColors() + "] after reduce()");
-				test();
+				// try new logic
+				reduce2();
+				log.info("Palette[" + mColorsHM.getUsedColors() + "] after reduce()");
+				// test();
 			}
 			else
-				log.debug("Palette[" + mColorsHM.getUsedColors() + "] no reduction neccessary");
+				log.info("Palette[" + mColorsHM.getUsedColors() + "] no reduction neccessary");
 		}
 		catch (Exception e)
 		{
@@ -204,9 +231,10 @@ public class OSMCB2AdaptivePalette implements IfOSMPalette
 			while (nSCol < mColorsHM.getUsedColors())
 			{
 				tSrcColor = mColorsHM.getColorByPIdx(nSCol);
-				if (tTgtColor.qDist(tSrcColor) < 17)
+				if (tTgtColor.qDiff(tSrcColor) < 17)
 				{
-					log.trace("colors to map(r1): Src=" + tSrcColor.toStringRGB() + ", " + nSCol + ", Tgt=" + tTgtColor.toStringRGB() + ", " + nTCol);
+					if (log.isTraceEnabled())
+						log.trace("colors to map(r1): Src=" + tSrcColor.toStringRGB() + ", " + nSCol + ", Tgt=" + tTgtColor.toStringRGB() + ", " + nTCol);
 					mColorsHM.map(tSrcColor, tTgtColor);
 				}
 				else
@@ -216,9 +244,12 @@ public class OSMCB2AdaptivePalette implements IfOSMPalette
 			}
 		}
 
-		log.debug("\r\n");
-		log.debug("Palette[" + mColorsHM.getUsedColors() + "] after first round()");
-		test();
+		if (log.isDebugEnabled())
+		{
+			log.debug("\r\n");
+			log.debug("Palette[" + mColorsHM.getUsedColors() + "] after first round()");
+			test();
+		}
 
 		// // Second round: now map the colors more different. Here one has to be careful. We use OSMColor.oDiff() instead of OSMColor.dDiff()
 		// // For each color in the list the best matching color is found. Then the best color match, i.e. the one with the least difference is mapped.
@@ -242,12 +273,14 @@ public class OSMCB2AdaptivePalette implements IfOSMPalette
 				OSMCB2ColorPair tCP = tME.getValue();
 				tSrcColor = tCP.mCol;
 				tTgtColor = tCP.mMCol;
-				log.trace("pair=(Src(" + tSrcColor.toStringRGB() + "), Tgt(" + tTgtColor.toStringRGB() + "), Dist=" + tME.getKey() + ")");
+				if (log.isTraceEnabled())
+					log.trace("pair=(Src(" + tSrcColor.toStringRGB() + "), Tgt(" + tTgtColor.toStringRGB() + "), Dist=" + tME.getKey() + ")");
 				if (mColorsHM.getCnt(tSrcColor) > 0)
 				{
 					if (mColorsHM.getCnt(tTgtColor) > 0)
 					{
-						log.trace("colors to map(r2): Src(" + tSrcColor.toStringRGB() + "), Tgt(" + tTgtColor.toStringRGB() + ")");
+						if (log.isTraceEnabled())
+							log.trace("colors to map(r2): Src(" + tSrcColor.toStringRGB() + "), Tgt(" + tTgtColor.toStringRGB() + ")");
 						mColorsHM.map(tSrcColor, tTgtColor);
 						findBestMatch(mColorsHM.getPIdx(tTgtColor), true);
 					}
@@ -259,10 +292,83 @@ public class OSMCB2AdaptivePalette implements IfOSMPalette
 				break;
 			}
 		}
-		log.debug("\r\n");
-		log.debug("Palette[" + mColorsHM.getUsedColors() + "] after reduce():");
-		test();
-		log.debug("----\r\n");
+		if (log.isDebugEnabled())
+		{
+			log.debug("\r\n");
+			log.debug("Palette[" + mColorsHM.getUsedColors() + "] after reduce():");
+			test();
+			log.debug("----\r\n");
+		}
+	}
+
+	/**
+	 * reduces the palette to mPaletteCnt entries by mapping the least used entries to the mPaletteCnt most used ones.
+	 */
+	public void reduce2()
+	{
+		// The palette is traversed in 'reverse' order, which is ascending in the usage count. This means, seldom used colors are mapped first, and hopefully
+		// prevents color drifting while chained mapping.
+		// It stops when the number of colors used in the palette has fallen below mPaletteCnt.
+
+		// The first round maps neatly matching colors, so the most often used colors move to the front of the palette
+		log.debug("reduce(): start");
+		OSMColor tTgtColor = null;
+		OSMColor tSrcColor = null;
+		for (int nTCol = 1; nTCol < mColorsHM.getUsedColors() - 1; nTCol++)
+		{
+			tTgtColor = mColorsHM.getColorByPIdx(nTCol);
+			int nSCol = Math.max(STD_COLOR_COUNT + 1, nTCol + 1);
+			while (nSCol < mColorsHM.getUsedColors())
+			{
+				tSrcColor = mColorsHM.getColorByPIdx(nSCol);
+				if (tTgtColor.qDiff(tSrcColor) < 17)
+				{
+					if (log.isTraceEnabled())
+						log.trace("colors to map(r1): Src=" + tSrcColor.toStringRGB() + ", " + nSCol + " to Tgt=" + tTgtColor.toStringRGB() + ", " + nTCol);
+					mColorsHM.map(tSrcColor, tTgtColor);
+				}
+				else
+				{
+					++nSCol;
+				}
+			}
+		}
+		if (log.isDebugEnabled())
+		{
+			log.debug("\r\n");
+			log.debug("Palette[" + mColorsHM.getUsedColors() + "] after first round()");
+			test();
+		}
+
+		// Second round: now map the colors more different.
+		// Map the least used color to the best matching one of the first mPaletteCnt colors.
+		// This is repeated until at most mPaletteCnt colors in the map remain.
+		// We need a sorted map with the distances and the indices
+		while (mColorsHM.getUsedColors() > mPaletteCnt)
+		{
+			int nSrcPIdx = mColorsHM.getUsedColors() - 1;
+			if (log.isTraceEnabled())
+				log.trace("colors in usage list=" + nSrcPIdx + ", matches=" + mMatchesTM.size());
+			Integer nTgtPIdx = findBestMatchInPalette(nSrcPIdx);
+			if (nTgtPIdx != null)
+			{
+				tSrcColor = mColorsHM.getColorByPIdx(nSrcPIdx);
+				tTgtColor = mColorsHM.getColorByPIdx(nTgtPIdx);
+
+				if (log.isTraceEnabled())
+					log.trace("colors to map(r2): Src=" + tSrcColor.toStringRGB() + ", " + nSrcPIdx + " to Tgt=" + tTgtColor.toStringRGB() + ", " + nTgtPIdx);
+				mColorsHM.map(tSrcColor, tTgtColor);
+			}
+			else
+				break;
+		}
+		if (log.isDebugEnabled())
+		{
+			log.debug("\r\n");
+			log.debug("Palette[" + mColorsHM.getUsedColors() + "] after reduce():");
+			test();
+			log.debug("----\r\n");
+		}
 	}
 
 	/**
@@ -305,7 +411,7 @@ public class OSMCB2AdaptivePalette implements IfOSMPalette
 				// remember the match source color
 				tMCol = mColorsHM.getColorByPIdx(nSrcPIdx);
 				dDiff = dNewDiff;
-				log.trace("DIFF: Src(" + tMCol.toStringRGB() + ") to Tgt(" + tTCol.toStringRGB() + ") oDiff=" + dNewDiff + "; qDiff=" + tTCol.qDist(tMCol));
+				log.trace("DIFF: Src(" + tMCol.toStringRGB() + ") to Tgt(" + tTCol.toStringRGB() + ") oDiff=" + dNewDiff + "; qDiff=" + tTCol.qDiff(tMCol));
 			}
 		}
 
@@ -319,9 +425,54 @@ public class OSMCB2AdaptivePalette implements IfOSMPalette
 		{
 			// evade collision
 			log.debug("optical distance already in map. " + dDiff);
-			dDiff += (mMatchesTM.higherKey(dDiff) - dDiff) / 2;
+			Double dHK = mMatchesTM.higherKey(dDiff);
+			if (dHK == null)
+				dHK = 15.0;
+			dDiff += (dHK - dDiff) / 2;
 		}
 		mMatchesTM.put(dDiff, new OSMCB2ColorPair(tMCol, tTCol));
+	}
+
+	/**
+	 * Looks for the color best matching the current one.
+	 */
+	private Integer findBestMatchInPalette(int nSrcPIdx)
+	{
+		Integer tSCID = mColorsHM.getCIDByPIdx(nSrcPIdx);
+		OSMColor tSCol = mColorsHM.getColor(tSCID);
+		OSMColor tMCol = null;
+		Integer nMPIdx = null;
+		double dDiff = 1e100;
+
+		for (int nTgtPIdx = 0; nTgtPIdx < mPaletteCnt; nTgtPIdx++)
+		{
+			Integer tTCID = mColorsHM.getCIDByPIdx(nTgtPIdx);
+			OSMColor tTCol = mColorsHM.getColor(tTCID);
+			double dNewDiff = 0.0;
+
+			// // stop when unused colors encountered
+			// if (mColorsHM.getCnt(tTCID) == 0)
+			// break;
+
+			// stop when self testing. This happens when there are less than mPaletteCnt colors in the palette used and nSrcPIdx < mPaletteCnt.
+			if (nTgtPIdx == nSrcPIdx)
+				break;
+
+			// test if it is a new best distance
+			if ((dNewDiff = tSCol.oDist(tTCol)) < dDiff)
+			{
+				// remember the matching target color
+				tMCol = mColorsHM.getColorByPIdx(nTgtPIdx);
+				nMPIdx = nTgtPIdx;
+				dDiff = dNewDiff;
+				if (log.isTraceEnabled())
+					log.trace("DIFF: Src(" + tMCol.toStringRGB() + ") to Tgt(" + tTCol.toStringRGB() + ") oDiff=" + dNewDiff + "; qDiff=" + tTCol.qDiff(tMCol));
+			}
+		}
+
+		if (tMCol == null)
+			log.debug("match null");
+		return nMPIdx;
 	}
 
 	@Override

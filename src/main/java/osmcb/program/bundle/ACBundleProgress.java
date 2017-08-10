@@ -123,10 +123,7 @@ public class ACBundleProgress implements IfMapSourceListener
 	public void initBundle(IfBundle bundle)
 	{
 		data.bundle = bundle;
-		if (bundle.getOutputFormat().equals(BundleOutputFormat.TILESTORE))
-			data.tilesTotal = (int) bundle.calculateTilesToLoad();
-		else
-			data.tilesTotal = (int) bundle.calculateTilesToLoad() * 2;
+		data.tilesTotal = (int) bundle.calculateTilesToLoad();
 		int mapCount = 0;
 		int tileCount = 0;
 		data.layersTotal = bundle.getLayerCount();

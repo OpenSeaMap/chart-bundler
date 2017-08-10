@@ -44,6 +44,7 @@ import osmcb.utilities.OSMCBUtilities;
 // @SupportedTIParameters(names = {Name.format, Name.height, Name.width})
 public class BCOpenCPN2 extends BCOpenCPN
 {
+	protected static final String STR_BUNDLE_TYPE = "OpenCPN2-KAP";
 	// protected File layerDir = null;
 	// protected File mapDir = null;
 
@@ -59,6 +60,7 @@ public class BCOpenCPN2 extends BCOpenCPN
 		super(bundle, bundleOutputDir);
 	}
 
+	// general bundle actions
 	/**
 	 * Creates a format specific directory for all OpenCPN-KAP bundles.
 	 */
@@ -67,10 +69,11 @@ public class BCOpenCPN2 extends BCOpenCPN
 	{
 		log.trace("START");
 		File bundleOutputDir = ((OSMCBSettings) ACApp.getApp().getSettings()).getChartBundleOutputDirectory();
-		bundleOutputDir = new File(bundleOutputDir, "OpenCPN-KAP2");
+		bundleOutputDir = new File(bundleOutputDir, "OpenCPN2-KAP");
 		OSMCBUtilities.mkDirs(bundleOutputDir);
 		SimpleDateFormat sdf = new SimpleDateFormat(STR_BUFMT);
-		String bundleDirName = "OSM-OpenCPN-KAP2-" + mBundle.getName() + "-" + sdf.format(new Date());
+		mBundle.setBaseName("OSM-" + STR_BUNDLE_TYPE + "-" + mBundle.getName());
+		String bundleDirName = mBundle.getBaseName() + "-" + sdf.format(new Date());
 		bundleOutputDir = new File(bundleOutputDir, bundleDirName);
 		super.initializeBundle(bundleOutputDir);
 	}
@@ -81,16 +84,6 @@ public class BCOpenCPN2 extends BCOpenCPN
 		log.trace(OSMBStrs.RStr("START"));
 		super.finishBundle();
 		log.debug("Bundle dir='" + mOutputDir + "'");
-		// zip bundle 'mOutputDir' is the root dir for this bundle
-		// try
-		// {
-		// OsmbLzma.encode7z(mOutputDir.getAbsolutePath(), mOutputDir + ".7z");
-		// }
-		// catch (IOException e)
-		// {
-		// log.error("7zip excepted '" + mOutputDir.getAbsolutePath() + "'");
-		// e.printStackTrace();
-		// }
 	}
 
 	@Override

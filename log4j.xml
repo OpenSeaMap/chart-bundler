@@ -29,7 +29,7 @@
 		<!-- For maximum verboseness please use the following line <priority value="TRACE" 
 			/> -->
 		<!-- By default we use log level/priority "DEBUG" -->
-		<priority value="INFO" />
+		<priority value="info" />
 		<appender-ref ref="console" />
 		<appender-ref ref="file" />
 	</root>
