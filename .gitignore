@@ -14,7 +14,8 @@ src/test/*
 
 *.class
 
-OSeaMChartBundler.log
+*.log
+OSeaMChart*.log
 OSMChartBundler*.zip
 settings-*.xml
 OSMChartBundler.jar
@@ -30,8 +31,3 @@ src/main/resources/osmcb/resources/text/mobac.strings
 /.git defekt/
 /log4j.xml
 /OSeaMChartBundler.jar
-<<<<<<< HEAD
-java_pid11456.hprof
-=======
-*.log
->>>>>>> master
