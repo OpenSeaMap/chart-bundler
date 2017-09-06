@@ -16,7 +16,6 @@ public class BundleGeoJsonWriter implements JsonGenerator
 	{
 		mGen = Json.createGenerator(tWriter);
 	}
-
 	@Override
 	public void close()
 	{
@@ -171,6 +170,13 @@ public class BundleGeoJsonWriter implements JsonGenerator
 	}
 
 	@Override
+	public JsonGenerator writeStartArray(String arg0)
+	{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
 	public JsonGenerator writeStartObject()
 	{
 		// TODO Auto-generated method stub
@@ -179,13 +185,6 @@ public class BundleGeoJsonWriter implements JsonGenerator
 
 	@Override
 	public JsonGenerator writeStartObject(String arg0)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public JsonGenerator writeStartArray(String arg0)
 	{
 		// TODO Auto-generated method stub
 		return null;
