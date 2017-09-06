@@ -29,7 +29,8 @@ import osmcb.program.bundlecreators.ACBundleCreator;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ChartBundleName {
+public @interface ChartBundleName
+{
 	String value();
 
 	String type() default "";

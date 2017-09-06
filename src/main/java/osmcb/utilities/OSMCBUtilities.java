@@ -51,6 +51,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -69,9 +70,12 @@ import osmb.program.tiles.TileImageType;
 import osmb.utilities.Charsets;
 import osmb.utilities.file.DirectoryFileFilter;
 import osmb.utilities.path.CatalogFilter;
+import osmb.utilities.path.DirEntry;
 import osmcb.OSMCBApp;
+import osmcb.OSMCBApp.CatEnt;
 import osmcb.OSMCBOutOfMemoryException;
 import osmcb.OSMCBStrs;
+import osmcb.program.bundle.Bundle;
 
 public class OSMCBUtilities
 {
@@ -641,7 +645,7 @@ public class OSMCBUtilities
 
 	public static List<File> listSubDirectoriesRec(File dir, int maxDepth)
 	{
-		List<File> dirList = new LinkedList<File>();
+		List<File> dirList = new LinkedList<>();
 		addSubDirectories(dirList, dir, maxDepth);
 		return dirList;
 	}
@@ -829,9 +833,13 @@ public class OSMCBUtilities
 		FileChannel out = null;
 		try
 		{
-			in = (new FileInputStream(source)).getChannel();
-			out = (new FileOutputStream(target)).getChannel();
+			FileInputStream fis = new FileInputStream(source);
+			in = fis.getChannel();
+			FileOutputStream fos = new FileOutputStream(target);
+			out = fos.getChannel();
 			in.transferTo(0, source.length(), out);
+			fis.close();
+			fos.close();
 		}
 		finally
 		{
@@ -841,7 +849,6 @@ public class OSMCBUtilities
 	}
 
 	/**
-	 * 
 	 * @param value
 	 *          positive value
 	 * @return 0 if no bit is set else the highest bit that is one in <code>value</code>
@@ -860,7 +867,6 @@ public class OSMCBUtilities
 	}
 
 	/**
-	 * 
 	 * @param revsision
 	 *          SVN revision string like <code>"1223"</code>, <code>"1224M"</code> or <code>"1616:1622M"</code>
 	 * @return parsed svn revision
@@ -896,21 +902,28 @@ public class OSMCBUtilities
 		{
 		}
 		return fileNames;
+
 	}
 
 	/**
-	 * 
+	 * returns a list of the catalogs file names (with their paths stripped)
+	 * This list is ordered by lastModificationTime of the catalog
+	 * The actual bundle creator does check if a creation is necessary and returns when finished the first bundle. Then the list is updated/newly created and the
+	 * next bundle is made
 	 */
-	public static List<String> listCatalogs(Path tP)
+	public static TreeSet<CatEnt> listCatalogs(Path tP)
 	{
-		List<String> fileNames = new ArrayList<>();
+		TreeSet<CatEnt> fileNames = new TreeSet<>();
 		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(tP, new CatalogFilter()))
 		{
 			for (Path path : directoryStream)
 			{
-				log.debug(path.subpath(path.getNameCount() - 1, path.getNameCount()).toString() + ": "
-				    + path.subpath(path.getNameCount() - 1, path.getNameCount()).toString().endsWith("xml"));
-				fileNames.add("\r" + path.toString());
+				CatEnt tCE = OSMCBApp.getApp().new CatEnt();
+				log.info(path.subpath(path.getNameCount() - 1, path.getNameCount()).toString() + ": "
+				    + path.subpath(path.getNameCount() - 1, path.getNameCount()).toString().endsWith("xml") + ", last modified:  " + Files.getLastModifiedTime(path));
+				tCE.SetName(path.subpath(path.getNameCount() - 1, path.getNameCount()));
+				tCE.SetDate(Files.getLastModifiedTime(path));
+				fileNames.add(tCE);
 			}
 		}
 		catch (IOException ex)
@@ -918,4 +931,38 @@ public class OSMCBUtilities
 		}
 		return fileNames;
 	}
+
+	/**
+	 * returns a list of the catalogs file names (with their paths stripped)
+	 * This list is ordered by lastModificationTime of the catalog
+	 * The actual bundle creator does check if a creation is necessary and returns when finished the first bundle. Then the list is updated/newly created and the
+	 * next bundle is made
+	 * 
+	 * @param strBaseName
+	 */
+	public static TreeSet<DirEntry> listBundles(Path tP, String strBaseName)
+	{
+		TreeSet<DirEntry> tBundles = new TreeSet<>();
+		// Pattern tPat = Pattern.compile(Bundle.BUNDLE_FILENAME_PREFIX + "-" + Bundle.BUNDLE_APP_REGEX + "-" + Bundle.BUNDLE_FMT_REGEX + "-" + "(" + strBaseName +
+		// ")"
+		// + "-" + "(" + Bundle.TIMESTAMP_REGEX + ")");
+		Pattern tPat = Pattern.compile("(" + strBaseName + ")" + "-" + "(" + Bundle.TIMESTAMP_REGEX + ")");
+		log.debug(tPat);
+		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(tP, new BundleFilter(tPat)))
+		{
+			for (Path path : directoryStream)
+			{
+				DirEntry tDE = new DirEntry();
+				log.debug(path.subpath(path.getNameCount() - 1, path.getNameCount()).toString() + ", last modified:  " + Files.getLastModifiedTime(path));
+				tDE.SetName(path.subpath(path.getNameCount() - 1, path.getNameCount()));
+				tDE.SetDate(Files.getLastModifiedTime(path));
+				tBundles.add(tDE);
+			}
+		}
+		catch (IOException ex)
+		{
+		}
+		return tBundles;
+	}
+
 }

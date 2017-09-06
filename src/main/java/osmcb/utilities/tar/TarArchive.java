@@ -23,7 +23,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
-import osmcb.utilities.stream.CountingOutputStream;
+import osmb.utilities.stream.CountingOutputStream;
 
 /**
  * Creates a new tar file and allows to add files from the file system or "virtual files" that only exist in memory as <code>byte[]</code>.

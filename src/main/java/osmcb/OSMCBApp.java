@@ -17,7 +17,9 @@
 package osmcb;
 
 import java.io.File;
-import java.util.List;
+import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
+import java.util.TreeSet;
 
 import javax.imageio.ImageIO;
 import javax.xml.bind.JAXBException;
@@ -44,6 +46,52 @@ import osmcb.utilities.OSMCBUtilities;
  */
 public class OSMCBApp extends ACConsoleApp
 {
+	/**
+	 * - element of a TreeSet of catalogs, newest (last modified) first
+	 * 
+	 * @author humbach
+	 */
+	public class CatEnt implements Comparable
+	{
+		Path strCatPath;
+		FileTime strCatDate;
+
+		public void SetName(Path path)
+		{
+			strCatPath = path;
+		}
+
+		public String GetPathStr()
+		{
+			return strCatPath.toString();
+		}
+
+		public void SetDate(FileTime date)
+		{
+			strCatDate = date;
+		}
+
+		public String GetDateStr()
+		{
+			return strCatDate.toString();
+		}
+
+		@Override
+		public String toString()
+		{
+			return GetPathStr() + ", " + GetDateStr();
+		}
+
+		@Override
+		public int compareTo(Object tObj)
+		{
+			if (tObj instanceof CatEnt)
+				return -1 * strCatDate.compareTo(((CatEnt) tObj).strCatDate);
+			else
+				return 0;
+		}
+	}
+
 	static public OSMCBApp getApp()
 	{
 		return (OSMCBApp) gApp;
@@ -111,30 +159,53 @@ public class OSMCBApp extends ACConsoleApp
 		}
 	}
 
+	/**
+	 * This checks the catalogs directory for catalogs and then creates all catalogs which are listed.
+	 * Bundle creation schedule
+	 * 
+	 * OSMCBApp
+	 * - list of catalogs, newest (modified) first
+	 * - createBundle with next catalog
+	 * 
+	 * - if bundle older than catalog: createBundle
+	 * - else:
+	 * - if bundle older than bundleCycleTime: createBundle
+	 * - else: return
+	 */
 	private void runWithoutMainGUI()
 	{
-		List<String> lCatalogs = OSMCBUtilities.listCatalogs(((OSMCBSettings) gApp.getSettings()).getCatalogsDirectory().toPath());
-		while (!lCatalogs.isEmpty())
+		TreeSet<CatEnt> lCatalogs = OSMCBUtilities.listCatalogs(((OSMCBSettings) gApp.getSettings()).getCatalogsDirectory().toPath());
+		String strFormat = mCmdlParser.getOptionValue(new StringOption('f', "format"), "OpenCPN-KAP");
+		String strCat = mCmdlParser.getOptionValue(new StringOption('c', "create"), "none");
+		if (strCat != "none")
 		{
-			try
+			// if there is one catalog given, create it indifferent from filedates
+			createBundle(Catalog.getCatalogFileName(strCat), strFormat);
+		}
+		else
+		{
+			while (!lCatalogs.isEmpty())
 			{
-				String strCat = lCatalogs.remove(0);
-				// createBundle(mCmdlParser.getOptionValue(new StringOption('c', "create"), "OSM-Std"),
-				// mCmdlParser.getOptionValue(new StringOption('f', "format"), "OpenCPN-KAP"));
-				log.info(strCat);
-				// createBundle(strCat, mCmdlParser.getOptionValue(new StringOption('f', "format"), "OpenCPN-KAP"));
-				wait();
-			}
-			catch (Exception e)
-			{
-				GUIExceptionHandler.processException(e);
+				try
+				{
+					CatEnt tCE = lCatalogs.pollFirst();
+
+					// createBundle(mCmdlParser.getOptionValue(new StringOption('c', "create"), "OSM-Std"),
+					// mCmdlParser.getOptionValue(new StringOption('f', "format"), "OpenCPN-KAP"));
+					log.info(tCE);
+					createBundle(tCE.GetPathStr(), strFormat);
+					// wait();
+				}
+				catch (Exception e)
+				{
+					GUIExceptionHandler.processException(e);
+				}
 			}
 		}
 	}
 
 	/**
-	 * This tries to create one bundle (One catalog for one format). In the near future it will check a specified directory for catalogs and automatically create
-	 * all catalogs for all formats available.
+	 * This tries to create one bundle (One catalog for one format).
 	 * 
 	 * @param catalogName
 	 * @param strBundleFormat
@@ -144,7 +215,8 @@ public class OSMCBApp extends ACConsoleApp
 		try
 		{
 			JobDispatcher mBCExec = new JobDispatcher();
-			Catalog cat = Catalog.load(new File(ACSettings.getInstance().getCatalogsDirectory(), Catalog.getCatalogFileName(catalogName)));
+			// Catalog cat = Catalog.load(new File(ACSettings.getInstance().getCatalogsDirectory(), Catalog.getCatalogFileName(catalogName)));
+			Catalog cat = Catalog.load(new File(ACSettings.getInstance().getCatalogsDirectory(), catalogName));
 			Bundle bundle = new Bundle(cat, BundleOutputFormat.getFormatByName(strBundleFormat));
 			ACBundleCreator bundleCreator = bundle.createBundleCreatorInstance();
 			bundleCreator.init(bundle, null);
@@ -156,13 +228,15 @@ public class OSMCBApp extends ACConsoleApp
 				log.debug("still running");
 			}
 			log.debug("bundle creator thread shutdown.");
-			ACTileStore.getInstance().closeAll();
+			if (ACTileStore.getInstance() != null)
+				ACTileStore.getInstance().closeAll();
 		}
 		catch (Exception e)
 		{
-			// System.err.println("Error loading catalog \"" + catalogName + "\".");
+			// System.err.println("Error creating bundle \"" + catalogName + "\".");
 			GUIExceptionHandler.processException(e);
-			ACTileStore.getInstance().closeAll();
+			if (ACTileStore.getInstance() != null)
+				ACTileStore.getInstance().closeAll();
 		}
 	}
 

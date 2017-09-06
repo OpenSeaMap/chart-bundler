@@ -2,6 +2,7 @@ package osmcb.program.bundle;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
@@ -36,10 +37,20 @@ public class Bundle extends Catalog implements IfBundle
 
 		@XmlElements(
 		{ @XmlElement(name = "map", type = MapDescriptor.class) })
-		protected List<IfMap> maps = new LinkedList<IfMap>();
+		protected List<IfMap> maps = new LinkedList<>();
 	}
 
+	public static final String BUNDLE_NAME_REGEX = "([\\w_]+)";
+	public static final String BUNDLE_APP_REGEX = "([\\w_]+)";
+	public static final String BUNDLE_FMT_REGEX = "([\\w_]+)";
+	public static final String TIMESTAMP_REGEX = "(\\d{8})-(\\d{4})";
+	public static final String BUNDLE_FILENAME_PREFIX = "OSM";
+	public static final Pattern BUNDLE_FILENAME_PATTERN = Pattern
+	    .compile(BUNDLE_FILENAME_PREFIX + BUNDLE_APP_REGEX + BUNDLE_FMT_REGEX + BUNDLE_NAME_REGEX + "(" + TIMESTAMP_REGEX + ")");
+
 	protected BundleOutputFormat mBOF;
+
+	protected String strBaseName;
 
 	/**
 	 * Should never be used
@@ -61,6 +72,8 @@ public class Bundle extends Catalog implements IfBundle
 	{
 		super(catalog);
 		mBOF = bundleOutputFormat;
+		// mBOF.getName();
+		strBaseName = "###";
 	}
 
 	@Override
@@ -80,6 +93,18 @@ public class Bundle extends Catalog implements IfBundle
 	public BundleOutputFormat getOutputFormat()
 	{
 		return mBOF;
+	}
+
+	@Override
+	public String getBaseName()
+	{
+		return strBaseName;
+	}
+
+	@Override
+	public void setBaseName(String newBaseName)
+	{
+		strBaseName = newBaseName;
 	}
 
 	/**

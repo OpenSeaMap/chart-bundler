@@ -35,4 +35,8 @@ public interface IfBundle extends IfCatalog
 	ACBundleCreator createLayerCreatorInstance() throws InstantiationException, IllegalAccessException;
 
 	ACBundleCreator createMapCreatorInstance() throws InstantiationException, IllegalAccessException;
+
+	public String getBaseName();
+
+	public void setBaseName(String newBaseName);
 }

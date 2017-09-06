@@ -151,12 +151,17 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 		mBundle = bundle;
 		mOutputDir = bundleOutputDir;
 		int nThreads = 5;
-		if (mBundle.getLayerCount() < nThreads)
-			nThreads = mBundle.getLayerCount();
-		mExec = new JobDispatcher(nThreads);
-		// mTileCount = bundle.calculateTilesToLoad();
-		// mMapCount = bundle.calcMapsToCompose();
-		log.trace("bundle '" + mBundle.getName() + "' pool for layers=" + mExec.getMaximumPoolSize() + ", " + mExec.toString());
+		if (mBundle.getLayerCount() > 0)
+		{
+			if (mBundle.getLayerCount() < nThreads)
+				nThreads = mBundle.getLayerCount();
+			mExec = new JobDispatcher(nThreads);
+			// mTileCount = bundle.calculateTilesToLoad();
+			// mMapCount = bundle.calcMapsToCompose();
+			log.trace("bundle '" + mBundle.getName() + "' pool for layers=" + mExec.getMaximumPoolSize() + ", " + mExec.toString());
+		}
+		else
+			log.warn("bundle '" + mBundle.getName() + "' contains no layers");
 	};
 
 	/**
@@ -260,7 +265,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	 */
 	protected void runBundle()
 	{
-		log.trace(OSMBStrs.RStr("START") + " [" + Thread.currentThread().getName() + "], pool=" + mExec.toString());
+
 		// log.trace("creation of bundle='" + mBundle.getName() + "' started with some tests");
 		// log.debug(OSMCBStrs.RStr("BundleThread.CB.ModeUnknown", mBundle.getName()));
 		// do some top-level preflight checks
@@ -273,25 +278,61 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 			log.error(OSMCBStrs.RStr("BundleThread.CB.BundleTestFailed") + e.getMessage());
 			return;
 		}
+		log.trace(OSMBStrs.RStr("START") + " [" + Thread.currentThread().getName() + "], pool=" + mExec.toString());
 		log.trace("test of bundle='" + mBundle.getName() + "' successful");
 
 		// actually create a bundle. The tiles will be downloaded when the map requests them.
 		try
 		{
+			boolean bCreate = false;
 			log.trace("before BC.initializeBundle()");
 			initializeBundle();
-			createBundle();
-			// wait for the bundle creation to finish
-			mExec.shutdown();
-			while (!mExec.isTerminated())
+			Path pOutDir = mOutputDir.toPath();
+			log.info("++++ Bundle name='" + mBundle.getBaseName() + "', dir='" + pOutDir.getParent() + "' +++++");
+			TreeSet<DirEntry> tBundles = OSMCBUtilities.listBundles(pOutDir.getParent(), mBundle.getBaseName());
+			if (tBundles.size() > 1)
 			{
-				log.trace("running jobs=" + mActiveJobs + ", " + mExec.getActiveCount() + ", total jobs=" + mExec.getTaskCount());
-				Thread.sleep(1000);
+				DirEntry tDE = tBundles.pollFirst();
+				tDE = tBundles.pollFirst();
+				log.debug(
+				    "bundle path='" + tDE.GetPathStr() + "', date=" + tDE.GetDateStr() + ", catalog date=" + Files.getLastModifiedTime(mBundle.getFile().toPath()));
+				if (tDE.GetDate().compareTo(Files.getLastModifiedTime(mBundle.getFile().toPath())) < 0)
+				{
+					bCreate = true;
+					log.info("create bundle name='" + mBundle.getBaseName() + "', date=" + tDE.GetDateStr() + ", catalog date="
+					    + Files.getLastModifiedTime(mBundle.getFile().toPath()));
+				}
+				else
+				{
+					long nMillis = new Date().getTime() - OSMCBSettings.getInstance().getBundleUpdateDays() * 86400 * 1000;
+					FileTime tTest = FileTime.fromMillis(nMillis);
+					if (tTest.compareTo(tDE.GetDate()) < 0)
+					{
+						bCreate = true;
+						log.info("create bundle name='" + mBundle.getBaseName() + "', date=" + tDE.GetDateStr() + ", test date=" + tTest);
+					}
+				}
 			}
-			log.debug("after shutdown(), completed tasks=" + mExec.getCompletedTaskCount() + ", total jobs=" + mExec.getTaskCount());
-			finishBundle();
-			jobFinishedSuccessfully(0);
-			log.debug("bundle '" + mBundle.getName() + "' finished");
+			else
+				bCreate = true;
+			if (bCreate)
+			{
+				createBundle();
+				// wait for the bundle creation to finish
+				mExec.shutdown();
+				while (!mExec.isTerminated())
+				{
+					log.trace("running jobs=" + mActiveJobs + ", " + mExec.getActiveCount() + ", total jobs=" + mExec.getTaskCount());
+					Thread.sleep(1000);
+				}
+				log.debug("after shutdown(), completed tasks=" + mExec.getCompletedTaskCount() + ", total jobs=" + mExec.getTaskCount());
+				finishBundle();
+				createGeoJson();
+				jobFinishedSuccessfully(0);
+				log.debug("bundle '" + mBundle.getName() + "' finished");
+			}
+			else
+				log.info("bundle '" + mBundle.getName() + "' skipped");
 		}
 		catch (BundleTestException e)
 		{
@@ -360,9 +401,9 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 		log.trace(OSMBStrs.RStr("START") + " [" + Thread.currentThread().getName() + "], pool=" + mExec.toString());
 		try
 		{
-			if (sTS == null)
+			if (sNTS == null)
 				log.error("no tile store init yet");
-			sTS.prepareTileStore(mMap.getMapSource());
+			sNTS.prepareTileStore(mMap.getMapSource());
 			// mMap.getMapSource().initialize();
 			initializeMap();
 			// load all necessary tiles. They should go directly into the tile store...
@@ -460,6 +501,8 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 		log.trace(OSMBStrs.RStr("START"));
 		try
 		{
+			if (mBundle.getLayerCount() < 1)
+				throw new BundleTestException("The bundle '" + mBundle.getName() + "' contains no layers");
 			for (IfLayer layer : mBundle)
 			{
 				for (IfMap map : layer)
@@ -510,7 +553,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 		String strDisclaimer = "";
 		strDisclaimer += "This Charts bundle is useable for testing ONLY, it is in no way fit for navigational purposes.\r\n";
 		strDisclaimer += "\r\n";
-		strDisclaimer += "OpenSeaMap does not give any warranty, that the data shown in this map are real.\r\n";
+		strDisclaimer += "OpenSeaMap does not give any warranty, that the data shown in this map are current or correct.\r\n";
 		strDisclaimer += "Even if you use it for testing, any damage resulting from this test will be solely your responsibility.\r\n";
 
 		strDisclaimer += "By using this chart you acknowledge that you have read, understood\r\n";
@@ -555,6 +598,95 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 		}
 	}
 
+	/**
+	 * This creates a GeoJson containing the complete bundle
+	 * 
+	 * supposed contents (as of 2017-08):
+	 * {
+	 * "type": "Feature",
+	 * "bbox": [-11.25000000, 48.92249926, 22.50000000, 66.51326044],
+	 * "geometry": {
+	 * "type": "GeometryCollection",
+	 * "geometries": [{
+	 * "type": "Polygon",
+	 * "coordinates": [
+	 * [
+	 * [-11.25, 48.92249926],
+	 * [22.5, 48.92249926],
+	 * [22.5, 66.51326044],
+	 * [-11.25, 66.51326044],
+	 * [-11.25, 48.92249926]
+	 * ]
+	 * ]
+	 * }, {
+	 * "type": "Polygon",
+	 * "coordinates": [
+	 * [
+	 * [2.81250000, 50.73645514],
+	 * [5.62500000, 50.73645514],
+	 * [5.62500000, 62.91523304],
+	 * [2.81250000, 62.91523304],
+	 * [2.81250000, 50.73645514]
+	 * ]
+	 * ]
+	 * }]
+	 * },
+	 * "properties": {
+	 * "kind": "bundle",
+	 * "name": "NorthSea",
+	 * "date": "20170122-0847"
+	 * }
+	 * }
+	 * 
+	 */
+	protected void createGeoJson()
+	{
+		log.trace(OSMBStrs.RStr("START"));
+		String strDatePart = new SimpleDateFormat(STR_BUFMT).format(new Date());
+		File crtba = new File(mOutputDir.getAbsolutePath(), mBundle.getBaseName() + "-" + strDatePart + ".json");
+		try
+		{
+			FileWriter fw = new FileWriter(crtba);
+			JsonGenerator tJGen = Json.createGenerator(fw);
+			tJGen.writeStartObject();
+			tJGen.write("type", "Feature");
+			// the bundles bounding box
+			IfLayer topLayer = mBundle.getLayer(0);
+			tJGen.writeStartArray("bbox").write(topLayer.getMinLon()).write(topLayer.getMinLat()).write(topLayer.getMaxLon()).write(topLayer.getMaxLat()).writeEnd();
+			tJGen.writeStartObject("geometry").write("type", "GeometryCollection");
+			tJGen.writeStartArray("geometries");
+			for (IfLayer layer : mBundle)
+			{
+				for (IfMap map : layer)
+				{
+					// mapwise
+					tJGen.writeStartObject().write("type", "Polygon");
+					tJGen.writeStartArray("coordinates");
+					tJGen.writeStartArray();
+					tJGen.writeStartArray();
+					tJGen.writeStartArray().write(map.getMinLon()).write(map.getMinLat()).writeEnd();
+					tJGen.writeStartArray().write(map.getMaxLon()).write(map.getMinLat()).writeEnd();
+					tJGen.writeStartArray().write(map.getMaxLon()).write(map.getMaxLat()).writeEnd();
+					tJGen.writeStartArray().write(map.getMinLon()).write(map.getMaxLat()).writeEnd();
+					tJGen.writeStartArray().write(map.getMinLon()).write(map.getMinLat()).writeEnd();
+					tJGen.writeEnd();
+					tJGen.writeEnd();
+					tJGen.writeEnd();
+					tJGen.writeEnd();
+				}
+			}
+			tJGen.writeEnd();
+			tJGen.writeEnd();
+			// the bundles data - synchronized with the dir and file names
+			tJGen.writeStartObject("properties").write("kind", "bundle").write("name", mBundle.getName()).write("date", strDatePart).writeEnd();
+			tJGen.writeEnd().close();
+		}
+		catch (IOException e)
+		{
+			log.error("", e);
+		}
+	}
+
 	// Bundle actions
 	/**
 	 * @see osmcb.program.bundlecreators.IfBundleCreator#initializeBundle()
@@ -580,13 +712,11 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 		if (bundleOutputDir == null)
 		{
 			bundleOutputDir = OSMCBSettings.getInstance().getChartBundleOutputDirectory();
-			// SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-HHmmss");
 			SimpleDateFormat sdf = new SimpleDateFormat(STR_BUFMT);
 			String bundleDirName = mBundle.getName() + "-" + sdf.format(new Date());
 			bundleOutputDir = new File(bundleOutputDir, bundleDirName);
 		}
 		mOutputDir = bundleOutputDir;
-		OSMCBUtilities.mkDirs(mOutputDir);
 		log.trace("bundle='" + mBundle.getName() + "' initialized");
 	}
 
@@ -599,6 +729,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	{
 		log.trace(OSMBStrs.RStr("START"));
 		File layerOutputDir = mOutputDir;
+		OSMCBUtilities.mkDirs(mOutputDir);
 		for (IfLayer tLayer : mBundle.getLayers())
 		{
 			// IfBundleCreator layerCreator = new ACBundleCreator(mBundle, tLayer, layerOutputDir);

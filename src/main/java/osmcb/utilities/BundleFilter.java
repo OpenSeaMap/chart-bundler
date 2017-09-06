@@ -14,40 +14,38 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
-package osmcb.utilities.stream;
+package osmcb.utilities;
 
-import java.io.FilterOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.regex.Pattern;
 
-public class CountingOutputStream extends FilterOutputStream {
+/**
+ * This Filter accepts only files following the scheme: "OSM-App-Fileformat-BaseName-Date-Time".
+ * This match is tested according to Bundle.BUNDLE_FILENAME_PATTERN
+ * 
+ * @author humbach
+ */
+public class BundleFilter implements DirectoryStream.Filter<Path>
+{
+	protected Pattern mPat;
 
-	private long bytesWritten = 0;
-
-	public CountingOutputStream(OutputStream out) {
-		super(out);
+	public BundleFilter(Pattern tPat)
+	{
+		mPat = tPat;
 	}
 
 	@Override
-	public void write(int b) throws IOException {
-		out.write(b);
-		bytesWritten++;
-	}
+	public boolean accept(Path tP)
+	{
+		boolean bExtOk = false;
+		if (Files.isDirectory(tP))
+		{
+			String strCName = tP.subpath(tP.getNameCount() - 1, tP.getNameCount()).toString();
 
-	@Override
-	public void write(byte[] b, int off, int len) throws IOException {
-		out.write(b, off, len);
-		bytesWritten += len;
+			bExtOk = mPat.matcher(strCName).matches();
+		}
+		return bExtOk;
 	}
-
-	@Override
-	public void write(byte[] b) throws IOException {
-		out.write(b);
-		bytesWritten += b.length;
-	}
-
-	public long getBytesWritten() {
-		return bytesWritten;
-	}
-
 }
