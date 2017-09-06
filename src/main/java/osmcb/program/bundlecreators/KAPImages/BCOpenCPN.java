@@ -428,7 +428,7 @@ public class BCOpenCPN extends ACBundleCreator
 		osw.write("! - KAP File" + LINEEND);
 		osw.write("VER/3.0" + LINEEND);
 		// Indentation !!!! osw.write("CRR/2015, OpenSeamMap. All rights reserved.\r\n " + createGeneralDisclaimer());
-		osw.write("CRR/2016, OpenSeamMap. All rights reserved." + LINEEND);
+		osw.write("CRR/2017, OpenSeaMap. All rights reserved." + LINEEND);
 		osw.write("CHT/NA=" + mMap.getName() + ",NU=" + mMap.getNumber() + LINEEND);
 		osw.write("CHF/" + getCHF() + LINEEND);
 		osw.write("CED/SE=1,RE=2,ED=" + strDate + LINEEND);

@@ -1,13 +1,21 @@
 package osmcb.program.bundle;
 
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import javax.json.Json;
 import javax.json.JsonValue;
 import javax.json.stream.JsonGenerator;
 
 public class BundleGeoJsonWriter implements JsonGenerator
 {
+	private JsonGenerator mGen = null;
+
+	public BundleGeoJsonWriter(Writer tWriter)
+	{
+		mGen = Json.createGenerator(tWriter);
+	}
 	@Override
 	public void close()
 	{

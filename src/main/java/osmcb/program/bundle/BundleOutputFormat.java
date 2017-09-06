@@ -173,7 +173,7 @@ public class BundleOutputFormat implements Comparable<BundleOutputFormat>
 	}
 
 	/**
-	 * This actually creates the bundle creator instance, which can in turn does the bundle creation.
+	 * This actually creates the bundle creator instance, which then in turn does the bundle creation.
 	 * 
 	 * @return An instance of a subclass of ACBundleCreator.
 	 */

@@ -28,6 +28,9 @@ import java.util.Date;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.json.Json;
+import javax.json.stream.JsonGenerator;
+
 import org.apache.log4j.Logger;
 
 import osmb.mapsources.ACMapSource;
@@ -333,6 +336,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 				}
 				log.debug("after shutdown(), completed tasks=" + mExec.getCompletedTaskCount() + ", total jobs=" + mExec.getTaskCount());
 				finishBundle();
+				createGeoJson();
 				jobFinishedSuccessfully(0);
 				log.debug("bundle '" + mBundle.getName() + "' finished");
 			}
@@ -558,7 +562,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 		String strDisclaimer = "";
 		strDisclaimer += "This Charts bundle is useable for testing ONLY, it is in no way fit for navigational purposes.\r\n";
 		strDisclaimer += "\r\n";
-		strDisclaimer += "OpenSeaMap does not give any warranty, that the data shown in this map are real.\r\n";
+		strDisclaimer += "OpenSeaMap does not give any warranty, that the data shown in this map are current or correct.\r\n";
 		strDisclaimer += "Even if you use it for testing, any damage resulting from this test will be solely your responsibility.\r\n";
 
 		strDisclaimer += "By using this chart you acknowledge that you have read, understood\r\n";
@@ -603,6 +607,95 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 		}
 	}
 
+	/**
+	 * This creates a GeoJson containing the complete bundle
+	 * 
+	 * supposed contents (as of 2017-08):
+	 * {
+	 * "type": "Feature",
+	 * "bbox": [-11.25000000, 48.92249926, 22.50000000, 66.51326044],
+	 * "geometry": {
+	 * "type": "GeometryCollection",
+	 * "geometries": [{
+	 * "type": "Polygon",
+	 * "coordinates": [
+	 * [
+	 * [-11.25, 48.92249926],
+	 * [22.5, 48.92249926],
+	 * [22.5, 66.51326044],
+	 * [-11.25, 66.51326044],
+	 * [-11.25, 48.92249926]
+	 * ]
+	 * ]
+	 * }, {
+	 * "type": "Polygon",
+	 * "coordinates": [
+	 * [
+	 * [2.81250000, 50.73645514],
+	 * [5.62500000, 50.73645514],
+	 * [5.62500000, 62.91523304],
+	 * [2.81250000, 62.91523304],
+	 * [2.81250000, 50.73645514]
+	 * ]
+	 * ]
+	 * }]
+	 * },
+	 * "properties": {
+	 * "kind": "bundle",
+	 * "name": "NorthSea",
+	 * "date": "20170122-0847"
+	 * }
+	 * }
+	 * 
+	 */
+	protected void createGeoJson()
+	{
+		log.trace(OSMBStrs.RStr("START"));
+		String strDatePart = new SimpleDateFormat(STR_BUFMT).format(new Date());
+		File crtba = new File(mOutputDir.getAbsolutePath(), mBundle.getBaseName() + "-" + strDatePart + ".json");
+		try
+		{
+			FileWriter fw = new FileWriter(crtba);
+			JsonGenerator tJGen = Json.createGenerator(fw);
+			tJGen.writeStartObject();
+			tJGen.write("type", "Feature");
+			// the bundles bounding box
+			IfLayer topLayer = mBundle.getLayer(0);
+			tJGen.writeStartArray("bbox").write(topLayer.getMinLon()).write(topLayer.getMinLat()).write(topLayer.getMaxLon()).write(topLayer.getMaxLat()).writeEnd();
+			tJGen.writeStartObject("geometry").write("type", "GeometryCollection");
+			tJGen.writeStartArray("geometries");
+			for (IfLayer layer : mBundle)
+			{
+				for (IfMap map : layer)
+				{
+					// mapwise
+					tJGen.writeStartObject().write("type", "Polygon");
+					tJGen.writeStartArray("coordinates");
+					tJGen.writeStartArray();
+					tJGen.writeStartArray();
+					tJGen.writeStartArray().write(map.getMinLon()).write(map.getMinLat()).writeEnd();
+					tJGen.writeStartArray().write(map.getMaxLon()).write(map.getMinLat()).writeEnd();
+					tJGen.writeStartArray().write(map.getMaxLon()).write(map.getMaxLat()).writeEnd();
+					tJGen.writeStartArray().write(map.getMinLon()).write(map.getMaxLat()).writeEnd();
+					tJGen.writeStartArray().write(map.getMinLon()).write(map.getMinLat()).writeEnd();
+					tJGen.writeEnd();
+					tJGen.writeEnd();
+					tJGen.writeEnd();
+					tJGen.writeEnd();
+				}
+			}
+			tJGen.writeEnd();
+			tJGen.writeEnd();
+			// the bundles data - synchronized with the dir and file names
+			tJGen.writeStartObject("properties").write("kind", "bundle").write("name", mBundle.getName()).write("date", strDatePart).writeEnd();
+			tJGen.writeEnd().close();
+		}
+		catch (IOException e)
+		{
+			log.error("", e);
+		}
+	}
+
 	// Bundle actions
 	/**
 	 * @see osmcb.program.bundlecreators.IfBundleCreator#initializeBundle()
@@ -628,13 +721,11 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 		if (bundleOutputDir == null)
 		{
 			bundleOutputDir = OSMCBSettings.getInstance().getChartBundleOutputDirectory();
-			// SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd-HHmmss");
 			SimpleDateFormat sdf = new SimpleDateFormat(STR_BUFMT);
 			String bundleDirName = mBundle.getName() + "-" + sdf.format(new Date());
 			bundleOutputDir = new File(bundleOutputDir, bundleDirName);
 		}
 		mOutputDir = bundleOutputDir;
-		OSMCBUtilities.mkDirs(mOutputDir);
 		log.trace("bundle='" + mBundle.getName() + "' initialized");
 	}
 
@@ -647,6 +738,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	{
 		log.trace(OSMBStrs.RStr("START"));
 		File layerOutputDir = mOutputDir;
+		OSMCBUtilities.mkDirs(mOutputDir);
 		for (IfLayer tLayer : mBundle.getLayers())
 		{
 			// IfBundleCreator layerCreator = new ACBundleCreator(mBundle, tLayer, layerOutputDir);

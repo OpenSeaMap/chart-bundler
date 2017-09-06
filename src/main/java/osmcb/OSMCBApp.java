@@ -179,6 +179,7 @@ public class OSMCBApp extends ACConsoleApp
 		String strCat = mCmdlParser.getOptionValue(new StringOption('c', "create"), "none");
 		if (strCat != "none")
 		{
+			// if there is one catalog given, create it indifferent from filedates
 			createBundle(Catalog.getCatalogFileName(strCat), strFormat);
 		}
 		else
