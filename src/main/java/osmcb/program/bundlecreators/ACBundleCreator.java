@@ -661,6 +661,11 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 			tJGen.write("type", "Feature");
 			// the bundles bounding box
 			IfLayer topLayer = mBundle.getLayer(0);
+			for (IfLayer layer : mBundle)
+			{
+				if (layer.getZoomLvl() < topLayer.getZoomLvl())
+					topLayer = layer;
+			}
 			tJGen.writeStartArray("bbox").write(topLayer.getMinLon()).write(topLayer.getMinLat()).write(topLayer.getMaxLon()).write(topLayer.getMaxLat()).writeEnd();
 			tJGen.writeStartObject("geometry").write("type", "GeometryCollection");
 			tJGen.writeStartArray("geometries");
