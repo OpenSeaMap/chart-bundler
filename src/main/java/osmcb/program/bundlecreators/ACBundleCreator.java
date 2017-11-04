@@ -647,6 +647,53 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	 * }
 	 * }
 	 * 
+	 * Reference about Polygon:
+	 * 
+	 * A.3. Polygons
+	 * 
+	 * Coordinates of a Polygon are an array of linear ring (see
+	 * Section 3.1.6) coordinate arrays. The first element in the array
+	 * represents the exterior ring. Any subsequent elements represent
+	 * interior rings (or holes).
+	 * 
+	 * No holes:
+	 * 
+	 * {
+	 * "type": "Polygon",
+	 * "coordinates": [
+	 * [
+	 * [100.0, 0.0],
+	 * [101.0, 0.0],
+	 * [101.0, 1.0],
+	 * [100.0, 1.0],
+	 * [100.0, 0.0]
+	 * ]
+	 * ]
+	 * }
+	 * 
+	 * Reference about GeometryCollection:
+	 * 
+	 * Each element in the "geometries" array of a GeometryCollection is one
+	 * of the Geometry objects described above:
+	 * 
+	 * {
+	 * "type": "GeometryCollection",
+	 * "geometries": [{
+	 * "type": "Point",
+	 * "coordinates": [100.0, 0.0]
+	 * }, {
+	 * "type": "Polygon",
+	 * "coordinates": [
+	 * [
+	 * [100.0, 0.0],
+	 * [101.0, 0.0],
+	 * [101.0, 1.0],
+	 * [100.0, 1.0],
+	 * [100.0, 0.0]
+	 * ]
+	 * ]
+	 * }]
+	 * }
 	 */
 	protected void createGeoJson()
 	{
@@ -677,13 +724,11 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 					tJGen.writeStartObject().write("type", "Polygon");
 					tJGen.writeStartArray("coordinates");
 					tJGen.writeStartArray();
-					tJGen.writeStartArray();
 					tJGen.writeStartArray().write(map.getMinLon()).write(map.getMinLat()).writeEnd();
 					tJGen.writeStartArray().write(map.getMaxLon()).write(map.getMinLat()).writeEnd();
 					tJGen.writeStartArray().write(map.getMaxLon()).write(map.getMaxLat()).writeEnd();
 					tJGen.writeStartArray().write(map.getMinLon()).write(map.getMaxLat()).writeEnd();
 					tJGen.writeStartArray().write(map.getMinLon()).write(map.getMinLat()).writeEnd();
-					tJGen.writeEnd();
 					tJGen.writeEnd();
 					tJGen.writeEnd();
 					tJGen.writeEnd();
