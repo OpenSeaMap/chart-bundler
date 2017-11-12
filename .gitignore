@@ -12,6 +12,7 @@ misc/Example*
 misc/spare/*
 src/test/*
 
+*.hprof
 *.class
 
 *.log
