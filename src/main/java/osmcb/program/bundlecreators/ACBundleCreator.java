@@ -87,6 +87,8 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	 * This is a default date/time format for naming bundles etc.
 	 */
 	protected static final String STR_BUFMT = "yyyyMMdd-HHmm";
+	// protected static final String STR_JSONFMT = "yyyy-MM-ddTHH:mm:00:000";
+	protected static final String STR_JSONFMT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
 	protected static MemoryTileCache sTC = new MemoryTileCache();
 	protected static ACTileStore sTS = ACTileStore.getInstance();
@@ -642,8 +644,11 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	 * },
 	 * "properties": {
 	 * "kind": "bundle",
-	 * "name": "NorthSea",
-	 * "date": "20170122-0847"
+	 * "format": "KAP",
+	 * "app": "OpenCPN",
+	 * "name:en": "NorthSea",
+	 * "name:de": "Nordsee",
+	 * "date": "2017-01-22T08:47:00:000Z"
 	 * }
 	 * }
 	 * 
@@ -737,7 +742,16 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 			tJGen.writeEnd();
 			tJGen.writeEnd();
 			// the bundles data - synchronized with the dir and file names
-			tJGen.writeStartObject("properties").write("kind", "bundle").write("name", mBundle.getName()).write("date", strDatePart).writeEnd();
+			strDatePart = new SimpleDateFormat(STR_JSONFMT).format(new Date());
+			tJGen.writeStartObject("properties");
+			tJGen.write("kind", "bundle");
+			tJGen.write("name:en", mBundle.getName());
+			tJGen.write("format", "KAP");
+			// tJGen.writeEnd();
+			tJGen.write("app", "OpenCPN");
+			// tJGen.writeEnd();
+			tJGen.write("date", strDatePart);
+			tJGen.writeEnd();
 			tJGen.writeEnd().close();
 		}
 		catch (IOException e)
@@ -774,6 +788,8 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 			SimpleDateFormat sdf = new SimpleDateFormat(STR_BUFMT);
 			String bundleDirName = mBundle.getName() + "-" + sdf.format(new Date());
 			bundleOutputDir = new File(bundleOutputDir, bundleDirName);
+			sCompletedMaps.set(0);
+			sDownloadedTiles.set(0);
 		}
 		mOutputDir = bundleOutputDir;
 		log.trace("bundle='" + mBundle.getName() + "' initialized");
