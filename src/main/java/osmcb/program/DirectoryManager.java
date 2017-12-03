@@ -131,7 +131,8 @@ public class DirectoryManager extends osmb.program.DirectoryManager
 		return null;
 	}
 
-	private DirectoryManager() {
+	private DirectoryManager()
+	{
 		super();
 	}
 }
