@@ -32,3 +32,4 @@ src/main/resources/osmcb/resources/text/mobac.strings
 /.git defekt/
 /log4j.xml
 /OSeaMChartBundler.jar
+ChartBundler_*.tar.gz
