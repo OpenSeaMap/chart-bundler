@@ -69,6 +69,7 @@ import osmb.program.Logging;
 import osmb.program.tiles.TileImageType;
 import osmb.utilities.Charsets;
 import osmb.utilities.file.DirectoryFileFilter;
+import osmb.utilities.path.CatalogFilter;
 import osmb.utilities.path.DirEntry;
 import osmcb.OSMCBApp;
 import osmcb.OSMCBApp.CatEnt;
