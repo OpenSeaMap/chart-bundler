@@ -1,0 +1,20 @@
+libs on build path
+
+bsh.-2.0b4
+commons-codec-1.4
+commons-io-2.0
+commons-lang3-3.1
+itextpdf-5.1.0
+jai_codec
+jai_core
+javapng-2.0
+javax.json-1.0.4
+javax.json-api-1.0
+je-3.3.93
+log4j-1.2.15
+sqlite-jdbc-3.8.11.1
+Tidy
+jre1.8.0_152
+JUnit 3
+
+json-20170516.jar

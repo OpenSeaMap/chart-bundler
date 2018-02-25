@@ -83,12 +83,12 @@ public class OSMCBApp extends ACConsoleApp
 		}
 
 		@Override
-		public int compareTo(Object tObj)
+		public int compareTo(Object tObj) throws ClassCastException
 		{
 			if (tObj instanceof CatEnt)
 				return -1 * strCatDate.compareTo(((CatEnt) tObj).strCatDate);
 			else
-				return 0;
+				throw new ClassCastException();
 		}
 	}
 
@@ -175,11 +175,11 @@ public class OSMCBApp extends ACConsoleApp
 	private void runWithoutMainGUI()
 	{
 		TreeSet<CatEnt> lCatalogs = OSMCBUtilities.listCatalogs(((OSMCBSettings) gApp.getSettings()).getCatalogsDirectory().toPath());
-		String strFormat = mCmdlParser.getOptionValue(new StringOption('f', "format"), "OpenCPN-KAP");
+		String strFormat = mCmdlParser.getOptionValue(new StringOption('f', "format"), "OpenCPN2");
 		String strCat = mCmdlParser.getOptionValue(new StringOption('c', "create"), "none");
 		if (strCat != "none")
 		{
-			// if there is one catalog given, create it indifferent from filedates
+			// if there is one catalog given, create it regardless of filedates
 			createBundle(Catalog.getCatalogFileName(strCat), strFormat);
 		}
 		else

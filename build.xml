@@ -1,3 +1,9 @@
+<!-- build.xml for ChartBundler.jar 
+     it includes ChartBundler and all used libraries
+     
+     ChartBase
+     
+     -->
 <project default="all" name="Compile and build java classes plus jar archives">
 	<property name="app.name" value="OSeaMChartBundler" />
 	<property name="app.shname" value="osmcb" />
@@ -43,6 +49,7 @@
 		<fileset dir="${osmb.dir}/lib" includes="commons-io-2.0.jar" />
 		<fileset dir="${osmb.dir}/lib" includes="commons-lang3-3.1.jar" />
 		<fileset dir="${osmb.dir}/lib" includes="je-${je-version}.jar" />
+		<fileset dir="${osmb.dir}/lib" includes="json-20170516.jar" />
 		
 		<fileset dir="${osmb.dir}/build" includes="${osmb.jarname}" />
 		
@@ -301,20 +308,6 @@
 			-dontobfuscate
 		</proguard>
 		<move file="build/temp.jar" tofile="${jar.name}" overwrite="true" />
-	</target>
-
-	<target name="svnversion" description="Updates the revision information in src/osmcb/osmcb.properties" depends="svnversion_svn">
-	</target>
-
-	<target name="svnversion_svn">
-		<delete file="${rev.prop.file}" />
-		<exec executable="svnversion" outputproperty="${app.shname}.revision.new" searchpath="true" failifexecutionfails="false" />
-		<property name="${app.shname}.revision.new" value="0013" />
-		<condition property="${app.shname}.revision.exported">
-			<equals arg1="${osmcb.revision.new}" arg2="0013" />
-		</condition>
-		<echo message="OSMCB revision: ${osmcb.revision.new}" />
-		<antcall target="svnversion_write_property_file" />
 	</target>-->
 
 	<!--<target name="svnversion_write_property_file" unless="${app.shname}.revision.exported">-->
