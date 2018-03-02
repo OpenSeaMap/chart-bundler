@@ -33,6 +33,7 @@ import javax.json.stream.JsonGenerator;
 
 import org.apache.log4j.Logger;
 
+import osmb.exceptions.InvalidNameException;
 import osmb.mapsources.ACMapSource;
 import osmb.mapsources.IfFileBasedMapSource;
 import osmb.mapsources.IfMapSource;
@@ -94,7 +95,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	protected static ACTileStore sTS = ACTileStore.getInstance();
 	protected static SQLiteDbTileStore sNTS = null; // the 'new' SQLite tile store
 
-	private static AtomicInteger sCompletedMaps = new AtomicInteger(0);
+	protected static AtomicInteger sCompletedMaps = new AtomicInteger(0);
 	protected static AtomicInteger sScheduledTiles = new AtomicInteger(0);
 	protected static AtomicInteger sDownloadedTiles = new AtomicInteger(0);
 
@@ -338,7 +339,8 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 				}
 				log.debug("after shutdown(), completed tasks=" + mExec.getCompletedTaskCount() + ", total jobs=" + mExec.getTaskCount());
 				finishBundle();
-				createGeoJson();
+				createGeoJson(pOutDir.getParent());
+				createGeoJsonFC(pOutDir.getParent());
 				jobFinishedSuccessfully(0);
 				log.debug("bundle '" + mBundle.getName() + "' finished");
 			}
@@ -358,6 +360,11 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 		catch (InterruptedException e)
 		{
 			log.error(OSMCBStrs.RStr("BundleThread.CB.IOException") + e.getMessage());
+			return;
+		}
+		catch (InvalidNameException e)
+		{
+			log.error(OSMCBStrs.RStr("BundleThread.CB.InvalidNameException") + e.getMessage());
 			return;
 		}
 	}
@@ -699,8 +706,10 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	 * ]
 	 * }]
 	 * }
+	 * 
+	 * @param tParentPath
 	 */
-	protected void createGeoJson()
+	protected void createGeoJson(Path tParentPath)
 	{
 		log.trace(OSMBStrs.RStr("START"));
 		String strDatePart = new SimpleDateFormat(STR_BUFMT).format(new Date());
@@ -736,6 +745,9 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 					tJGen.writeStartArray().write(map.getMinLon()).write(map.getMinLat()).writeEnd();
 					tJGen.writeEnd();
 					tJGen.writeEnd();
+					tJGen.writeStartObject("info").write("type", "OSM-Info");
+					tJGen.write("layer", layer.getName());
+					tJGen.writeEnd();
 					tJGen.writeEnd();
 				}
 			}
@@ -760,11 +772,107 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 		}
 	}
 
+	/*
+	 * produce a geojson with a featureCollection for testing...
+	 */
+	protected void createGeoJsonFC(Path tParentPath)
+	{
+		log.trace(OSMBStrs.RStr("START"));
+		String strDatePart = new SimpleDateFormat(STR_BUFMT).format(new Date());
+		// File crtba = new File(mOutputDir.getAbsolutePath(), mBundle.getBaseName() + "-" + strDatePart + ".json");
+		File crtba = new File(tParentPath.toFile(), mBundle.getName() + ".geojson");
+		// log.info("bundle name='" + mBundle.getName() + "', date=" + mBundle.getDate().toString());
+		try
+		{
+			FileWriter fw = new FileWriter(crtba);
+			JsonGenerator tJGen = Json.createGenerator(fw);
+			tJGen.writeStartObject();
+			tJGen.write("type", "FeatureCollection");
+			tJGen.writeStartArray("features");
+			tJGen.writeStartObject().write("type", "Feature");
+			// the bundles bounding box
+			IfLayer topLayer = mBundle.getLayer(0);
+			for (IfLayer layer : mBundle)
+			{
+				if (layer.getZoomLvl() < topLayer.getZoomLvl())
+					topLayer = layer;
+			}
+			tJGen.writeStartArray("bbox").write(topLayer.getMinLon()).write(topLayer.getMinLat()).write(topLayer.getMaxLon()).write(topLayer.getMaxLat()).writeEnd();
+
+			tJGen.writeStartObject("geometry").write("type", "Polygon");
+			tJGen.writeStartArray("coordinates");
+			tJGen.writeStartArray();
+			tJGen.writeStartArray().write(topLayer.getMinLon()).write(topLayer.getMinLat()).writeEnd();
+			tJGen.writeStartArray().write(topLayer.getMaxLon()).write(topLayer.getMinLat()).writeEnd();
+			tJGen.writeStartArray().write(topLayer.getMaxLon()).write(topLayer.getMaxLat()).writeEnd();
+			tJGen.writeStartArray().write(topLayer.getMinLon()).write(topLayer.getMaxLat()).writeEnd();
+			tJGen.writeStartArray().write(topLayer.getMinLon()).write(topLayer.getMinLat()).writeEnd();
+			tJGen.writeEnd();
+			tJGen.writeEnd();
+			tJGen.writeEnd();
+
+			// the bundles data - synchronized with the dir and file names
+			strDatePart = new SimpleDateFormat(STR_JSONFMT).format(new Date());
+			tJGen.writeStartObject("properties");
+			tJGen.write("kind", "bundle");
+			tJGen.write("name:en", mBundle.getName());
+			tJGen.write("format", "KAP");
+			// tJGen.writeEnd();
+			tJGen.write("app", "OpenCPN");
+			// tJGen.writeEnd();
+			tJGen.write("date", strDatePart);
+			tJGen.writeEnd();
+
+			tJGen.writeEnd();
+
+			for (IfLayer layer : mBundle)
+			{
+				if (mBundle.getLayers().indexOf(layer) < mBundle.getLayers().size())
+				{
+					for (IfMap map : layer)
+					{
+						// mapwise
+						tJGen.writeStartObject().write("type", "Feature");
+
+						tJGen.writeStartObject("geometry").write("type", "Polygon");
+						tJGen.writeStartArray("coordinates");
+						tJGen.writeStartArray();
+						tJGen.writeStartArray().write(map.getMinLon()).write(map.getMinLat()).writeEnd();
+						tJGen.writeStartArray().write(map.getMaxLon()).write(map.getMinLat()).writeEnd();
+						tJGen.writeStartArray().write(map.getMaxLon()).write(map.getMaxLat()).writeEnd();
+						tJGen.writeStartArray().write(map.getMinLon()).write(map.getMaxLat()).writeEnd();
+						tJGen.writeStartArray().write(map.getMinLon()).write(map.getMinLat()).writeEnd();
+						tJGen.writeEnd();
+						tJGen.writeEnd();
+						tJGen.writeEnd();
+
+						// the maps data - synchronized with the dir and file names
+						tJGen.writeStartObject("properties");
+						tJGen.write("kind", "map");
+						tJGen.write("zlevel", map.getZoom());
+						tJGen.write("name:en", map.getName());
+						tJGen.writeEnd();
+
+						tJGen.writeEnd();
+					}
+				}
+			}
+			// tJGen.writeEnd();
+			tJGen.writeEnd();
+			tJGen.writeEnd().close();
+		}
+		catch (IOException e)
+		{
+			log.error("", e);
+		}
+	}
+
 	// Bundle actions
 	/**
+	 * @throws InvalidNameException
 	 * @see osmcb.program.bundlecreators.IfBundleCreator#initializeBundle()
 	 */
-	public void initializeBundle() throws IOException, BundleTestException
+	public void initializeBundle() throws IOException, BundleTestException, InvalidNameException
 	{
 		log.trace(OSMBStrs.RStr("START"));
 		initializeBundle(null);
@@ -777,9 +885,10 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	 * @param bundle
 	 * @throws IOException
 	 * @throws BundleTestException
+	 * @throws InvalidNameException
 	 */
 	// public void initializeBundle(String bundleDirName) throws IOException, BundleTestException
-	public void initializeBundle(File bundleOutputDir) throws IOException, BundleTestException
+	public void initializeBundle(File bundleOutputDir) throws IOException, BundleTestException, InvalidNameException
 	{
 		log.trace(OSMBStrs.RStr("START"));
 		if (bundleOutputDir == null)
@@ -791,6 +900,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 			sCompletedMaps.set(0);
 			sDownloadedTiles.set(0);
 		}
+		mBundle.setName(bundleOutputDir.getName());
 		mOutputDir = bundleOutputDir;
 		log.trace("bundle='" + mBundle.getName() + "' initialized");
 	}

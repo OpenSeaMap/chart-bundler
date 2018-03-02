@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import osmb.exceptions.InvalidNameException;
 import osmb.program.ACApp;
 import osmb.program.map.IfMap;
 import osmb.utilities.OSMBStrs;
@@ -63,9 +64,11 @@ public class BCOpenCPN2 extends BCOpenCPN
 	// general bundle actions
 	/**
 	 * Creates a format specific directory for all OpenCPN-KAP bundles.
+	 * 
+	 * @throws InvalidNameException
 	 */
 	@Override
-	public void initializeBundle() throws IOException, BundleTestException
+	public void initializeBundle() throws IOException, BundleTestException, InvalidNameException
 	{
 		log.trace("START");
 		File bundleOutputDir = ((OSMCBSettings) ACApp.getApp().getSettings()).getChartBundleOutputDirectory();
@@ -75,6 +78,8 @@ public class BCOpenCPN2 extends BCOpenCPN
 		mBundle.setBaseName("OSM-" + STR_BUNDLE_TYPE + "-" + mBundle.getName());
 		String bundleDirName = mBundle.getBaseName() + "-" + sdf.format(new Date());
 		bundleOutputDir = new File(bundleOutputDir, bundleDirName);
+		sCompletedMaps.set(0);
+		sDownloadedTiles.set(0);
 		super.initializeBundle(bundleOutputDir);
 	}
 

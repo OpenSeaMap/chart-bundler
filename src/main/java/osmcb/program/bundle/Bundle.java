@@ -1,5 +1,6 @@
 package osmcb.program.bundle;
 
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -50,7 +51,19 @@ public class Bundle extends Catalog implements IfBundle
 
 	protected BundleOutputFormat mBOF;
 
+	/*
+	 * The bundles name is a multipart name. It consists of:
+	 * - OSM as literal
+	 * - App field
+	 * - Map file format
+	 * - Region name
+	 * - Date
+	 * - Time
+	 * The baseName is the part of the name containing app, map format and region name.
+	 */
 	protected String strBaseName;
+
+	protected Date dtCreationDate;
 
 	/**
 	 * Should never be used
@@ -79,7 +92,7 @@ public class Bundle extends Catalog implements IfBundle
 	@Override
 	public boolean isInvalid()
 	{
-		boolean bOK = (mBOF != null);
+		boolean bOK = (mBOF == null);
 		return bOK;
 	}
 
@@ -168,5 +181,17 @@ public class Bundle extends Catalog implements IfBundle
 	{
 		ACBundleCreator bc = this.mBOF.createBundleCreatorInstance();
 		return bc;
+	}
+
+	@Override
+	public void SetDate(Date tCrDate)
+	{
+		dtCreationDate = tCrDate;
+	}
+
+	@Override
+	public Date getDate()
+	{
+		return dtCreationDate;
 	}
 }

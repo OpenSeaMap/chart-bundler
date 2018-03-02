@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import osmb.exceptions.InvalidNameException;
 import osmb.mapsources.ACMapSource;
 import osmb.program.ACApp;
 // W #mapSpace import osmb.program.map.IfMapSpace;
@@ -99,7 +100,7 @@ public class BCRMapsSQLite extends ACBundleCreator implements IfRequiresSQLite
 	}
 
 	@Override
-	public void initializeBundle() throws IOException, BundleTestException
+	public void initializeBundle() throws IOException, BundleTestException, InvalidNameException
 	{
 		File bundleOutputDir = ((OSMCBSettings) ACApp.getApp().getSettings()).getChartBundleOutputDirectory();
 		bundleOutputDir = new File(bundleOutputDir, "OsmAnd-SQLITE");

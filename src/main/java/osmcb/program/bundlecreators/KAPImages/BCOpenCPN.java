@@ -81,18 +81,24 @@ public class BCOpenCPN extends ACBundleCreator
 	/**
 	 * Creates a format specific directory for all OpenCPN-KAP bundles
 	 * Creates a format specific directory name
+	 * 
+	 * @throws InvalidNameException
 	 */
 	@Override
-	public void initializeBundle() throws IOException, BundleTestException
+	public void initializeBundle() throws IOException, BundleTestException, InvalidNameException
 	{
+		Date tCrDate = new Date();
 		log.trace(OSMBStrs.RStr("START"));
 		File bundleOutputDir = ((OSMCBSettings) ACApp.getApp().getSettings()).getChartBundleOutputDirectory();
 		bundleOutputDir = new File(bundleOutputDir, STR_BUNDLE_TYPE);
 		OSMCBUtilities.mkDirs(bundleOutputDir);
 		SimpleDateFormat sdf = new SimpleDateFormat(STR_BUFMT);
 		mBundle.setBaseName("OSM-" + STR_BUNDLE_TYPE + "-" + mBundle.getName());
-		String bundleDirName = mBundle.getBaseName() + "-" + sdf.format(new Date());
+		String bundleDirName = mBundle.getBaseName() + "-" + sdf.format(tCrDate);
 		bundleOutputDir = new File(bundleOutputDir, bundleDirName);
+		sCompletedMaps.set(0);
+		sDownloadedTiles.set(0);
+		mBundle.SetDate(tCrDate);
 		super.initializeBundle(bundleOutputDir);
 	}
 
@@ -725,10 +731,20 @@ public class BCOpenCPN extends ACBundleCreator
 	protected BufferedImage createMapFromTiles() throws InterruptedException, MapCreationException
 	{
 		log.trace(OSMBStrs.RStr("START"));
+
+		BufferedImage img = null;
+		Graphics2D gc = null;
 		int width = (mMap.getXMax() - mMap.getXMin() + 1) * MP2MapSpace.TECH_TILESIZE;
 		int height = (mMap.getYMax() - mMap.getYMin() + 1) * MP2MapSpace.TECH_TILESIZE;
-		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-		Graphics2D gc = img.createGraphics();
+		try
+		{
+			img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+			gc = img.createGraphics();
+		}
+		catch (Exception e)
+		{
+			log.debug("Exception beim Image anlegen, Breite: " + width + ", Höhe: " + height);
+		}
 		int tilex = 0;
 		int tiley = 0;
 

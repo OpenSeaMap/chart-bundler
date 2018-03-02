@@ -34,6 +34,7 @@ import javax.imageio.ImageIO;
 
 import org.apache.log4j.Logger;
 
+import osmb.exceptions.InvalidNameException;
 import osmb.mapsources.ACMapSource;
 import osmb.mapsources.MP2MapSpace;
 import osmb.mapsources.TileAddress;
@@ -93,15 +94,17 @@ public class BCTrekBuddy extends ACBundleCreator
 	}
 
 	@Override
-	public void initializeBundle() throws IOException, BundleTestException
+	public void initializeBundle() throws IOException, BundleTestException, InvalidNameException
 	{
+		Date tCrDate = new Date();
 		File bundleOutputDir = ((OSMCBSettings) ACApp.getApp().getSettings()).getChartBundleOutputDirectory();
 		bundleOutputDir = new File(bundleOutputDir, "TrekBuddy-Atlas");
 		OSMCBUtilities.mkDirs(bundleOutputDir);
 		SimpleDateFormat sdf = new SimpleDateFormat(STR_BUFMT);
 		mBundle.setBaseName("OSM-" + STR_BUNDLE_TYPE + "-" + mBundle.getName());
-		String bundleDirName = mBundle.getBaseName() + "-" + sdf.format(new Date());
+		String bundleDirName = mBundle.getBaseName() + "-" + sdf.format(tCrDate);
 		bundleOutputDir = new File(bundleOutputDir, bundleDirName);
+		mBundle.SetDate(tCrDate);
 		super.initializeBundle(bundleOutputDir);
 	}
 

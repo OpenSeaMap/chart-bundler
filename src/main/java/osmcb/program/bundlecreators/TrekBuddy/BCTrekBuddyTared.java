@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import osmb.exceptions.InvalidNameException;
 import osmb.program.ACApp;
 import osmb.program.tiles.Tile;
 import osmcb.OSMCBSettings;
@@ -65,15 +66,17 @@ public class BCTrekBuddyTared extends BCTrekBuddy
 	// }
 	//
 	@Override
-	public void initializeBundle() throws IOException, BundleTestException
+	public void initializeBundle() throws IOException, BundleTestException, InvalidNameException
 	{
+		Date tCrDate = new Date();
 		File bundleOutputDir = ((OSMCBSettings) ACApp.getApp().getSettings()).getChartBundleOutputDirectory();
 		bundleOutputDir = new File(bundleOutputDir, "TrekBuddy-TAR");
 		OSMCBUtilities.mkDirs(bundleOutputDir);
 		SimpleDateFormat sdf = new SimpleDateFormat(STR_BUFMT);
 		mBundle.setBaseName("OSM-" + STR_BUNDLE_TYPE + "-" + mBundle.getName());
-		String bundleDirName = mBundle.getBaseName() + "-" + sdf.format(new Date());
+		String bundleDirName = mBundle.getBaseName() + "-" + sdf.format(tCrDate);
 		bundleOutputDir = new File(bundleOutputDir, bundleDirName);
+		mBundle.SetDate(tCrDate);
 		super.initializeBundle(bundleOutputDir);
 	}
 

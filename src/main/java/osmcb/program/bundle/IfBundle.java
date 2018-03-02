@@ -16,6 +16,8 @@
  ******************************************************************************/
 package osmcb.program.bundle;
 
+import java.util.Date;
+
 import osmb.program.catalog.IfCatalog;
 import osmcb.program.bundlecreators.ACBundleCreator;
 
@@ -39,4 +41,8 @@ public interface IfBundle extends IfCatalog
 	public String getBaseName();
 
 	public void setBaseName(String newBaseName);
+
+	void SetDate(Date tCrDate);
+
+	Date getDate();
 }

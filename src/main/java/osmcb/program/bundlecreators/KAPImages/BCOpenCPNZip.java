@@ -78,9 +78,11 @@ public class BCOpenCPNZip extends ACBundleCreator
 	/**
 	 * Creates a format specific directory for all OpenCPN-KAP bundles
 	 * Creates a format specific directory name
+	 * 
+	 * @throws InvalidNameException
 	 */
 	@Override
-	public void initializeBundle() throws IOException, BundleTestException
+	public void initializeBundle() throws IOException, BundleTestException, InvalidNameException
 	{
 		log.trace("START");
 		File bundleOutputDir = ((OSMCBSettings) ACApp.getApp().getSettings()).getChartBundleOutputDirectory();
