@@ -38,7 +38,7 @@ import org.apache.log4j.Logger;
 import osmcb.program.Logging;
 
 /**
- * Proxies the default {@link SocketImpl} using reflection. This allows to trace all calls into the log file.
+ * Proxies the default {@link SocketImpl} using reflection. This allows to trace all calls into the sLog file.
  * 
  * Requires SunJRE/SunJDK!
  */
@@ -186,7 +186,7 @@ public class MySocketImplFactory implements SocketImplFactory
 		@Override
 		protected int available() throws IOException
 		{
-			// log.trace("[" + socketId + "] available()");
+			// sLog.trace("[" + socketId + "] available()");
 			try
 			{
 				return ((Integer) bind.invoke(si)).intValue();
@@ -298,7 +298,7 @@ public class MySocketImplFactory implements SocketImplFactory
 		@Override
 		protected InputStream getInputStream() throws IOException
 		{
-			// log.trace("[" + socketId + "] getInputStream()");
+			// sLog.trace("[" + socketId + "] getInputStream()");
 			try
 			{
 				return (InputStream) getInputStream.invoke(si);
@@ -313,14 +313,14 @@ public class MySocketImplFactory implements SocketImplFactory
 
 		public Object getOption(int optID) throws SocketException
 		{
-			// log.trace("[" + socketId + "] getOption(..)");
+			// sLog.trace("[" + socketId + "] getOption(..)");
 			return si.getOption(optID);
 		}
 
 		@Override
 		protected OutputStream getOutputStream() throws IOException
 		{
-			// log.trace("[" + socketId + "] getOutputStream()");
+			// sLog.trace("[" + socketId + "] getOutputStream()");
 			try
 			{
 				return (OutputStream) getOutputStream.invoke(si);
@@ -352,7 +352,7 @@ public class MySocketImplFactory implements SocketImplFactory
 		@Override
 		protected void sendUrgentData(int data) throws IOException
 		{
-			// log.trace("[" + socketId + "] sendUrgentData");
+			// sLog.trace("[" + socketId + "] sendUrgentData");
 			try
 			{
 				sendUrgentData.invoke(si, data);
@@ -367,7 +367,7 @@ public class MySocketImplFactory implements SocketImplFactory
 
 		public void setOption(int optID, Object value) throws SocketException
 		{
-			// log.trace("[" + socketId + "] setOption");
+			// sLog.trace("[" + socketId + "] setOption");
 			si.setOption(optID, value);
 		}
 

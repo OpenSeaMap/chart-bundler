@@ -185,7 +185,7 @@ public abstract class ACPlainImage extends ACBundleCreator
 		 * }
 		 * catch (IOException e)
 		 * {
-		 * log.error("", e);
+		 * sLog.error("", e);
 		 * }
 		 * lineX += sTileSize;
 		 * }

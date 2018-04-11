@@ -47,7 +47,7 @@ public class BCTrekBuddyTared extends BCTrekBuddy
 	public BCTrekBuddyTared()
 	{
 		super();
-		log = Logger.getLogger(this.getClass());
+		sLog = Logger.getLogger(this.getClass());
 	}
 
 	public BCTrekBuddyTared(IfBundle bundle, File bundleOutputDir)
@@ -86,7 +86,7 @@ public class BCTrekBuddyTared extends BCTrekBuddy
 		createInfoFile();
 		createAtlasTarArchive(mBundle.getName());
 		sBundleProgress.finishBundle();
-		log.info("bundle='" + mBundle.getName() + "' finished");
+		sLog.info("bundle='" + mBundle.getName() + "' finished");
 	}
 
 	@Override
@@ -94,7 +94,7 @@ public class BCTrekBuddyTared extends BCTrekBuddy
 	{
 		try
 		{
-			log.debug("Creating map");
+			sLog.debug("Creating map");
 
 			// write the .map file containing the calibration points
 			writeMapFile();
@@ -119,7 +119,7 @@ public class BCTrekBuddyTared extends BCTrekBuddy
 
 	private void createAtlasTarArchive(String name)
 	{
-		log.trace("Creating " + name + ".tar for bundle in dir \"" + mOutputDir.getPath() + "\"");
+		sLog.trace("Creating " + name + ".tar for bundle in dir \"" + mOutputDir.getPath() + "\"");
 
 		File[] atlasLayerDirs = OSMCBUtilities.listSubDirectories(mOutputDir);
 		List<File> atlasMapDirs = new LinkedList<>();
@@ -151,7 +151,7 @@ public class BCTrekBuddyTared extends BCTrekBuddy
 		}
 		catch (IOException e)
 		{
-			log.error("Failed writing tar file \"" + crFile.getPath() + "\"", e);
+			sLog.error("Failed writing tar file \"" + crFile.getPath() + "\"", e);
 		}
 		finally
 		{
@@ -181,7 +181,7 @@ public class BCTrekBuddyTared extends BCTrekBuddy
 				tileWidth = parameters.getWidth();
 			}
 			File mapTarFile = new File(mOutputDir, mMap.getName() + ".tar");
-			log.debug("Writing tiles to tared map: " + mapTarFile);
+			sLog.debug("Writing tiles to tared map: " + mapTarFile);
 			try
 			{
 				ta = new TarTmiArchive(mapTarFile, null);
@@ -191,7 +191,7 @@ public class BCTrekBuddyTared extends BCTrekBuddy
 			}
 			catch (IOException e)
 			{
-				log.error("", e);
+				sLog.error("", e);
 			}
 		}
 
@@ -212,7 +212,7 @@ public class BCTrekBuddyTared extends BCTrekBuddy
 			}
 			catch (IOException e)
 			{
-				log.error("", e);
+				sLog.error("", e);
 			}
 			ta.close();
 		}

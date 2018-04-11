@@ -146,7 +146,7 @@ public class OSMCBApp extends ACConsoleApp
 			EnvironmentSetup.upgrade();
 			Logging.logSystemInfo();
 
-			// log.info(FileSystemProvider.installedProviders());
+			// sLog.info(FileSystemProvider.installedProviders());
 			// no 7zip fs available
 
 			runWithoutMainGUI();

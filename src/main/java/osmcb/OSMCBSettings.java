@@ -198,7 +198,7 @@ public class OSMCBSettings extends ACSettings
 		}
 		catch (JAXBException e)
 		{
-			// log.error(e);
+			// sLog.error(e);
 			// JOptionPane
 			// .showMessageDialog(null, OSMCBStrs.RStr(OSMCBStrs.RStr("msg_settings_file_can_not_parse")), OSMCBStrs.RStr("Error"), JOptionPane.ERROR_MESSAGE);
 			System.exit(0);

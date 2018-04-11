@@ -84,7 +84,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 	@Override
 	public void initializeBundle() throws IOException, BundleTestException, InvalidNameException
 	{
-		log.trace("START");
+		sLog.trace("START");
 		File bundleOutputDir = ((OSMCBSettings) ACApp.getApp().getSettings()).getChartBundleOutputDirectory();
 		URI zipURI = URI.create("jar:file:/OpenCPN-KAP/Test.zip");
 		bundleOutputDir = new File(bundleOutputDir, "OpenCPN-KAP");
@@ -118,7 +118,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 	@Override
 	public void initializeMap() throws IOException
 	{
-		log.trace("START");
+		sLog.trace("START");
 		// each map goes in its own folder BUT all maps are in the same folder 'ChartBundleRoot'
 		// NOAA has its own numbering scheme for the charts with more digits for smaller charts, but not a clear description to make subdivisions
 		// 'L00-M0000' will be the map folder name. Each chart includes one map L00-M0000.kap
@@ -129,7 +129,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 		}
 		catch (InvalidNameException e)
 		{
-			log.error("", e);
+			sLog.error("", e);
 		}
 		// mMapDir = new File(bundleDir, mMap.getName());
 		// OSMCBUtilities.mkDirs(mMapDir);
@@ -143,7 +143,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 	@Override
 	public void createMap() throws MapCreationException, InterruptedException
 	{
-		log.trace("START");
+		sLog.trace("START");
 		BufferedImage img = null;
 		// the map is stored as a single file, so all tiles have to be put together
 		try
@@ -169,7 +169,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 
 	protected void writeBsbFile()
 	{
-		log.trace("START");
+		sLog.trace("START");
 		File bsbFile = new File(mOutputDir, mMap.getName() + ".bsb");
 		// !
 		// CRR/This electronic chart was produced under the authority of USA-NOAA/NOS.
@@ -302,7 +302,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 			SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 			String strDate = sdf.format(editionDate);
 
-			log.trace("Writing bsb file");
+			sLog.trace("Writing bsb file");
 			OutputStreamWriter bsbWriter = new OutputStreamWriter(bsbFileStream, TEXT_FILE_CHARSET);
 
 			bsbWriter.write("! - BSB File\r\n");
@@ -341,7 +341,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 
 	protected void writeMapFile(BufferedImage img) throws IOException
 	{
-		log.trace("START");
+		sLog.trace("START");
 		OutputStream mFS = null;
 
 		Path mapFile = Files.createFile(mOutputDir.toPath().resolve(mMap.getName() + "_1.kap"));
@@ -353,7 +353,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 			IfOSMPalette sPal = makePalette(img);
 			mFS = Files.newOutputStream(mapFile, CREATE);
 
-			log.debug("Writing map file (.kap)");
+			sLog.debug("Writing map file (.kap)");
 
 			ImageOutputStream ios = ImageIO.createImageOutputStream(mFS);
 			writeMapHeader(mFS, sPal);
@@ -367,7 +367,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 			OSMCBUtilities.closeStream(mFS);
 		}
 
-		log.debug("Writing test map file (.png)");
+		sLog.debug("Writing test map file (.png)");
 		// these are here for testing purposes
 		File test = new File(mOutputDir, mMap.getName() + ".png");
 		ImageIO.write(img, "png", test);
@@ -381,7 +381,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 
 	protected void writeMapHeader(OutputStream os, IfOSMPalette sPal) throws IOException
 	{
-		log.trace("START");
+		sLog.trace("START");
 		// W #mapSpace IfMapSpace mapSpace = mMap.getMapSource().getMapSpace();
 		int tileSize = mMap.getTileSize().width;
 		@SuppressWarnings("unused") // W #unused
@@ -398,7 +398,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 		double laMin = mMap.getMinLat();
 		double laMax = mMap.getMaxLat();
 
-		log.info("start writing image file for='" + mMap.getName() + "'");
+		sLog.info("start writing image file for='" + mMap.getName() + "'");
 
 		Date editionDate = new Date();
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
@@ -520,10 +520,10 @@ public class BCOpenCPNZip extends ACBundleCreator
 
 	protected IfOSMPalette makePalette(BufferedImage img)
 	{
-		log.trace("START");
+		sLog.trace("START");
 		OSMAdaptivePalette tPal = new OSMAdaptivePalette(img);
 		// OSMFixedHSLPalette tPal = new OSMFixedHSLPalette(img);
-		log.debug("final Palette:" + tPal.toString());
+		sLog.debug("final Palette:" + tPal.toString());
 		return tPal;
 	}
 
@@ -537,7 +537,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 	 */
 	protected void writeMapImage(BufferedImage img, ImageOutputStream ios, IfOSMPalette tPal, long nPos)
 	{
-		log.trace("START");
+		sLog.trace("START");
 		ArrayList<Long> tLIdx = new ArrayList<>(img.getHeight());
 		try
 		{
@@ -573,7 +573,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 					}
 
 					if ((nPalIdx > 127) || (nPalIdx == 0))
-						log.error("palette index wrong=" + nPalIdx + ", used=" + (nPalIdx & 0x7F));
+						sLog.error("palette index wrong=" + nPalIdx + ", used=" + (nPalIdx & 0x7F));
 					// for our 7bit palette the whole first Byte is used by the color index, so the count will follow -> set bit 7
 					ios.write((nPalIdx & 0x7F) | 0x80);
 					// calculate the run count
@@ -606,7 +606,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 				ios.write(((int) nIdx & 0xFF) >> 0);
 			}
 			ios.close();
-			log.info("finished writing image file for='" + mMap.getName() + "'");
+			sLog.info("finished writing image file for='" + mMap.getName() + "'");
 		}
 		catch (IOException e)
 		{
@@ -621,7 +621,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 	 */
 	protected void writeTestMapImage(IfMap map, BufferedImage img, ImageOutputStream ios, OSMAdaptivePalette tPal, long nPos)
 	{
-		log.trace("START");
+		sLog.trace("START");
 		ArrayList<Long> tLIdx = new ArrayList<>(img.getHeight());
 		try
 		{
@@ -696,7 +696,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 				ios.write(((int) nIdx & 0xFF) >> 0);
 			}
 			ios.close();
-			log.info("finished writing image file for='" + map.getName() + "'");
+			sLog.info("finished writing image file for='" + map.getName() + "'");
 		}
 		catch (IOException e)
 		{
@@ -706,7 +706,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 	}
 
 	/**
-	 * When this is called, all tiles should be locally available. So, we use only locally tiles here, including an 'error overlay' and simply log the failure.
+	 * When this is called, all tiles should be locally available. So, we use only locally tiles here, including an 'error overlay' and simply sLog the failure.
 	 * Probably later we will write a list of tiles to be downloaded in the near future, but this is not yet implemented.
 	 * 
 	 * @return The maps image
@@ -715,7 +715,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 	 */
 	protected BufferedImage createMapFromTiles() throws InterruptedException, MapCreationException
 	{
-		log.trace("START");
+		sLog.trace("START");
 		int tileSize = mMap.getTileSize().width;
 		int width = (mMap.getXMax() - mMap.getXMin() + 1) * tileSize;
 		int height = (mMap.getYMax() - mMap.getYMin() + 1) * tileSize;
@@ -743,7 +743,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 						// ts.getTileImage()
 						if (tile == null)
 						{
-							log.debug(String.format("Tile x=%d y=%d not found in tile archive - creating default", tilex, tiley));
+							sLog.debug(String.format("Tile x=%d y=%d not found in tile archive - creating default", tilex, tiley));
 							// create error tile
 							// mapTileWriter.writeTile(tilex, tiley, tileType, emptyTileData);
 							gc.drawImage(tile, tilex * tileSize, tiley * tileSize, tileSize, tileSize, null);
@@ -751,7 +751,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 					}
 					if (tile != null)
 					{
-						log.trace(String.format("Tile x=%d y=%d ", tilex, tiley));
+						sLog.trace(String.format("Tile x=%d y=%d ", tilex, tiley));
 						// mapTileWriter.writeTile(tilex, tiley, tileType, sourceTileData);
 						gc.drawImage(tile, tilex * tileSize, tiley * tileSize, tileSize, tileSize, null);
 					}
@@ -781,7 +781,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 			super();
 			setFolder = new File(mOutputDir, "set");
 			OSMCBUtilities.mkDir(setFolder);
-			log.debug("Writing tiles to set folder: " + setFolder);
+			sLog.debug("Writing tiles to set folder: " + setFolder);
 			File setFile = new File(mOutputDir, mMap.getName() + ".set");
 			if (parameters != null)
 			{
@@ -794,14 +794,14 @@ public class BCOpenCPNZip extends ACBundleCreator
 			}
 			catch (IOException e)
 			{
-				log.error("", e);
+				sLog.error("", e);
 			}
 		}
 
 		@Override
 		public void writeTile(int tilex, int tiley, String imageFormat, byte[] tileData) throws IOException
 		{
-			log.trace("START");
+			sLog.trace("START");
 			String tileFileName = String.format(FILENAME_PATTERN, (tilex * tileWidth), (tiley * tileHeight), imageFormat);
 
 			File f = new File(setFolder, tileFileName);
@@ -826,7 +826,7 @@ public class BCOpenCPNZip extends ACBundleCreator
 			}
 			catch (IOException e)
 			{
-				log.error("", e);
+				sLog.error("", e);
 			}
 			OSMCBUtilities.closeWriter(setFileWriter);
 		}

@@ -23,6 +23,7 @@ import osmb.mapsources.ACMapSource;
 import osmb.mapsources.TileAddress;
 import osmb.program.tiles.Tile;
 import osmb.program.tiles.TileLoader;
+import osmb.program.tilestore.sqlitedb.SQLiteDbTileStore;
 import osmb.utilities.OSMBStrs;
 import osmcb.program.bundle.IfBundle;
 import osmcb.program.bundle.MapCreationException;
@@ -56,10 +57,10 @@ public class BCTileStoreDownload extends ACBundleCreator
 	@Override
 	protected void runMap()
 	{
-		log.trace(OSMBStrs.RStr("START") + " [" + Thread.currentThread().getName() + "], pool=" + mExec.toString());
+		sLog.trace(OSMBStrs.RStr("START") + " [" + Thread.currentThread().getName() + "], pool=" + mExec.toString());
 		try
 		{
-			sTS.prepareTileStore(mMap.getMapSource());
+			SQLiteDbTileStore.prepareTileStore(mMap.getMapSource());
 			initializeMap();
 			// load all necessary tiles. They should go directly into the tile store...
 			loadMapTiles();
@@ -67,10 +68,10 @@ public class BCTileStoreDownload extends ACBundleCreator
 			mExec.shutdown();
 			while (!mExec.isTerminated())
 			{
-				log.trace("running jobs=" + mExec.getCompletedTaskCount() + ", " + mExec.getActiveCount());
+				sLog.trace("running jobs=" + mExec.getCompletedTaskCount() + ", " + mExec.getActiveCount());
 				Thread.sleep(1000);
 			}
-			log.debug("after shutdown(), completed tasks=" + mExec.getCompletedTaskCount() + ", total jobs=" + mExec.getTaskCount());
+			sLog.debug("after shutdown(), completed tasks=" + mExec.getCompletedTaskCount() + ", total jobs=" + mExec.getTaskCount());
 		}
 		catch (IOException e)
 		{
@@ -102,12 +103,12 @@ public class BCTileStoreDownload extends ACBundleCreator
 	@Override
 	public boolean loadMapTiles() throws Exception
 	{
-		log.trace(OSMBStrs.RStr("START"));
-		log.debug("start map=" + mMap.getName() + ", TileStore=" + sTS);
+		sLog.trace(OSMBStrs.RStr("START"));
+		sLog.debug("start map=" + mMap.getName() + ", TileStore=" + sNTS);
 
 		if (Thread.currentThread().isInterrupted())
 		{
-			log.debug("currentThread().isInterrupted()");
+			sLog.debug("currentThread().isInterrupted()");
 			throw new InterruptedException();
 		}
 
@@ -115,7 +116,7 @@ public class BCTileStoreDownload extends ACBundleCreator
 
 		try
 		{
-			log.debug("download tiles=" + tileCount);
+			sLog.debug("download tiles=" + tileCount);
 			// sBundleProgress.initMapDownload(mMap);
 			TileLoader tl = new TileLoader(this, sTC);
 
@@ -123,14 +124,14 @@ public class BCTileStoreDownload extends ACBundleCreator
 			{
 				for (int tileY = mMap.getMinTileCoordinate().y; tileY <= mMap.getMaxTileCoordinate().y; ++tileY)
 				{
-					log.debug("tiles=" + sScheduledTiles.incrementAndGet() + " of " + mBundle.calculateTilesToLoad());
+					sLog.debug("tiles=" + sScheduledTiles.incrementAndGet() + " of " + mBundle.calculateTilesToLoad());
 					mExec.execute(tl.createTileLoaderJob(mMap.getMapSource(), new TileAddress(tileX, tileY, mMap.getZoom())));
 				}
 			}
 		}
 		catch (Error e)
 		{
-			log.error("Error: " + e.getMessage(), e);
+			sLog.error("Error: " + e.getMessage(), e);
 			throw e;
 		}
 		finally
@@ -143,21 +144,21 @@ public class BCTileStoreDownload extends ACBundleCreator
 	@Override
 	public void tileLoadingFinished(Tile tile, boolean success)
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		// old berkely tile store
 		// TileDbEntry tTSE = new TileDbEntry(tile.getXtile(), tile.getYtile(), tile.getZoom(), tile.getImage());
 		// sTS.putTile(tTSE, tile.getSource());
 		// sTC.addTile(tile);
 		int nTiles = sDownloadedTiles.incrementAndGet();
-		log.debug("tiles=" + nTiles + " of " + mBundle.calculateTilesToLoad());
+		sLog.debug("tiles=" + nTiles + " of " + mBundle.calculateTilesToLoad());
 		// info at 0.5% steps
 		if (nTiles % (mBundle.calculateTilesToLoad() / 200) == 0)
-			log.info("tiles=" + nTiles + " of " + mBundle.calculateTilesToLoad() + ", " + nTiles / (mBundle.calculateTilesToLoad() / 200) * 0.5 + "%");
+			sLog.info("tiles=" + nTiles + " of " + mBundle.calculateTilesToLoad() + ", " + nTiles / (mBundle.calculateTilesToLoad() / 200) * 0.5 + "%");
 		sBundleProgress.finishTileDownload(tile);
 		if (!success)
-			log.debug("tile=" + tile + " loaded=" + success);
+			sLog.debug("tile=" + tile + " loaded=" + success);
 		else
-			log.trace("tile=" + tile + " loaded=" + success);
+			sLog.trace("tile=" + tile + " loaded=" + success);
 		// new SQLite tile store
 		sNTS.putTile(tile);
 	}

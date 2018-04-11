@@ -14,7 +14,7 @@ public class OSMCBStrs
 
 	private OSMCBStrs()
 	{
-		// log.info("RSC bundle='" + (RESOURCE_BUNDLE). + "'");
+		// sLog.info("RSC bundle='" + (RESOURCE_BUNDLE). + "'");
 		log.info("RSC bundle='" + BUNDLE_NAME + "'");
 	}
 
@@ -26,7 +26,7 @@ public class OSMCBStrs
 		}
 		catch (MissingResourceException e)
 		{
-			// log.info("RSC bundle='" + RESOURCE_BUNDLE.getBaseBundleName() + "' missing");
+			// sLog.info("RSC bundle='" + RESOURCE_BUNDLE.getBaseBundleName() + "' missing");
 			log.info("RSC key='" + key + "' from bundle='" + BUNDLE_NAME + "' missing");
 			return '!' + key + '!';
 		}

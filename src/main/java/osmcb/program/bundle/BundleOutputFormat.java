@@ -44,7 +44,7 @@ import osmcb.program.bundlecreators.TrekBuddy.BCTrekBuddyTared;
 @XmlJavaTypeAdapter(BundleOutputFormatAdapter.class)
 public class BundleOutputFormat implements Comparable<BundleOutputFormat>
 {
-	protected static Logger log = Logger.getLogger(BundleOutputFormatAdapter.class);
+	protected static Logger sLog = Logger.getLogger(BundleOutputFormatAdapter.class);
 	public static List<BundleOutputFormat> FORMATS;
 
 	static
@@ -145,7 +145,7 @@ public class BundleOutputFormat implements Comparable<BundleOutputFormat>
 
 	private BundleOutputFormat(Class<? extends ACBundleCreator> bundleCreatorClass, String typeName, String name)
 	{
-		log = Logger.getLogger(this.getClass());
+		sLog = Logger.getLogger(this.getClass());
 		this.setBundleCreatorClass(bundleCreatorClass);
 		this.typeName = typeName;
 		this.name = name;

@@ -260,7 +260,7 @@ public class OSMCB2AdaptivePalette implements IfOSMPalette
 			findBestMatch(nTCol, false);
 		}
 
-		// log.trace("mapped colors[" + nSrcColor + "] of [" + nTstColor + "]-" + mColorsHM.getMColorCnt());
+		// sLog.trace("mapped colors[" + nSrcColor + "] of [" + nTstColor + "]-" + mColorsHM.getMColorCnt());
 		// Now crawl over the distance map and match the color. After each match the distance map must be corrected.
 		// Since the mapping does not produce new colors, the best matches can only become worse when the source color is mapped and hence removed from the used
 		// colors list.
@@ -690,7 +690,7 @@ public class OSMCB2AdaptivePalette implements IfOSMPalette
 	 * {
 	 * tTPE = mColorList.get(nTCol);
 	 * dDiff = nNewDiff;
-	 * log.trace("DIFF: " + tSPE + " to " + tTPE + " diff=" + nNewDiff + "; qDiff=" + tTCol.qDist(tSCol));
+	 * sLog.trace("DIFF: " + tSPE + " to " + tTPE + " diff=" + nNewDiff + "; qDiff=" + tTCol.qDist(tSCol));
 	 * }
 	 * }
 	 * nTCol--;
@@ -727,7 +727,7 @@ public class OSMCB2AdaptivePalette implements IfOSMPalette
 	 * {
 	 * tTPE = mColorList.get(nTCol);
 	 * nDiff = nNewDiff;
-	 * log.trace("DIFF: " + tSPE + " to " + tTPE + " diff=" + nNewDiff);
+	 * sLog.trace("DIFF: " + tSPE + " to " + tTPE + " diff=" + nNewDiff);
 	 * }
 	 * nTCol--;
 	 * }
@@ -736,7 +736,7 @@ public class OSMCB2AdaptivePalette implements IfOSMPalette
 	 * map(tTPE, tSPE);
 	 * }
 	 * // else
-	 * // log.trace(tSPE + " no match");
+	 * // sLog.trace(tSPE + " no match");
 	 * 
 	 * return tTPE;
 	 * }
@@ -769,7 +769,7 @@ public class OSMCB2AdaptivePalette implements IfOSMPalette
 	 * {
 	 * tTPE = mColorList.get(nTCol);
 	 * nDiff = nNewDiff;
-	 * log.trace("DIFF: " + tSPE + " to " + tTPE + " diff=" + nNewDiff);
+	 * sLog.trace("DIFF: " + tSPE + " to " + tTPE + " diff=" + nNewDiff);
 	 * }
 	 * nTCol--;
 	 * }
@@ -778,7 +778,7 @@ public class OSMCB2AdaptivePalette implements IfOSMPalette
 	 * map(tTPE, tSPE);
 	 * }
 	 * // else
-	 * // log.trace(tSPE + " no match");
+	 * // sLog.trace(tSPE + " no match");
 	 * 
 	 * return tTPE;
 	 * }
@@ -811,7 +811,7 @@ public class OSMCB2AdaptivePalette implements IfOSMPalette
 	 * {
 	 * tTPE = mColorList.get(nTCol);
 	 * dDiff = nNewDiff;
-	 * log.trace("DIFF: " + tSPE + " to " + tTPE + " diff=" + nNewDiff + "; qDiff=" + tTCol.qDist(tSCol));
+	 * sLog.trace("DIFF: " + tSPE + " to " + tTPE + " diff=" + nNewDiff + "; qDiff=" + tTCol.qDist(tSCol));
 	 * }
 	 * }
 	 * nTCol--;
@@ -848,17 +848,17 @@ public class OSMCB2AdaptivePalette implements IfOSMPalette
 	 * {
 	 * tTPE = mColorList.get(nTCol);
 	 * nDiff = nNewDiff;
-	 * log.info("DIFF: " + tSPE + " to " + tTPE + " diff=" + nNewDiff);
+	 * sLog.info("DIFF: " + tSPE + " to " + tTPE + " diff=" + nNewDiff);
 	 * }
 	 * nTCol++;
 	 * }
 	 * if (tTPE != null)
 	 * {
 	 * map(tSPE, tTPE);
-	 * log.info("Mapped: " + tTPE + " to " + tSPE);
+	 * sLog.info("Mapped: " + tTPE + " to " + tSPE);
 	 * }
 	 * // else
-	 * // log.trace(tSPE + " no match");
+	 * // sLog.trace(tSPE + " no match");
 	 * 
 	 * return tTPE;
 	 * }
@@ -897,11 +897,11 @@ public class OSMCB2AdaptivePalette implements IfOSMPalette
 	 * tMPE = mColorList.get(nSCol);
 	 * nMCol = nSCol;
 	 * dDiff = dNewDiff;
-	 * log.trace("DIFF: " + tMPE + " to " + tTPE + " oDiff=" + dNewDiff + "; qDiff=" + tTCol.qDist(tSCol));
+	 * sLog.trace("DIFF: " + tMPE + " to " + tTPE + " oDiff=" + dNewDiff + "; qDiff=" + tTCol.qDist(tSCol));
 	 * }
 	 * }
 	 * // Fill list with color distances.
-	 * log.debug("match DIFF: " + tMPE + " to " + tTPE + " oDiff=" + dDiff);
+	 * sLog.debug("match DIFF: " + tMPE + " to " + tTPE + " oDiff=" + dDiff);
 	 * mMatchesTM.put(dDiff, new OSMCB2ColorPair(nTCol, nMCol));
 	 * }
 	 */
@@ -938,11 +938,11 @@ public class OSMCB2AdaptivePalette implements IfOSMPalette
 	 * tMPE = mColorList.get(nSCol);
 	 * nMCol = nSCol;
 	 * dDiff = dNewDiff;
-	 * log.trace("DIFF: " + tTPE + " to " + tMPE + " oDiff=" + dNewDiff + "; qDiff=" + tTCol.qDist(tSCol));
+	 * sLog.trace("DIFF: " + tTPE + " to " + tMPE + " oDiff=" + dNewDiff + "; qDiff=" + tTCol.qDist(tSCol));
 	 * }
 	 * }
 	 * // Fill list with color distances.
-	 * log.debug("match DIFF: " + tTPE + " to " + tMPE + " oDiff=" + dDiff);
+	 * sLog.debug("match DIFF: " + tTPE + " to " + tMPE + " oDiff=" + dDiff);
 	 * mMatchesTM.put(dDiff, new OSMCB2ColorPair(nMCol, nTCol));
 	 * }
 	 */

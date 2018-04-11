@@ -28,7 +28,7 @@ import osmcb.program.bundlecreators.IfBundleCreator;
  */
 public interface IfBundleThread
 {
-	// static final Logger log;
+	// static final Logger sLog;
 	File customBundleDir = null;
 	// DownloadJobProducerThread djp = null;
 	// JobDispatcher downloadJobDispatcher = null;

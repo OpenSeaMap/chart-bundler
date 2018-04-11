@@ -134,7 +134,7 @@ public class OSMAdaptivePalette implements IfOSMPalette
 				}
 			}
 			log.debug("Palette[" + mColorsHM.size() + "," + mColorsHM.getMColorCnt() + "] after put()");
-			// log.debug("Colors:" + toString());
+			// sLog.debug("Colors:" + toString());
 
 			mColorsHM.usageSet();
 
@@ -142,8 +142,8 @@ public class OSMAdaptivePalette implements IfOSMPalette
 			{
 				reduce();
 				log.debug("Palette[" + mColorsHM.size() + "," + mColorsHM.getMColorCnt() + "] after reduce()");
-				// log.trace("Colors:" + toString());
-				// log.trace("BSB:" + asBSBStr());
+				// sLog.trace("Colors:" + toString());
+				// sLog.trace("BSB:" + asBSBStr());
 			}
 			else
 				log.debug("Palette[" + mColorsHM.size() + "," + mColorsHM.getMColorCnt() + "] no reduction neccessary");
@@ -176,7 +176,7 @@ public class OSMAdaptivePalette implements IfOSMPalette
 			Map.Entry<OSMColor, ColorInfo> tPE = iColor.next();
 			if (tPE.getValue().getMColor() == null)
 			{
-				// log.trace("tgt color=[" + nSrcColor + "], " + tColor.toStringKmpl() + ", cnt=" + tPE.getValue().getCount());
+				// sLog.trace("tgt color=[" + nSrcColor + "], " + tColor.toStringKmpl() + ", cnt=" + tPE.getValue().getCount());
 
 				for (Iterator<Map.Entry<OSMColor, ColorInfo>> iSrcColor = mColorsHM.getLessUsageIt(tPE); iSrcColor.hasNext();)
 				{
@@ -191,25 +191,25 @@ public class OSMAdaptivePalette implements IfOSMPalette
 							ci.incCount(tSPE.getValue().setMColor(tPE.getKey()));
 							// tPE.setValue(ci);
 							// if (tSPE.getValue().getMColor() != null)
-							// log.trace(
+							// sLog.trace(
 							// "src " + tSPE.getKey().toStringKmpl() + ", cnt=" + tSPE.getValue().getCount() + " mapped to= " + tSPE.getValue().getMColor().toStringRGB());
 							// else
-							// log.trace("src " + tSPE.getKey().toStringKmpl() + ", cnt=" + tSPE.getValue().getCount());
+							// sLog.trace("src " + tSPE.getKey().toStringKmpl() + ", cnt=" + tSPE.getValue().getCount());
 							mColorsHM.decMColorCnt();
 						}
 						// else if (tSPE.getValue().getCount() == 0)
 						// {
-						// log.debug("src " + tSPE.getKey().toStringKmpl() + ", tgt " + tPE.getKey().toStringKmpl() + ", last color=" + nSrcColor + ", cnt[src]=0");
+						// sLog.debug("src " + tSPE.getKey().toStringKmpl() + ", tgt " + tPE.getKey().toStringKmpl() + ", last color=" + nSrcColor + ", cnt[src]=0");
 						// // break;
 						// }
 					}
 				}
-				// log.trace("tgt after=[" + nSrcColor + "], " + tColor.toStringKmpl() + ", cnt=" + tPE.getValue().getCount());
+				// sLog.trace("tgt after=[" + nSrcColor + "], " + tColor.toStringKmpl() + ", cnt=" + tPE.getValue().getCount());
 			}
 			else
 			{
 				// OSMColor tColor = tPE.getKey();
-				// log.trace("tgt color=[" + nSrcColor + "], " + tColor.toStringKmpl() + ", cnt=" + tPE.getValue().getCount() + " mapped to= "
+				// sLog.trace("tgt color=[" + nSrcColor + "], " + tColor.toStringKmpl() + ", cnt=" + tPE.getValue().getCount() + " mapped to= "
 				// + tPE.getValue().getMColor().toStringRGB());
 			}
 
@@ -218,7 +218,7 @@ public class OSMAdaptivePalette implements IfOSMPalette
 
 		log.trace("\r\n");
 		log.debug("Palette[" + mColorsHM.size() + "," + mColorsHM.getMColorCnt() + "] after first round()");
-		// log.debug("Colors:" + toString());
+		// sLog.debug("Colors:" + toString());
 
 		// Second round: now map the colors more different. Here one has to be careful. We use OSMColor.oDiff() instead of OSMColor.dDiff()
 		// For each color in the list the best matching color is found. Then the best color match, i.e. the one with the least difference is mapped.
@@ -232,7 +232,7 @@ public class OSMAdaptivePalette implements IfOSMPalette
 
 		log.trace("\r\n");
 		log.debug("Palette[" + mColorsHM.size() + "," + mColorsHM.getMColorCnt() + "] after findBestMatch()");
-		// log.trace("Colors:" + toString());
+		// sLog.trace("Colors:" + toString());
 
 		nSrcColor = 0;
 		int nTstColor = mStartColorIdx;
@@ -242,13 +242,13 @@ public class OSMAdaptivePalette implements IfOSMPalette
 			Map.Entry<OSMColor, ColorInfo> tPE = mColorsHM.getBestODist();
 			ColorInfo tCI = tPE.getValue();
 			OSMColor tCBM = tCI.getBestMatch();
-			// log.trace("tgt color[" + nTstColor + "]=" + tPE.getKey().toStringKmpl() + ", cnt=" + tPE.getValue().getCount());
+			// sLog.trace("tgt color[" + nTstColor + "]=" + tPE.getKey().toStringKmpl() + ", cnt=" + tPE.getValue().getCount());
 			if ((tCI.getCount() == 0) || (tCI.getMColor() != null) || (mColorsHM.getMColor(tCBM) != null))
 			{
 				// if (tCI.getMColor() != null)
-				// log.trace("tgt already mapped to= " + tCI.getMColor().toStringRGB());
+				// sLog.trace("tgt already mapped to= " + tCI.getMColor().toStringRGB());
 				// if (mColorsHM.getMColor(tCBM) != null)
-				// log.trace("best match already mapped to= " + mColorsHM.getMColor(tCBM).toStringRGB());
+				// sLog.trace("best match already mapped to= " + mColorsHM.getMColor(tCBM).toStringRGB());
 				findBestMatch(tPE, true);
 				log.trace("tgt rematch");
 			}
@@ -258,7 +258,7 @@ public class OSMAdaptivePalette implements IfOSMPalette
 				{
 					// map best match to this color
 					tCI.incCount(mColorsHM.get(tCBM).setMColor(tPE.getKey()));
-					// log.trace("tgt < color[" + nTstColor + "]=RGB(" + tPE.getKey().toStringRGB() + "), HSL(" + tPE.getKey().toStringHSL() + "), cnt=" + tCI.getCount()
+					// sLog.trace("tgt < color[" + nTstColor + "]=RGB(" + tPE.getKey().toStringRGB() + "), HSL(" + tPE.getKey().toStringHSL() + "), cnt=" + tCI.getCount()
 					// + ", < best match mapped=RGB(" + tCBM.toStringRGB() + "), m-cnt=" + mColorsHM.getCount(tCBM) + ", dist=" + tCI.getDist());
 					findBestMatch(tPE, true);
 					++nSrcColor;
@@ -306,7 +306,7 @@ public class OSMAdaptivePalette implements IfOSMPalette
 
 		log.trace("\r\n");
 		log.debug("Palette[" + mColorsHM.size() + "," + mColorsHM.getMColorCnt() + "] after reduce():");
-		// log.trace("Colors:" + toString());
+		// sLog.trace("Colors:" + toString());
 	}
 
 	/**
@@ -327,7 +327,7 @@ public class OSMAdaptivePalette implements IfOSMPalette
 		if (tPE.getValue().mMColor == null)
 		{
 			Iterator<Map.Entry<OSMColor, ColorInfo>> iSrcColor;
-			// log.trace("tgt " + tSrcColor.toStringKmpl() + ", cnt=" + tPE.getValue().getCount());
+			// sLog.trace("tgt " + tSrcColor.toStringKmpl() + ", cnt=" + tPE.getValue().getCount());
 
 			if (bAll)
 				iSrcColor = mColorsHM.getUsageIt();
@@ -350,7 +350,7 @@ public class OSMAdaptivePalette implements IfOSMPalette
 				}
 				if (tMPE != null)
 				{
-					// log.trace("best match: " + tPE.getKey().toStringKmpl() + ", cnt=" + tPE.getValue().getCount() + " to " + tMPE.getKey().toStringKmpl() + ", cnt="
+					// sLog.trace("best match: " + tPE.getKey().toStringKmpl() + ", cnt=" + tPE.getValue().getCount() + " to " + tMPE.getKey().toStringKmpl() + ", cnt="
 					// + tMPE.getValue().getCount() + ", diff=" + dDist);
 
 					// Fill list with color distances.

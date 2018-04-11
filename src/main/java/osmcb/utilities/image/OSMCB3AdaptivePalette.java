@@ -239,8 +239,8 @@ public class OSMCB3AdaptivePalette implements IfOSMPalette
 						tCI.addCount(nCnt);
 						if (log.isTraceEnabled())
 							log.trace("usage incremented " + tCI.toString() + " by " + nCnt);
-						// else if (log.isDebugEnabled())
-						// log.debug("usage incremented " + tColor.toStringKmpl() + ", Cnt=" + nCnt);
+						// else if (sLog.isDebugEnabled())
+						// sLog.debug("usage incremented " + tColor.toStringKmpl() + ", Cnt=" + nCnt);
 						// repositionColor(tColor);
 					}
 					else
@@ -264,8 +264,8 @@ public class OSMCB3AdaptivePalette implements IfOSMPalette
 				mUL.add(tCI);
 				if (log.isTraceEnabled())
 					log.trace(tCI.toString() + " added: Cnt=" + nCnt);
-				// else if (log.isDebugEnabled())
-				// log.debug(tColor.toStringKmpl() + " added: Cnt=" + nCnt);
+				// else if (sLog.isDebugEnabled())
+				// sLog.debug(tColor.toStringKmpl() + " added: Cnt=" + nCnt);
 				mUsedColors++;
 			}
 			mDirty = true;
@@ -409,7 +409,7 @@ public class OSMCB3AdaptivePalette implements IfOSMPalette
 			int nSrcIdx = tSrcInf.getPIdx();
 			if (nSrcIdx != mUL.indexOf(tSrcInf))
 			{
-				// log.debug("PIdx wrong, PIdx=" + nTgtIdx + ", pos=" + mUL.indexOf(tTgtInf));
+				// sLog.debug("PIdx wrong, PIdx=" + nTgtIdx + ", pos=" + mUL.indexOf(tTgtInf));
 				tSrcInf.setPIdx(mUL.indexOf(tSrcInf));
 			}
 			// reposition only non-standard colors (>= mStdColorCount)

@@ -110,7 +110,7 @@ public class BCRMapsSQLite extends ACBundleCreator implements IfRequiresSQLite
 		bundleOutputDir = new File(bundleOutputDir, bundleDirName);
 		super.initializeBundle(bundleOutputDir);
 		databaseFile = new File(mOutputDir, getDatabaseFileName());
-		log.debug("SQLite Database file: " + databaseFile);
+		sLog.debug("SQLite Database file: " + databaseFile);
 	}
 
 	@Override
@@ -224,7 +224,7 @@ public class BCRMapsSQLite extends ACBundleCreator implements IfRequiresSQLite
 							batchTileCount++;
 							if ((heapAvailable < HEAP_MIN) || (batchTileCount >= MAX_BATCH_SIZE))
 							{
-								log.trace("Executing batch containing " + batchTileCount + " tiles");
+								sLog.trace("Executing batch containing " + batchTileCount + " tiles");
 								prepStmt.executeBatch();
 								prepStmt.clearBatch();
 								System.gc();
@@ -245,7 +245,7 @@ public class BCRMapsSQLite extends ACBundleCreator implements IfRequiresSQLite
 			System.gc();
 			if (tilesWritten > 0)
 				updateTileMetaInfo();
-			log.trace("Final commit containing " + batchTileCount + " tiles");
+			sLog.trace("Final commit containing " + batchTileCount + " tiles");
 			conn.commit();
 			// bundleProgress.setMapCreationProgress(maxMapProgress);
 		}

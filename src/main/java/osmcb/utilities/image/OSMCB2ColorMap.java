@@ -430,7 +430,7 @@ public class OSMCB2ColorMap
 	 */
 	public Integer getPIdx(OSMColor tColor)
 	{
-		// log.trace(OSMBStrs.RStr("START"));
+		// sLog.trace(OSMBStrs.RStr("START"));
 		return mUL.indexByCID(getCID(tColor));
 	}
 

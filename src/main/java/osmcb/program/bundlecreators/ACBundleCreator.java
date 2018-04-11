@@ -51,7 +51,6 @@ import osmb.program.tiles.MemoryTileCache;
 import osmb.program.tiles.Tile;
 import osmb.program.tiles.TileImageParameters;
 import osmb.program.tiles.TileLoader;
-import osmb.program.tilestore.ACTileStore;
 import osmb.program.tilestore.TileStoreException;
 import osmb.program.tilestore.berkeleydb.TileDbEntry;
 import osmb.program.tilestore.sqlitedb.SQLiteDbTileStore;
@@ -81,7 +80,7 @@ import osmcb.utilities.OSMCBUtilities;
 public class ACBundleCreator implements Runnable, IfTileLoaderListener
 {
 	// static/class data
-	protected static Logger log = Logger.getLogger(ACBundleCreator.class);
+	protected static Logger sLog = Logger.getLogger(ACBundleCreator.class);
 
 	public static final Charset TEXT_FILE_CHARSET = Charsets.ISO_8859_1;
 	/**
@@ -92,7 +91,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	protected static final String STR_JSONFMT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
 	protected static MemoryTileCache sTC = new MemoryTileCache();
-	protected static ACTileStore sTS = ACTileStore.getInstance();
+	// protected static ACTileStore sTS = ACTileStore.getInstance();
 	protected static SQLiteDbTileStore sNTS = null; // the 'new' SQLite tile store
 
 	protected static AtomicInteger sCompletedMaps = new AtomicInteger(0);
@@ -159,7 +158,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	 */
 	public void init(IfBundle bundle, File bundleOutputDir)
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		mBundle = bundle;
 		mOutputDir = bundleOutputDir;
 		int nThreads = 5;
@@ -170,10 +169,10 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 			mExec = new JobDispatcher(nThreads);
 			// mTileCount = bundle.calculateTilesToLoad();
 			// mMapCount = bundle.calcMapsToCompose();
-			log.trace("bundle '" + mBundle.getName() + "' pool for layers=" + mExec.getMaximumPoolSize() + ", " + mExec.toString());
+			sLog.trace("bundle '" + mBundle.getName() + "' pool for layers=" + mExec.getMaximumPoolSize() + ", " + mExec.toString());
 		}
 		else
-			log.warn("bundle '" + mBundle.getName() + "' contains no layers");
+			sLog.warn("bundle '" + mBundle.getName() + "' contains no layers");
 	};
 
 	/**
@@ -185,7 +184,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	 */
 	public void init(IfBundle bundle, IfLayer layer, File layerOutputDir)
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		mBundle = bundle;
 		mLayer = layer;
 		mOutputDir = layerOutputDir;
@@ -195,7 +194,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 		if (mLayer.getMapCount() < nThreads)
 			nThreads = mLayer.getMapCount();
 		mExec = new JobDispatcher(nThreads);
-		log.trace("layer '" + mLayer.getName() + "' pool for maps=" + mExec.getMaximumPoolSize() + ", " + mExec.toString());
+		sLog.trace("layer '" + mLayer.getName() + "' pool for maps=" + mExec.getMaximumPoolSize() + ", " + mExec.toString());
 	};
 
 	/**
@@ -208,7 +207,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	 */
 	public void init(IfBundle bundle, IfLayer layer, IfMap map, File mapOutputDir)
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		mBundle = bundle;
 		mLayer = layer;
 		mMap = map;
@@ -220,7 +219,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 			}
 			catch (TileStoreException e)
 			{
-				log.error("init of " + map + " failed", e);
+				sLog.error("init of " + map + " failed", e);
 				e.printStackTrace();
 			}
 
@@ -230,8 +229,8 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 		if (mMap.getTileCount() < nThreads)
 			nThreads = (int) mMap.getTileCount();
 		mExec = new JobDispatcher(nThreads);
-		log.trace("map '" + mMap.getName() + "' pool for tiles=" + mExec.getMaximumPoolSize() + ", " + mExec.toString());
-		// log.debug("map pool threads=" + nThreads);
+		sLog.trace("map '" + mMap.getName() + "' pool for tiles=" + mExec.getMaximumPoolSize() + ", " + mExec.toString());
+		// sLog.debug("map pool threads=" + nThreads);
 	};
 
 	/**
@@ -240,7 +239,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	@Override
 	public void run()
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		if (sBundleProgress == null)
 			sBundleProgress = new BundleProgress(this);
 		try
@@ -258,11 +257,11 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 				runBundle();
 			}
 			else
-				log.error(OSMCBStrs.RStr("BundleThread.CB.ModeUnknown"));
+				sLog.error(OSMCBStrs.RStr("BundleThread.CB.ModeUnknown"));
 		}
 		catch (Exception e)
 		{
-			log.error(OSMCBStrs.RStr("BundleCreator.Interrupted"));
+			sLog.error(OSMCBStrs.RStr("BundleCreator.Interrupted"));
 			e.printStackTrace();
 		}
 		System.gc();
@@ -278,8 +277,8 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	protected void runBundle()
 	{
 
-		// log.trace("creation of bundle='" + mBundle.getName() + "' started with some tests");
-		// log.debug(OSMCBStrs.RStr("BundleThread.CB.ModeUnknown", mBundle.getName()));
+		// sLog.trace("creation of bundle='" + mBundle.getName() + "' started with some tests");
+		// sLog.debug(OSMCBStrs.RStr("BundleThread.CB.ModeUnknown", mBundle.getName()));
 		// do some top-level preflight checks
 		try
 		{
@@ -287,31 +286,31 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 		}
 		catch (BundleTestException e)
 		{
-			log.error(OSMCBStrs.RStr("BundleThread.CB.BundleTestFailed") + e.getMessage());
+			sLog.error(OSMCBStrs.RStr("BundleThread.CB.BundleTestFailed") + e.getMessage());
 			return;
 		}
-		log.trace(OSMBStrs.RStr("START") + " [" + Thread.currentThread().getName() + "], pool=" + mExec.toString());
-		log.trace("test of bundle='" + mBundle.getName() + "' successful");
+		sLog.trace(OSMBStrs.RStr("START") + " [" + Thread.currentThread().getName() + "], pool=" + mExec.toString());
+		sLog.trace("test of bundle='" + mBundle.getName() + "' successful");
 
 		// actually create a bundle. The tiles will be downloaded when the map requests them.
 		try
 		{
 			boolean bCreate = false;
-			log.trace("before BC.initializeBundle()");
+			sLog.trace("before BC.initializeBundle()");
 			initializeBundle();
 			Path pOutDir = mOutputDir.toPath();
-			log.info("++++ Bundle name='" + mBundle.getBaseName() + "', dir='" + pOutDir.getParent() + "' +++++");
+			sLog.info("++++ Bundle name='" + mBundle.getBaseName() + "', dir='" + pOutDir.getParent() + "' +++++");
 			TreeSet<DirEntry> tBundles = OSMCBUtilities.listBundles(pOutDir.getParent(), mBundle.getBaseName());
 			if (tBundles.size() > 1)
 			{
 				DirEntry tDE = tBundles.pollFirst();
 				tDE = tBundles.pollFirst();
-				log.debug(
+				sLog.debug(
 				    "bundle path='" + tDE.GetPathStr() + "', date=" + tDE.GetDateStr() + ", catalog date=" + Files.getLastModifiedTime(mBundle.getFile().toPath()));
 				if (tDE.GetDate().compareTo(Files.getLastModifiedTime(mBundle.getFile().toPath())) < 0)
 				{
 					bCreate = true;
-					log.info("create bundle name='" + mBundle.getBaseName() + "', date=" + tDE.GetDateStr() + ", catalog date="
+					sLog.info("create bundle name='" + mBundle.getBaseName() + "', date=" + tDE.GetDateStr() + ", catalog date="
 					    + Files.getLastModifiedTime(mBundle.getFile().toPath()));
 				}
 				else
@@ -321,7 +320,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 					if (tTest.compareTo(tDE.GetDate()) < 0)
 					{
 						bCreate = true;
-						log.info("create bundle name='" + mBundle.getBaseName() + "', date=" + tDE.GetDateStr() + ", test date=" + tTest);
+						sLog.info("create bundle name='" + mBundle.getBaseName() + "', date=" + tDE.GetDateStr() + ", test date=" + tTest);
 					}
 				}
 			}
@@ -334,37 +333,37 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 				mExec.shutdown();
 				while (!mExec.isTerminated())
 				{
-					log.trace("running jobs=" + mActiveJobs + ", " + mExec.getActiveCount() + ", total jobs=" + mExec.getTaskCount());
+					sLog.trace("running jobs=" + mActiveJobs + ", " + mExec.getActiveCount() + ", total jobs=" + mExec.getTaskCount());
 					Thread.sleep(1000);
 				}
-				log.debug("after shutdown(), completed tasks=" + mExec.getCompletedTaskCount() + ", total jobs=" + mExec.getTaskCount());
+				sLog.debug("after shutdown(), completed tasks=" + mExec.getCompletedTaskCount() + ", total jobs=" + mExec.getTaskCount());
 				finishBundle();
 				createGeoJson(pOutDir.getParent());
 				createGeoJsonFC(pOutDir.getParent());
 				jobFinishedSuccessfully(0);
-				log.debug("bundle '" + mBundle.getName() + "' finished");
+				sLog.debug("bundle '" + mBundle.getName() + "' finished");
 			}
 			else
-				log.info("bundle '" + mBundle.getName() + "' skipped");
+				sLog.info("bundle '" + mBundle.getName() + "' skipped");
 		}
 		catch (BundleTestException e)
 		{
-			log.error(OSMCBStrs.RStr("BundleThread.CB.FormatInvalid") + e.getMessage());
+			sLog.error(OSMCBStrs.RStr("BundleThread.CB.FormatInvalid") + e.getMessage());
 			return;
 		}
 		catch (IOException e)
 		{
-			log.error(OSMCBStrs.RStr("BundleThread.CB.IOException") + e.getMessage());
+			sLog.error(OSMCBStrs.RStr("BundleThread.CB.IOException") + e.getMessage());
 			return;
 		}
 		catch (InterruptedException e)
 		{
-			log.error(OSMCBStrs.RStr("BundleThread.CB.IOException") + e.getMessage());
+			sLog.error(OSMCBStrs.RStr("BundleThread.CB.IOException") + e.getMessage());
 			return;
 		}
 		catch (InvalidNameException e)
 		{
-			log.error(OSMCBStrs.RStr("BundleThread.CB.InvalidNameException") + e.getMessage());
+			sLog.error(OSMCBStrs.RStr("BundleThread.CB.InvalidNameException") + e.getMessage());
 			return;
 		}
 	}
@@ -378,26 +377,26 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	 */
 	protected void runLayer()
 	{
-		log.trace(OSMBStrs.RStr("START") + " [" + Thread.currentThread().getName() + "], pool=" + mExec.toString());
+		sLog.trace(OSMBStrs.RStr("START") + " [" + Thread.currentThread().getName() + "], pool=" + mExec.toString());
 		try
 		{
 			initializeLayer();
-			log.trace("after initializeLayer()");
+			sLog.trace("after initializeLayer()");
 			createLayer();
 			// wait for the layer creation to finish
-			log.trace("after createLayer()");
+			sLog.trace("after createLayer()");
 			mExec.shutdown();
 			while (!mExec.isTerminated())
 			{
-				log.trace("running jobs=" + mActiveJobs + ", " + mExec.getActiveCount());
+				sLog.trace("running jobs=" + mActiveJobs + ", " + mExec.getActiveCount());
 				Thread.sleep(1000);
 			}
-			log.debug("after shutdown(), completed tasks=" + mExec.getCompletedTaskCount() + ", total jobs=" + mExec.getTaskCount());
+			sLog.debug("after shutdown(), completed tasks=" + mExec.getCompletedTaskCount() + ", total jobs=" + mExec.getTaskCount());
 			finishLayer();
-			log.trace("after finishLayer()");
+			sLog.trace("after finishLayer()");
 			jobFinishedSuccessfully(0);
-			log.info("layer='" + mLayer.getName() + "' finished");
-			// log.info("layer '" + mLayer.getName() + "' of " + mBundle.getLayers() + " finished");
+			sLog.info("layer='" + mLayer.getName() + "' finished");
+			// sLog.info("layer '" + mLayer.getName() + "' of " + mBundle.getLayers() + " finished");
 		}
 		catch (IOException | InterruptedException e)
 		{
@@ -416,11 +415,11 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	 */
 	protected void runMap()
 	{
-		log.trace(OSMBStrs.RStr("START") + " [" + Thread.currentThread().getName() + "], pool=" + mExec.toString());
+		sLog.trace(OSMBStrs.RStr("START") + " [" + Thread.currentThread().getName() + "], pool=" + mExec.toString());
 		try
 		{
 			if (sNTS == null)
-				log.error("no tile store init yet");
+				sLog.error("no tile store init yet");
 			sNTS.prepareTileStore(mMap.getMapSource());
 			// mMap.getMapSource().initialize();
 			initializeMap();
@@ -430,10 +429,10 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 			mExec.shutdown();
 			while (!mExec.isTerminated())
 			{
-				log.trace("running jobs=" + mExec.getCompletedTaskCount() + ", " + mExec.getActiveCount());
+				sLog.trace("running jobs=" + mExec.getCompletedTaskCount() + ", " + mExec.getActiveCount());
 				Thread.sleep(1000);
 			}
-			log.debug("after shutdown(), completed tasks=" + mExec.getCompletedTaskCount() + ", total jobs=" + mExec.getTaskCount());
+			sLog.debug("after shutdown(), completed tasks=" + mExec.getCompletedTaskCount() + ", total jobs=" + mExec.getTaskCount());
 			// create the map from all downloaded tiles
 			createMap();
 			// wait for the map creation to finish
@@ -464,14 +463,14 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	//
 	public void jobFinishedSuccessfully(int bytesDownloaded)
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		mActiveJobs.decrementAndGet();
 		mJobsCompleted.incrementAndGet();
 	}
 
 	public void jobFinishedWithError(boolean retry)
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		mActiveJobs.decrementAndGet();
 		if (retry)
 			mJobsRetryError.incrementAndGet();
@@ -486,7 +485,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	 */
 	public void shutdown()
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		mExec.shutdown();
 	}
 
@@ -495,17 +494,17 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	 */
 	final public void abortBundleCreation()
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		try
 		{
 			shutdown();
 		}
 		catch (Exception e)
 		{
-			log.error("Exception thrown in stopDownload()" + e.getMessage());
+			sLog.error("Exception thrown in stopDownload()" + e.getMessage());
 		}
 		// this.aborted = true;
-		log.trace("bundle='" + mBundle.getName() + "' aborted");
+		sLog.trace("bundle='" + mBundle.getName() + "' aborted");
 	}
 
 	// general bundle actions
@@ -516,7 +515,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	 */
 	protected void testBundle() throws BundleTestException
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		try
 		{
 			if (mBundle.getLayerCount() < 1)
@@ -530,8 +529,8 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 						    "The selected bundle output format \"" + mBundle.getOutputFormat() + "\" does not support the map source \"" + map.getMapSource() + "\"");
 				}
 			}
-			log.info("bundle with " + mBundle.calcMapsToCompose() + " maps, " + mBundle.calculateTilesToLoad() + " tiles");
-			log.trace("bundle successfully tested");
+			sLog.info("bundle with " + mBundle.calcMapsToCompose() + " maps, " + mBundle.calculateTilesToLoad() + " tiles");
+			sLog.trace("bundle successfully tested");
 		}
 		catch (BundleTestException e)
 		{
@@ -541,7 +540,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 		{
 			throw new BundleTestException(e);
 		}
-		log.trace("bundle='" + mBundle.getName() + "' tested");
+		sLog.trace("bundle='" + mBundle.getName() + "' tested");
 	}
 
 	/**
@@ -567,7 +566,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	 */
 	public String createGeneralDisclaimer()
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		String strDisclaimer = "";
 		strDisclaimer += "This Charts bundle is useable for testing ONLY, it is in no way fit for navigational purposes.\r\n";
 		strDisclaimer += "\r\n";
@@ -590,7 +589,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	 */
 	public void createInfoFile()
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		createInfoFile("OpenSeaMap General Charts Bundle 0.1\r\n");
 	}
 
@@ -601,7 +600,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	 */
 	public void createInfoFile(String strBundleDescription)
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		File crtba = new File(mOutputDir.getAbsolutePath(), "UserAgreement-OpenSeaMap.txt");
 		try
 		{
@@ -612,7 +611,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 		}
 		catch (IOException e)
 		{
-			log.error("", e);
+			sLog.error("", e);
 		}
 	}
 
@@ -711,7 +710,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	 */
 	protected void createGeoJson(Path tParentPath)
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		String strDatePart = new SimpleDateFormat(STR_BUFMT).format(new Date());
 		File crtba = new File(mOutputDir.getAbsolutePath(), mBundle.getBaseName() + "-" + strDatePart + ".json");
 		try
@@ -768,7 +767,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 		}
 		catch (IOException e)
 		{
-			log.error("", e);
+			sLog.error("", e);
 		}
 	}
 
@@ -777,11 +776,11 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	 */
 	protected void createGeoJsonFC(Path tParentPath)
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		String strDatePart = new SimpleDateFormat(STR_BUFMT).format(new Date());
 		// File crtba = new File(mOutputDir.getAbsolutePath(), mBundle.getBaseName() + "-" + strDatePart + ".json");
 		File crtba = new File(tParentPath.toFile(), mBundle.getName() + ".geojson");
-		// log.info("bundle name='" + mBundle.getName() + "', date=" + mBundle.getDate().toString());
+		// sLog.info("bundle name='" + mBundle.getName() + "', date=" + mBundle.getDate().toString());
 		try
 		{
 			FileWriter fw = new FileWriter(crtba);
@@ -863,7 +862,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 		}
 		catch (IOException e)
 		{
-			log.error("", e);
+			sLog.error("", e);
 		}
 	}
 
@@ -874,7 +873,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	 */
 	public void initializeBundle() throws IOException, BundleTestException, InvalidNameException
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		initializeBundle(null);
 	}
 
@@ -890,7 +889,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	// public void initializeBundle(String bundleDirName) throws IOException, BundleTestException
 	public void initializeBundle(File bundleOutputDir) throws IOException, BundleTestException, InvalidNameException
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		if (bundleOutputDir == null)
 		{
 			bundleOutputDir = OSMCBSettings.getInstance().getChartBundleOutputDirectory();
@@ -902,7 +901,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 		}
 		mBundle.setName(bundleOutputDir.getName());
 		mOutputDir = bundleOutputDir;
-		log.trace("bundle='" + mBundle.getName() + "' initialized");
+		sLog.trace("bundle='" + mBundle.getName() + "' initialized");
 	}
 
 	/**
@@ -912,7 +911,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	 */
 	public void createBundle() throws IOException, InterruptedException
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		File layerOutputDir = mOutputDir;
 		OSMCBUtilities.mkDirs(mOutputDir);
 		for (IfLayer tLayer : mBundle.getLayers())
@@ -934,7 +933,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 				e.printStackTrace();
 			}
 		}
-		log.trace("bundle='" + mBundle.getName() + "' created");
+		sLog.trace("bundle='" + mBundle.getName() + "' created");
 	}
 
 	/**
@@ -942,22 +941,22 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	 */
 	public void finishBundle()
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		createInfoFile();
 		sBundleProgress.finishBundle();
-		log.info("bundle='" + mBundle.getName() + "' finished");
+		sLog.info("bundle='" + mBundle.getName() + "' finished");
 	}
 
 	public void initializeLayer() throws IOException, InterruptedException
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		sBundleProgress.initLayer(mLayer);
-		log.trace("layer='" + mLayer.getName() + "' initialized");
+		sLog.trace("layer='" + mLayer.getName() + "' initialized");
 	}
 
 	public void createLayer() throws IOException, InterruptedException
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		File mapOutputDir = mOutputDir;
 		for (IfMap tMap : mLayer)
 		{
@@ -974,20 +973,20 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 				e.printStackTrace();
 			}
 		}
-		log.trace("layer='" + mLayer.getName() + "' created");
+		sLog.trace("layer='" + mLayer.getName() + "' created");
 	}
 
 	public void finishLayer() throws IOException
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		sBundleProgress.finishLayer(mLayer);
-		log.info("layer='" + mLayer.getName() + "' finished");
+		sLog.info("layer='" + mLayer.getName() + "' finished");
 		// mLayer = null;
 	}
 
 	public void initializeMap() throws IOException
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		// int tileSize = MP2MapSpace.getTileSize(); // #mapSpace mMap.getMapSource().getMapSpace().getTileSize();
 		// xMin = mMap.getMinPixelCoordinate().x / tileSize;
 		// xMax = mMap.getMaxPixelCoordinate().x / tileSize;
@@ -999,7 +998,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 		// throw new RuntimeException("Calling thread must be BundleThread!");
 		// BundleThread at = (BundleThread) t;
 		// mBundleProgress = at.getBundleProgress();
-		log.trace("map='" + mMap.getName() + "' initialized");
+		sLog.trace("map='" + mMap.getName() + "' initialized");
 	}
 
 	/**
@@ -1013,12 +1012,12 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	 */
 	public boolean loadMapTiles() throws Exception
 	{
-		log.trace(OSMBStrs.RStr("START"));
-		log.debug("start map=" + mMap.getName() + ", TileStore=" + sTS);
+		sLog.trace(OSMBStrs.RStr("START"));
+		sLog.debug("start map=" + mMap.getName() + ", TileStore=" + sNTS);
 
 		if (Thread.currentThread().isInterrupted())
 		{
-			log.debug("currentThread().isInterrupted()");
+			sLog.debug("currentThread().isInterrupted()");
 			throw new InterruptedException();
 		}
 
@@ -1026,19 +1025,19 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 
 		try
 		{
-			log.debug("download tiles=" + tileCount);
+			sLog.debug("download tiles=" + tileCount);
 			sBundleProgress.initMapDownload(mMap);
 			// we download only from online map sources, not from file based map sources
 			if (!(mMap.getMapSource() instanceof IfFileBasedMapSource))
 			{
 				TileLoader tl = new TileLoader(this, sTC);
 
-				log.trace("TileLoader instanciated");
+				sLog.trace("TileLoader instanciated");
 				for (int tileX = mMap.getMinTileCoordinate().x; tileX <= mMap.getMaxTileCoordinate().x; ++tileX)
 				{
 					for (int tileY = mMap.getMinTileCoordinate().y; tileY <= mMap.getMaxTileCoordinate().y; ++tileY)
 					{
-						log.debug("tiles=" + sScheduledTiles.incrementAndGet() + " of " + mBundle.calculateTilesToLoad());
+						sLog.debug("tiles=" + sScheduledTiles.incrementAndGet() + " of " + mBundle.calculateTilesToLoad());
 						mExec.execute(tl.createTileLoaderJob(mMap.getMapSource(), new TileAddress(tileX, tileY, mMap.getZoom())));
 					}
 				}
@@ -1046,7 +1045,7 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 		}
 		catch (Error e)
 		{
-			log.error("Error: " + e.getMessage(), e);
+			sLog.error("Error: " + e.getMessage(), e);
 			throw e;
 		}
 		finally
@@ -1058,16 +1057,16 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 
 	public void createMap() throws MapCreationException, InterruptedException
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		// wait for all threads to finish
-		log.trace("map='" + mMap.getName() + "' created");
+		sLog.trace("map='" + mMap.getName() + "' created");
 	}
 
 	public void finishMap()
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		sBundleProgress.finishMap(mMap);
-		log.info("map '" + mMap.getName() + "', " + sCompletedMaps.incrementAndGet() + " of " + mBundle.calcMapsToCompose() + " finished, tiles="
+		sLog.info("map '" + mMap.getName() + "', " + sCompletedMaps.incrementAndGet() + " of " + mBundle.calcMapsToCompose() + " finished, tiles="
 		    + sDownloadedTiles.incrementAndGet() + " of " + mBundle.calculateTilesToLoad());
 		mMap = null;
 	}
@@ -1080,32 +1079,40 @@ public class ACBundleCreator implements Runnable, IfTileLoaderListener
 	@Override
 	public void tileLoadingFinished(Tile tile, boolean success)
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		TileDbEntry tTSE = new TileDbEntry(tile.getXtile(), tile.getYtile(), tile.getZoom(), tile.getImage());
-		sTS.putTile(tTSE, tile.getSource());
+		try
+		{
+			sNTS.putTileData(tile.getImageData(), tTSE.getTAddr());
+		}
+		catch (IOException e)
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		sTC.addTile(tile);
 		int nTiles = sDownloadedTiles.incrementAndGet();
-		log.debug("tiles=" + nTiles + " of " + mBundle.calculateTilesToLoad());
+		sLog.debug("tiles=" + nTiles + " of " + mBundle.calculateTilesToLoad());
 		// info at 0.5% steps
 		if (nTiles % (mBundle.calculateTilesToLoad() / 200.0) == 0)
-			log.info("tiles=" + nTiles + " of " + mBundle.calculateTilesToLoad() + ", " + nTiles / (mBundle.calculateTilesToLoad() / 200.0) * 0.5 + "%");
+			sLog.info("tiles=" + nTiles + " of " + mBundle.calculateTilesToLoad() + ", " + nTiles / (mBundle.calculateTilesToLoad() / 200.0) * 0.5 + "%");
 		sBundleProgress.finishTileDownload(tile);
 		if (!success)
-			log.debug("tile=" + tile + " loaded=" + success);
+			sLog.debug("tile=" + tile + " loaded=" + success);
 		else
-			log.trace("tile=" + tile + " loaded=" + success);
+			sLog.trace("tile=" + tile + " loaded=" + success);
 	}
 
 	@Override
 	public void tileDownloaded(Tile tile, int size)
 	{
-		log.info(tile + " loaded from online map source, size=" + size);
+		sLog.info(tile + " loaded from online map source, size=" + size);
 	}
 
 	@Override
 	public void tileLoadedFromCache(Tile tile, int size)
 	{
-		log.info(tile + " loaded from mtc, size=" + size);
+		sLog.info(tile + " loaded from mtc, size=" + size);
 	}
 
 	public static MemoryTileCache getTileImageCache()

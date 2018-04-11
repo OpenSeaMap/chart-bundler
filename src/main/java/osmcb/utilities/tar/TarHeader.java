@@ -21,7 +21,7 @@ import java.io.UnsupportedEncodingException;
 
 public class TarHeader {
 
-	// private static Logger log = Logger.getLogger(TarHeader.class);
+	// private static Logger sLog = Logger.getLogger(TarHeader.class);
 
 	private File baseFilePath;
 

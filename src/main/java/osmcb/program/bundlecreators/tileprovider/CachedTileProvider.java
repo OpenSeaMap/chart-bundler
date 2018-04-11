@@ -64,11 +64,11 @@ public class CachedTileProvider implements IfTileProvider
 		 * if (tile != null)
 		 * {
 		 * if (tile.loaded)
-		 * log.trace(String.format("Cache hit: x=%d y=%d", x, y));
+		 * sLog.trace(String.format("Cache hit: x=%d y=%d", x, y));
 		 * image = tile.getImage();
 		 * if (!tile.nextLoadJobCreated)
 		 * {
-		 * // log.debug(String.format("Preload job added : x=%d y=%d l=%d",
+		 * // sLog.debug(String.format("Preload job added : x=%d y=%d l=%d",
 		 * // x + 1, y, layer));
 		 * preloadTile(new CachedTile(new CacheKey(x + 1, y)));
 		 * tile.nextLoadJobCreated = true;
@@ -77,8 +77,8 @@ public class CachedTileProvider implements IfTileProvider
 		 * }
 		 * if (image == null)
 		 * {
-		 * log.trace(String.format("Cache miss: x=%d y=%d", x, y));
-		 * // log.debug(String.format("Preload job added : x=%d y=%d l=%d", x +
+		 * sLog.trace(String.format("Cache miss: x=%d y=%d", x, y));
+		 * // sLog.debug(String.format("Preload job added : x=%d y=%d l=%d", x +
 		 * // 1, y, layer));
 		 * preloadTile(new CachedTile(new CacheKey(x + 1, y)));
 		 * // image = internalGetTileImage(x, y);
@@ -175,7 +175,7 @@ public class CachedTileProvider implements IfTileProvider
 					tile = queue.take();
 					if (tile != null && !tile.loaded)
 					{
-						// log.trace("Loading image async: " + tile);
+						// sLog.trace("Loading image async: " + tile);
 						tile.loadImage();
 					}
 				}

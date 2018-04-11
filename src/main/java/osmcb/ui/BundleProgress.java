@@ -63,9 +63,9 @@ public class BundleProgress extends ACBundleProgress
 
 	// private void printData()
 	// {
-	// log.info(OSMCBStrs.RStr("BundleProgress.Data"));
+	// sLog.info(OSMCBStrs.RStr("BundleProgress.Data"));
 	// if (data.iBundle != null)
-	// log.info("bundle: '" + data.iBundle.getName() + "; level " + data.mapCurrent + " of " + data.mapsTotal + "; map " + data.mapCurrent + " of "
+	// sLog.info("bundle: '" + data.iBundle.getName() + "; level " + data.mapCurrent + " of " + data.mapsTotal + "; map " + data.mapCurrent + " of "
 	// + data.mapsTotal + "; tiles " + data.tilesDLMap + " of " + data.tilesTotal + "; bytes downloaded " + data.bytesDLTotal + ", from cache "
 	// + data.bytesCachedTotal + " last tile " + data.bytesLastTile);
 	// }
@@ -97,7 +97,7 @@ public class BundleProgress extends ACBundleProgress
 	//
 	// initialTotalTime = System.currentTimeMillis();
 	// initialMapDownloadTime = -1;
-	// log.trace(OSMCBStrs.RStr("BundleProgress.Init"));
+	// sLog.trace(OSMCBStrs.RStr("BundleProgress.Init"));
 	// printData();
 	// }
 
@@ -258,7 +258,7 @@ public class BundleProgress extends ACBundleProgress
 
 	// public void setDownloadControlerListener(BundleThread bundleThread)
 	// {
-	// log.trace("BP: setDownloadControlerListener()");
+	// sLog.trace("BP: setDownloadControlerListener()");
 	// // this.downloadControlListener = (IfBCControler) bundleThread;
 	// }
 }

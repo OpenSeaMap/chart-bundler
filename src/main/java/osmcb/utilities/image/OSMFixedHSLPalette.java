@@ -353,11 +353,11 @@ public class OSMFixedHSLPalette implements IfOSMPalette
 		// {
 		// OSMPaletteEntry tSPE = mColorList.get(nSCol);
 		// OSMPaletteEntry tTPE = mColorList.get(nTCol);
-		// log.trace("map: " + tSPE + " to " + tTPE + " diff=" + tME.getKey());
+		// sLog.trace("map: " + tSPE + " to " + tTPE + " diff=" + tME.getKey());
 		// map(tTPE, tSPE);
 		// }
 		// else
-		// log.debug("map match: Tgt=" + nTCol + " or Src=" + nSCol + " invalid: " + mColorList.size());
+		// sLog.debug("map match: Tgt=" + nTCol + " or Src=" + nSCol + " invalid: " + mColorList.size());
 		// }
 	}
 
@@ -393,7 +393,7 @@ public class OSMFixedHSLPalette implements IfOSMPalette
 			// tMPE = mColorList.get(nSCol);
 			// nMCol = nSCol;
 			// dDiff = dNewDiff;
-			// log.trace("DIFF: " + tMPE + " to " + tTPE + " oDiff=" + dNewDiff + "; qDiff=" + tTCol.qDiff(tSCol));
+			// sLog.trace("DIFF: " + tMPE + " to " + tTPE + " oDiff=" + dNewDiff + "; qDiff=" + tTCol.qDiff(tSCol));
 			// }
 		}
 		// Fill list with color distances.
@@ -432,11 +432,11 @@ public class OSMFixedHSLPalette implements IfOSMPalette
 	// tMPE = mColorList.get(nSCol);
 	// nMCol = nSCol;
 	// dDiff = dNewDiff;
-	// log.trace("DIFF: " + tTPE + " to " + tMPE + " oDiff=" + dNewDiff + "; qDiff=" + tTCol.qDiff(tSCol));
+	// sLog.trace("DIFF: " + tTPE + " to " + tMPE + " oDiff=" + dNewDiff + "; qDiff=" + tTCol.qDiff(tSCol));
 	// }
 	// }
 	// // Fill list with color distances.
-	// log.debug("match DIFF: " + tTPE + " to " + tMPE + " oDiff=" + dDiff);
+	// sLog.debug("match DIFF: " + tTPE + " to " + tMPE + " oDiff=" + dDiff);
 	// mMatchesTM.put(dDiff, new OSMColorPair(nMCol, nTCol));
 	// }
 
@@ -546,7 +546,7 @@ public class OSMFixedHSLPalette implements IfOSMPalette
 	// {
 	// tTPE = mColorList.get(nTCol);
 	// dDiff = nNewDiff;
-	// log.trace("DIFF: " + tSPE + " to " + tTPE + " diff=" + nNewDiff + "; qDiff=" + tTCol.qDiff(tSCol));
+	// sLog.trace("DIFF: " + tSPE + " to " + tTPE + " diff=" + nNewDiff + "; qDiff=" + tTCol.qDiff(tSCol));
 	// }
 	// }
 	// nTCol--;
@@ -581,7 +581,7 @@ public class OSMFixedHSLPalette implements IfOSMPalette
 	// {
 	// tTPE = mColorList.get(nTCol);
 	// dDiff = nNewDiff;
-	// log.trace("DIFF: " + tSPE + " to " + tTPE + " diff=" + nNewDiff + "; qDiff=" + tTCol.qDiff(tSCol));
+	// sLog.trace("DIFF: " + tSPE + " to " + tTPE + " diff=" + nNewDiff + "; qDiff=" + tTCol.qDiff(tSCol));
 	// }
 	// }
 	// nTCol--;
@@ -616,7 +616,7 @@ public class OSMFixedHSLPalette implements IfOSMPalette
 	// {
 	// tTPE = mColorList.get(nTCol);
 	// nDiff = nNewDiff;
-	// log.trace("DIFF: " + tSPE + " to " + tTPE + " diff=" + nNewDiff);
+	// sLog.trace("DIFF: " + tSPE + " to " + tTPE + " diff=" + nNewDiff);
 	// }
 	// nTCol--;
 	// }
@@ -625,7 +625,7 @@ public class OSMFixedHSLPalette implements IfOSMPalette
 	// map(tTPE, tSPE);
 	// }
 	// // else
-	// // log.trace(tSPE + " no match");
+	// // sLog.trace(tSPE + " no match");
 	//
 	// return tTPE;
 	// }
@@ -656,24 +656,24 @@ public class OSMFixedHSLPalette implements IfOSMPalette
 	// {
 	// tTPE = mColorList.get(nTCol);
 	// nDiff = nNewDiff;
-	// log.info("DIFF: " + tSPE + " to " + tTPE + " diff=" + nNewDiff);
+	// sLog.info("DIFF: " + tSPE + " to " + tTPE + " diff=" + nNewDiff);
 	// }
 	// nTCol++;
 	// }
 	// if (tTPE != null)
 	// {
 	// map(tSPE, tTPE);
-	// log.info("Mapped: " + tTPE + " to " + tSPE);
+	// sLog.info("Mapped: " + tTPE + " to " + tSPE);
 	// }
 	// // else
-	// // log.trace(tSPE + " no match");
+	// // sLog.trace(tSPE + " no match");
 	//
 	// return tTPE;
 	// }
 
 	// protected void map(OSMPaletteEntry tTgt, OSMPaletteEntry tPE)
 	// {
-	// log.debug("map: " + tPE + " to " + tTgt);
+	// sLog.debug("map: " + tPE + " to " + tTgt);
 	// tTgt.map(tPE);
 	// reorder(tTgt, tPE);
 	// }

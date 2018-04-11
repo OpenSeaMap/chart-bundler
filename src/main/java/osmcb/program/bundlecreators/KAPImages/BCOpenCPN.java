@@ -69,7 +69,7 @@ public class BCOpenCPN extends ACBundleCreator
 	public BCOpenCPN()
 	{
 		super();
-		log = Logger.getLogger(this.getClass());
+		sLog = Logger.getLogger(this.getClass());
 	}
 
 	public BCOpenCPN(IfBundle bundle, File bundleOutputDir)
@@ -88,7 +88,7 @@ public class BCOpenCPN extends ACBundleCreator
 	public void initializeBundle() throws IOException, BundleTestException, InvalidNameException
 	{
 		Date tCrDate = new Date();
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		File bundleOutputDir = ((OSMCBSettings) ACApp.getApp().getSettings()).getChartBundleOutputDirectory();
 		bundleOutputDir = new File(bundleOutputDir, STR_BUNDLE_TYPE);
 		OSMCBUtilities.mkDirs(bundleOutputDir);
@@ -118,7 +118,7 @@ public class BCOpenCPN extends ACBundleCreator
 	@Override
 	public void initializeMap() throws IOException
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		// each map goes in its own folder BUT all maps are in the same folder 'ChartBundleRoot'
 		// NOAA has its own numbering scheme for the charts with more digits for smaller charts, but not a clear description to make subdivisions
 		super.initializeMap();
@@ -128,7 +128,7 @@ public class BCOpenCPN extends ACBundleCreator
 		}
 		catch (InvalidNameException e)
 		{
-			log.error("", e);
+			sLog.error("", e);
 		}
 	}
 
@@ -140,7 +140,7 @@ public class BCOpenCPN extends ACBundleCreator
 	@Override
 	public void createMap() throws MapCreationException, InterruptedException
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		// the map is stored as a two file ensemble, one bsb file with a description and a kap file with the image data, so all tiles have to be put together
 		try
 		{
@@ -155,7 +155,7 @@ public class BCOpenCPN extends ACBundleCreator
 
 	protected void writeBsbFile()
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		File bsbFile = new File(mOutputDir, mMap.getName() + ".bsb");
 		// !
 		// CRR/This electronic chart was produced under the authority of USA-NOAA/NOS.
@@ -260,7 +260,7 @@ public class BCOpenCPN extends ACBundleCreator
 
 		try
 		{
-			log.trace("Writing bsb file");
+			sLog.trace("Writing bsb file");
 			bsbFileStream = new FileOutputStream(bsbFile);
 
 			OutputStreamWriter bsbWriter = new OutputStreamWriter(bsbFileStream, TEXT_FILE_CHARSET);
@@ -302,7 +302,7 @@ public class BCOpenCPN extends ACBundleCreator
 
 	protected void writeKapFile() throws IOException
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		OutputStream mFS = null;
 
 		Path mapFile = Files.createFile(mOutputDir.toPath().resolve(mMap.getName() + "_1.kap"));
@@ -316,7 +316,7 @@ public class BCOpenCPN extends ACBundleCreator
 			IfOSMPalette tPal = makePalette(img);
 			mFS = Files.newOutputStream(mapFile, CREATE);
 
-			log.debug("Writing map file (.kap)");
+			sLog.debug("Writing map file (.kap)");
 
 			ImageOutputStream ios = ImageIO.createImageOutputStream(mFS);
 			writeMapHeader(mFS, tPal);
@@ -326,7 +326,7 @@ public class BCOpenCPN extends ACBundleCreator
 			writeMapImage(img, ios, tPal, pos);
 			tPal = null;
 
-			// log.debug("Writing test map file (.png)");
+			// sLog.debug("Writing test map file (.png)");
 			// // these are here for testing purposes
 			// File test = new File(mOutputDir, mMap.getName() + ".png");
 			// ImageIO.write(img, "png", test);
@@ -357,7 +357,7 @@ public class BCOpenCPN extends ACBundleCreator
 
 	protected void writeMapHeader(OutputStream os, IfOSMPalette tPal) throws IOException
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		int tileSize = mMap.getTileSize().width;
 		@SuppressWarnings("unused")
 		int zoom = mMap.getZoom();
@@ -368,7 +368,7 @@ public class BCOpenCPN extends ACBundleCreator
 		double laMin = mMap.getMinLat();
 		double laMax = mMap.getMaxLat();
 
-		log.debug("start writing image file for='" + mMap.getName() + "'");
+		sLog.debug("start writing image file for='" + mMap.getName() + "'");
 
 		// BSB-header
 		// VER/2.0
@@ -500,10 +500,10 @@ public class BCOpenCPN extends ACBundleCreator
 
 	protected IfOSMPalette makePalette(BufferedImage img)
 	{
-		log.trace("START");
+		sLog.trace("START");
 		OSMCB3AdaptivePalette tPal = new OSMCB3AdaptivePalette(img);
 		// OSMFixedHSLPalette tPal = new OSMFixedHSLPalette(img);
-		// log.debug("final Palette:" + tPal.toString());
+		// sLog.debug("final Palette:" + tPal.toString());
 		return tPal;
 	}
 
@@ -521,7 +521,7 @@ public class BCOpenCPN extends ACBundleCreator
 	 */
 	protected void writeMapImage(BufferedImage img, ImageOutputStream ios, IfOSMPalette tPal, long nPos)
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		int nErrCnt = 0;
 		ArrayList<Long> tLIdx = new ArrayList<>(img.getHeight());
 		try
@@ -569,15 +569,15 @@ public class BCOpenCPN extends ACBundleCreator
 
 					if (nPalIdx > 127)
 					{
-						// log.error(mMap.getName() + " [" + nX + "|" + (nY - 1) + "], (" + new OSMColor(img.getRGB(nX, nY - 1)).toStringRGB() + "), " + nCnt
-						log.error(mMap.getName() + " [" + nX + "|" + (nY) + "], (" + new OSMColor(img.getRGB(nX, nY)).toStringRGB() + "), " + nCnt
+						// sLog.error(mMap.getName() + " [" + nX + "|" + (nY - 1) + "], (" + new OSMColor(img.getRGB(nX, nY - 1)).toStringRGB() + "), " + nCnt
+						sLog.error(mMap.getName() + " [" + nX + "|" + (nY) + "], (" + new OSMColor(img.getRGB(nX, nY)).toStringRGB() + "), " + nCnt
 						    + ", palette index wrong=" + nPalIdx + ", used=" + (nPalIdx & 0x7F) + ", errors=" + nErrCnt);
 						++nErrCnt;
 					}
 					if ((false) && (nPalIdx == 0))
 					{
-						// log.error(mMap.getName() + " [" + nX + "|" + (nY - 1) + "], (" + new OSMColor(img.getRGB(nX, nY - 1)).toStringRGB() + "), " + nCnt
-						log.error(mMap.getName() + " [" + nX + "|" + (nY) + "], (" + new OSMColor(img.getRGB(nX, nY)).toStringRGB() + "), " + nCnt
+						// sLog.error(mMap.getName() + " [" + nX + "|" + (nY - 1) + "], (" + new OSMColor(img.getRGB(nX, nY - 1)).toStringRGB() + "), " + nCnt
+						sLog.error(mMap.getName() + " [" + nX + "|" + (nY) + "], (" + new OSMColor(img.getRGB(nX, nY)).toStringRGB() + "), " + nCnt
 						    + ", palette index wrong=" + nPalIdx + ", used=" + (1) + ", errors=" + nErrCnt);
 						nPalIdx = 1;
 						++nErrCnt;
@@ -621,9 +621,9 @@ public class BCOpenCPN extends ACBundleCreator
 				ios.write(((int) nIdx & 0x000000FF) >> 0);
 			}
 			// adjusted for 'line index start' entry as last entry in the line index
-			log.debug("finished writing line index with " + (tLIdx.size() - 1) + " lines");
+			sLog.debug("finished writing line index with " + (tLIdx.size() - 1) + " lines");
 			ios.close();
-			log.debug("finished writing image file for='" + mMap.getName() + "'");
+			sLog.debug("finished writing image file for='" + mMap.getName() + "'");
 		}
 		catch (IOException e)
 		{
@@ -638,7 +638,7 @@ public class BCOpenCPN extends ACBundleCreator
 	 */
 	protected void writeTestMapImage(IfMap map, BufferedImage img, ImageOutputStream ios, OSMAdaptivePalette tPal, long nPos)
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		ArrayList<Long> tLIdx = new ArrayList<>(img.getHeight());
 		try
 		{
@@ -719,7 +719,7 @@ public class BCOpenCPN extends ACBundleCreator
 				ios.write(((int) nIdx & 0xFF) >> 0);
 			}
 			ios.close();
-			log.info("finished writing image file for='" + map.getName() + "'");
+			sLog.info("finished writing image file for='" + map.getName() + "'");
 		}
 		catch (IOException e)
 		{
@@ -730,7 +730,7 @@ public class BCOpenCPN extends ACBundleCreator
 
 	protected BufferedImage createMapFromTiles() throws InterruptedException, MapCreationException
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 
 		BufferedImage img = null;
 		Graphics2D gc = null;
@@ -743,7 +743,7 @@ public class BCOpenCPN extends ACBundleCreator
 		}
 		catch (Exception e)
 		{
-			log.debug("Exception beim Image anlegen, Breite: " + width + ", Höhe: " + height);
+			sLog.debug("Exception beim Image anlegen, Breite: " + width + ", Höhe: " + height);
 		}
 		int tilex = 0;
 		int tiley = 0;
@@ -763,7 +763,7 @@ public class BCOpenCPN extends ACBundleCreator
 				if ((tile = sTC.getTile(mMap.getMapSource(), tAddr)) != null)
 				{
 					if (tile.getTileState() == TileState.TS_LOADING)
-						log.warn("tried to load loading tile from mtc" + tile);
+						sLog.warn("tried to load loading tile from mtc" + tile);
 					else
 						tileImage = tile.getImage();
 				}
@@ -772,19 +772,19 @@ public class BCOpenCPN extends ACBundleCreator
 					// if the tile is not available in the mtc, get it from the tile store
 					tile = mMap.getMapSource().getNTileStore().getTile(tAddr);
 					if (tile.getTileState() == TileState.TS_LOADING)
-						log.warn("tried to load loading tile from tile store" + tile);
+						sLog.warn("tried to load loading tile from tile store" + tile);
 					else
 						tileImage = tile.getImage();
 				}
 				if (tileImage != null)
 				{
-					log.trace(String.format("Tile x=%d y=%d ", tilex, tiley));
+					sLog.trace(String.format("Tile x=%d y=%d ", tilex, tiley));
 					gc.drawImage(tileImage, tilex * MP2MapSpace.TECH_TILESIZE, tiley * MP2MapSpace.TECH_TILESIZE, MP2MapSpace.TECH_TILESIZE, MP2MapSpace.TECH_TILESIZE,
 					    null);
 				}
 				else
 				{
-					log.warn(String.format("Tile x=%d y=%d not found in tile archive - creating error tile", tilex, tiley));
+					sLog.warn(String.format("Tile x=%d y=%d not found in tile archive - creating error tile", tilex, tiley));
 					tile = new Tile(mMap.getMapSource(), tilex, tiley, mMap.getZoom());
 					tile.setErrorImage();
 					gc.drawImage(tile.getImage(), tilex * MP2MapSpace.TECH_TILESIZE, tiley * MP2MapSpace.TECH_TILESIZE, MP2MapSpace.TECH_TILESIZE,

@@ -60,7 +60,7 @@ public class Logging
 		{
 			configureDefaultErrorLogging();
 			Logger logger = Logger.getRootLogger();
-			logger.info("log4j.xml not found - enabling default error log to console");
+			logger.info("log4j.xml not found - enabling default error sLog to console");
 		}
 		gApp = myApp;
 	}

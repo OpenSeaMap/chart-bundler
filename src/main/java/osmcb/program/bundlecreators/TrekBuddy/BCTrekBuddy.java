@@ -64,7 +64,7 @@ public class BCTrekBuddy extends ACBundleCreator
 	public BCTrekBuddy()
 	{
 		super();
-		log = Logger.getLogger(this.getClass());
+		sLog = Logger.getLogger(this.getClass());
 	}
 
 	public BCTrekBuddy(IfBundle bundle, File bundleOutputDir)
@@ -118,7 +118,7 @@ public class BCTrekBuddy extends ACBundleCreator
 		createInfoFile();
 		createAtlasTbaFile(mBundle.getName());
 		sBundleProgress.finishBundle();
-		log.info("bundle='" + mBundle.getName() + "' finished");
+		sLog.info("bundle='" + mBundle.getName() + "' finished");
 	}
 
 	// public void initializeMap(TileProvider mapTileProvider)
@@ -131,7 +131,7 @@ public class BCTrekBuddy extends ACBundleCreator
 	@Override
 	public void initializeLayer() throws IOException, InterruptedException
 	{
-		log.trace("initializeLayer() called, layer='" + mLayer.getName() + "', dir='" + mOutputDir);
+		sLog.trace("initializeLayer() called, layer='" + mLayer.getName() + "', dir='" + mOutputDir);
 		mOutputDir = new File(mOutputDir, mLayer.getName());
 		OSMCBUtilities.mkDirs(mOutputDir);
 		super.initializeLayer();
@@ -175,7 +175,7 @@ public class BCTrekBuddy extends ACBundleCreator
 
 	protected void writeMapFile(String imageFileName, OutputStream stream) throws IOException
 	{
-		log.trace("Writing map file");
+		sLog.trace("Writing map file");
 		OutputStreamWriter mapWriter = new OutputStreamWriter(stream, TEXT_FILE_CHARSET);
 
 		// W #mapSpace MP2MapSpace
@@ -202,7 +202,7 @@ public class BCTrekBuddy extends ACBundleCreator
 	{
 		try
 		{
-			log.debug("Creating map");
+			sLog.debug("Creating map");
 
 			// write the .map file containing the calibration points
 			writeMapFile();
@@ -228,7 +228,7 @@ public class BCTrekBuddy extends ACBundleCreator
 
 	protected BufferedImage createMapFromTiles() throws InterruptedException, MapCreationException
 	{
-		log.trace(OSMBStrs.RStr("START"));
+		sLog.trace(OSMBStrs.RStr("START"));
 		int width = (mMap.getXMax() - mMap.getXMin() + 1) * MP2MapSpace.TECH_TILESIZE;
 		int height = (mMap.getYMax() - mMap.getYMin() + 1) * MP2MapSpace.TECH_TILESIZE;
 		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
@@ -252,7 +252,7 @@ public class BCTrekBuddy extends ACBundleCreator
 				if ((tile = sTC.getTile(mMap.getMapSource(), tAddr)) != null)
 				{
 					if (tile.getTileState() == TileState.TS_LOADING)
-						log.warn("tried to load loading tile from mtc" + tile);
+						sLog.warn("tried to load loading tile from mtc" + tile);
 					else
 						tileImage = tile.getImage();
 				}
@@ -261,19 +261,19 @@ public class BCTrekBuddy extends ACBundleCreator
 					// if the tile is not available in the mtc, get it from the tile store
 					tile = mMap.getMapSource().getNTileStore().getTile(tAddr);
 					if (tile.getTileState() == TileState.TS_LOADING)
-						log.warn("tried to load loading tile from tile store" + tile);
+						sLog.warn("tried to load loading tile from tile store" + tile);
 					else
 						tileImage = tile.getImage();
 				}
 				if (tileImage != null)
 				{
-					log.trace(String.format("Tile x=%d y=%d ", tilex, tiley));
+					sLog.trace(String.format("Tile x=%d y=%d ", tilex, tiley));
 					// gc.drawImage(tileImage, tilex * MP2MapSpace.TECH_TILESIZE, tiley * MP2MapSpace.TECH_TILESIZE, MP2MapSpace.TECH_TILESIZE, MP2MapSpace.TECH_TILESIZE,
 					// null);
 				}
 				else
 				{
-					log.warn(String.format("Tile x=%d y=%d not found in tile archive - creating error tile", tilex, tiley));
+					sLog.warn(String.format("Tile x=%d y=%d not found in tile archive - creating error tile", tilex, tiley));
 					tile = new Tile(mMap.getMapSource(), tilex, tiley, mMap.getZoom());
 					tile.setErrorImage();
 					// gc.drawImage(tile.getImage(), tilex * MP2MapSpace.TECH_TILESIZE, tiley * MP2MapSpace.TECH_TILESIZE, MP2MapSpace.TECH_TILESIZE,
@@ -322,7 +322,7 @@ public class BCTrekBuddy extends ACBundleCreator
 					}
 					else
 					{
-						log.warn(String.format("Tile x=%d y=%d not found in tile archive - creating default", tilex, tiley));
+						sLog.warn(String.format("Tile x=%d y=%d not found in tile archive - creating default", tilex, tiley));
 						mapTileWriter.writeTile(tilex, tiley, tileType, emptyTileData);
 					}
 				}
@@ -349,7 +349,7 @@ public class BCTrekBuddy extends ACBundleCreator
 			super();
 			setFolder = new File(mOutputDir, "set");
 			OSMCBUtilities.mkDir(setFolder);
-			log.debug("Writing tiles to set folder: " + setFolder);
+			sLog.debug("Writing tiles to set folder: " + setFolder);
 			File setFile = new File(mOutputDir, mMap.getName() + ".set");
 			if (parameters != null)
 			{
@@ -362,7 +362,7 @@ public class BCTrekBuddy extends ACBundleCreator
 			}
 			catch (IOException e)
 			{
-				log.error("", e);
+				sLog.error("", e);
 			}
 		}
 
@@ -411,7 +411,7 @@ public class BCTrekBuddy extends ACBundleCreator
 			}
 			catch (IOException e)
 			{
-				log.error("", e);
+				sLog.error("", e);
 			}
 			OSMCBUtilities.closeWriter(setFileWriter);
 		}
@@ -496,7 +496,7 @@ public class BCTrekBuddy extends ACBundleCreator
 		}
 		catch (IOException e)
 		{
-			log.error("", e);
+			sLog.error("", e);
 		}
 	}
 
